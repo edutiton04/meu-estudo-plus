@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meus Estudos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', Arial, sans-serif; background: #F5F4F0; color: #26251F; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1.5rem 5rem; }
+
+  /* Header / nav */
+  header { background: #1B2A4A; box-shadow: 0 1px 3px rgba(15,20,35,0.2); margin-bottom: 1.5rem; position: relative; z-index: 30; }
+  .header-inner { max-width: 1180px; margin: 0 auto; padding: 14px 1.5rem; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .logo { display: flex; align-items: center; gap: 8px; }
+  .logo-badge { width: 32px; height: 32px; border-radius: 8px; background: #C9A227; color: #1B2A4A; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; font-weight: 700; }
+  .logo-text { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 16px; color: #F5F3EC; letter-spacing: 0.01em; line-height: 1.2; }
+  .profile-switcher-wrap { position: relative; }
+  .profile-switcher { background: none; border: none; color: #C9A227; font-size: 12.5px; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 3px; }
+  .chevron-down { font-size: 10px; }
+  .profile-dropdown { display: none; position: absolute; top: calc(100% + 10px); left: 0; width: 260px; background: #fff; border-radius: 12px; box-shadow: 0 12px 32px rgba(20,20,30,0.25); padding: 12px; z-index: 60; }
+  .profile-dropdown.open { display: block; }
+  .profile-dropdown-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #9B9890; margin-bottom: 8px; }
+  .profile-row { display: flex; align-items: center; gap: 4px; padding: 8px 6px; border-radius: 8px; cursor: pointer; font-size: 13px; color: #2A2926; }
+  .profile-row:hover { background: #F1EFE8; }
+  .profile-row.active { background: #E8EAF0; font-weight: 600; }
+  .profile-row-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .profile-add-row { display: flex; gap: 6px; margin-top: 8px; padding-top: 10px; border-top: 1px solid #F1EFE8; }
+  .sync-status { font-size: 11px; color: #6E6B63; display: flex; align-items: center; gap: 5px; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #9B9890; flex-shrink: 0; }
+  .sync-dot.ok { background: #3E8A4F; }
+  .sync-dot.syncing { background: #C9A227; }
+  .sync-dot.error { background: #D1526E; }
+  .account-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; padding-top: 10px; border-top: 1px solid #F1EFE8; }
+  .account-email { font-size: 11.5px; color: #6E6B63; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .profile-add-row input { font-size: 13px; padding: 8px 10px; min-height: 36px; }
+  .exam-countdown { background: none; border: none; color: #8A9AB8; font-size: 11.5px; font-weight: 500; cursor: pointer; padding: 2px 0 0; display: block; }
+  .exam-countdown:hover { color: #C9A227; }
+  .exam-countdown.urgent { color: #E88A9F; }
+  nav.tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+  nav.tabs button { border: none; background: transparent; padding: 10px 15px; border-radius: 8px; font-size: 13.5px; font-weight: 500; color: #C7CCDB; cursor: pointer; white-space: nowrap; min-height: 40px; flex-shrink: 0; }
+  nav.tabs button.active { background: #C9A227; color: #1B2A4A; font-weight: 700; }
+  .header-actions { margin-left: auto; display: flex; gap: 8px; }
+
+  .card { background: #FFFFFF; border-radius: 12px; border: 1px solid #E5E3DC; box-shadow: 0 1px 3px rgba(30,26,10,0.05); transition: box-shadow 0.15s ease, border-color 0.15s ease; }
+  .stat-card, .subject-card, .sim-row, .hist-entry, .week-day { transition: box-shadow 0.15s ease, border-color 0.15s ease; }
+  .stat-card:hover, .subject-card:hover, .sim-row:hover, .hist-entry:hover, .week-day:hover {
+    box-shadow: 0 4px 14px rgba(30,26,10,0.09);
+    border-color: #D8D4C8;
+  }
+  .btn { cursor: pointer; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.55; cursor: default; }
+  .btn-primary { background: #C9A227; color: #1B2A4A; font-weight: 600; box-shadow: 0 1px 2px rgba(30,26,10,0.15); }
+  .btn-primary:hover { background: #BC981F; }
+  .btn-primary:active { background: #A8841C; }
+  .btn-outline { background: #FFFFFF; color: #2A2926; border: 1px solid #E3E0D8; }
+  .btn-outline:hover { background: #F7F6F2; border-color: #D5D0C3; }
+  .btn-danger { background: #D1526E; color: #fff; }
+  .btn-danger:hover { background: #BE4560; }
+  .btn-small { padding: 7px 12px; font-size: 12.5px; min-height: 34px; }
+  .icon-btn { border: none; background: transparent; color: #9B9890; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; width: 30px; height: 30px; border-radius: 8px; opacity: 0.7; transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease; }
+  .icon-btn:hover, .icon-btn:focus-visible { color: #2A2926; opacity: 1; background: #F1EFE8; }
+
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    padding: 10px 12px; border-radius: 8px; border: 1px solid #E3E0D8; font-size: 16px; font-family: inherit; background: #F8F6F0; color: #2A2926; width: 100%; min-height: 42px;
+  }
+  textarea { min-height: 70px; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid #C9A227; outline-offset: 1px; }
+  button:focus-visible, a:focus-visible { outline: 2px solid #C9A227; outline-offset: 2px; }
+  label.field-label { font-size: 12px; font-weight: 600; color: #6E6B63; margin-bottom: 5px; display: block; }
+  .field-row { margin-bottom: 12px; }
+  .field-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  .save-warning { background: #FDEEEE; border: 1px solid #F2A6A6; color: #9B2C2C; padding: 0.6rem 0.9rem; border-radius: 10px; font-size: 13px; margin-bottom: 1.25rem; display: none; }
+  .empty-hint { font-size: 13px; color: #6E6B63; line-height: 1.5; }
+
+  /* Page switching */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ---- EDITAL PAGE ---- */
+  .edital-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .edital-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 21px; margin: 0; }
+  .edital-progress-wrap { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+  .edital-progress-bar { flex: 1; height: 8px; background: #E3E0D8; border-radius: 4px; overflow: hidden; }
+  .edital-progress-fill { height: 100%; background: #C9A227; }
+  .edital-progress-label { font-size: 13px; color: #6E6B63; white-space: nowrap; }
+  .edital-progress-pct { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; white-space: nowrap; }
+
+  .subject-card { margin-bottom: 14px; overflow: hidden; }
+  .subject-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; }
+  .subject-color-bar { width: 5px; height: 20px; border-radius: 3px; flex-shrink: 0; }
+  .subject-header-name { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; flex: 1; }
+  .subject-header-meta { font-size: 12px; color: #6E6B63; margin-right: 6px; }
+  .weight-badge { font-size: 11px; font-weight: 600; color: #24365C; background: #E8EAF0; padding: 3px 9px; border-radius: 6px; cursor: pointer; white-space: nowrap; margin-right: 4px; }
+  .chevron { transition: transform 0.15s ease; color: #9B9890; }
+  .chevron.collapsed { transform: rotate(-90deg); }
+  .subject-body { border-top: 1px solid #F1EFE8; }
+  table.topics-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.topics-table th { text-align: left; padding: 8px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #9B9890; font-weight: 600; border-bottom: 1px solid #F1EFE8; }
+  table.topics-table td { padding: 8px 12px; border-bottom: 1px solid #F5F3EE; vertical-align: middle; }
+  table.topics-table tr.topic-row-tr:hover { background: #F8F6F0; }
+  .topic-num { color: #9B9890; font-size: 12px; width: 24px; }
+  .topic-name-cell { min-width: 220px; }
+  .topic-name-cell.done { color: #9B9890; text-decoration: line-through; }
+  .pct-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .pct-good { background: #FBF3DC; color: #8A6A14; }
+  .pct-mid { background: #FFF4E0; color: #C77700; }
+  .pct-bad { background: #FDEEEE; color: #C0554F; }
+  .pct-none { color: #C4C7D0; }
+  .check-cell { width: 30px; }
+  .check-topic { width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid #C9C5BA; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; background: transparent; }
+  .check-topic.done { background: #C9A227; border: none; }
+  .link-add { color: #C9A227; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+  .last-study-cell { white-space: nowrap; color: #6E6B63; font-size: 12px; }
+  tr.total-row td { font-weight: 600; background: #F8F6F0; border-top: 1.5px solid #E3E0D8; border-bottom: none; }
+  .subject-actions-row { padding: 10px 12px; display: flex; gap: 8px; align-items: center; }
+  .del-subject-btn { margin-left: auto; }
+
+  .add-subject-row { display: flex; gap: 6px; margin-top: 6px; }
+
+  /* ---- ESTATISTICAS PAGE ---- */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .stat-card { padding: 1rem 1.1rem; }
+  .stat-card .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #9B9890; font-weight: 600; margin-bottom: 8px; }
+  .stat-card .stat-value { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; }
+  .stat-card .stat-sub { font-size: 11px; color: #9B9890; margin-top: 4px; }
+  .donut-card { display: flex; align-items: center; gap: 14px; }
+  .chart-card { padding: 1.25rem 1.4rem; }
+  .chart-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #9B9890; font-weight: 600; margin-bottom: 14px; }
+
+  /* ---- HISTORICO PAGE ---- */
+  .hist-day-header { display: flex; align-items: baseline; gap: 10px; margin: 22px 0 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: #9B9890; text-transform: uppercase; }
+  .hist-day-header:first-child { margin-top: 0; }
+  .hist-day-total { margin-left: auto; font-weight: 500; color: #6E6B63; text-transform: none; letter-spacing: normal; }
+  .hist-entry { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; margin-bottom: 8px; }
+  .hist-color-bar { width: 4px; align-self: stretch; border-radius: 3px; flex-shrink: 0; }
+  .hist-info { flex: 1; min-width: 0; }
+  .hist-subject { font-size: 13px; font-weight: 600; }
+  .hist-topic { font-size: 12px; color: #6E6B63; margin-top: 2px; }
+  .hist-duration { font-size: 12px; color: #6E6B63; white-space: nowrap; width: 76px; }
+  .hist-score { display: flex; gap: 10px; align-items: center; white-space: nowrap; }
+  .hist-score .ok { color: #8A6A14; font-size: 12px; font-weight: 600; }
+  .hist-score .err { color: #C0554F; font-size: 12px; font-weight: 600; }
+  .tag { padding: 3px 9px; border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
+  .tag-teoria { background: #E8EAF0; color: #24365C; }
+  .tag-revisao { background: #ECEAE4; color: #4A4842; }
+  .tag-questoes { background: #FBF3DC; color: #8A6A14; }
+  .hist-actions { display: flex; gap: 2px; opacity: 0.6; }
+  .hist-entry:hover .hist-actions, .hist-actions:focus-within { opacity: 1; }
+  .hist-note { font-size: 12px; color: #6E6B63; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #F1EFE8; white-space: pre-wrap; }
+  .note-icon { color: #C9A227; }
+
+  /* ---- CICLO PAGE ---- */
+  .plan-subpage { display: none; }
+  .plan-subpage.active { display: block; }
+  .week-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+  .week-nav { display: flex; align-items: center; gap: 4px; }
+  .week-range-label { font-size: 13.5px; font-weight: 700; color: #2A2926; min-width: 190px; text-align: center; }
+  .plan-layout { display: grid; grid-template-columns: 1fr 260px; gap: 14px; }
+  .plan-sidebar { display: flex; flex-direction: column; gap: 12px; }
+  .layer-check { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 0; cursor: pointer; }
+  .mini-cal-header { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; font-weight: 700; margin-bottom: 8px; }
+  .mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .mini-cal-dow { font-size: 9px; color: #9B9890; text-align: center; font-weight: 700; padding-bottom: 2px; }
+  .mini-cal-day { font-size: 11px; text-align: center; padding: 5px 0; border-radius: 6px; cursor: pointer; color: #2A2926; border: 1.5px solid transparent; }
+  .mini-cal-day:hover { background: #F1EFE8; }
+  .mini-cal-day.other-month { color: #C9C5BA; }
+  .mini-cal-day.today { border-color: #C9A227; font-weight: 700; }
+  .mini-cal-day.in-week { background: #E8EAF0; }
+
+  .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .week-day { background: #fff; border: 1px solid #E3E0D8; border-radius: 12px; padding: 10px; min-height: 260px; display: flex; flex-direction: column; }
+  .week-day.is-today { border-color: #C9A227; border-width: 1.5px; box-shadow: 0 0 0 1px #C9A227 inset; }
+  .week-day-header { text-align: center; margin-bottom: 8px; }
+  .week-day-dow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #9B9890; }
+  .week-day-num { font-size: 17px; font-weight: 700; color: #2A2926; }
+  .week-day.is-today .week-day-num { color: #C9A227; }
+  .week-section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #9B9890; margin: 4px 0 4px; }
+  .rev-block { background: #4A4842; color: #fff; border-radius: 8px; padding: 6px 8px; margin-bottom: 5px; font-size: 11px; }
+  .rev-block.done { opacity: 0.5; text-decoration: line-through; }
+  .rev-block.is-ignored { opacity: 0.4; }
+  .rev-block .rb-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hist-block { background: #FBF3DC; border: 1px solid #F1E6B8; border-radius: 8px; padding: 5px 8px; margin-bottom: 5px; font-size: 10.5px; display: flex; align-items: center; gap: 5px; color: #6B5A10; }
+  .hist-block .hb-check { color: #8A6A14; flex-shrink: 0; }
+  .hist-block .hb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .week-block { border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; font-size: 11.5px; color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+  .week-block .wb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .week-block .wb-del { cursor: pointer; opacity: 0.85; flex-shrink: 0; }
+  .week-block .wb-time { font-size: 10px; opacity: 0.9; display: block; }
+  .cycle-layout { display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
+  .cycle-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #F1EFE8; }
+  .cycle-item:last-child { border-bottom: none; }
+  .cycle-color-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .cycle-item-info { flex: 1; min-width: 0; }
+  .cycle-item-name { font-size: 13px; font-weight: 500; }
+  .cycle-bar-track { height: 5px; background: #E3E0D8; border-radius: 3px; overflow: hidden; margin-top: 5px; }
+  .cycle-bar-fill { height: 100%; background: #C9A227; }
+  .cycle-item-time { font-size: 11px; color: #6E6B63; white-space: nowrap; }
+  .cycle-ring-wrap { position: relative; width: 220px; height: 220px; margin: 0 auto; }
+  .cycle-ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .add-cycle-row { display: flex; gap: 10px; padding: 12px 14px; align-items: flex-end; flex-wrap: wrap; }
+  .field-item { display: flex; flex-direction: column; gap: 4px; }
+  .field-item.grow { flex: 2; min-width: 140px; }
+  .field-item.small { flex: 1; min-width: 90px; }
+  .field-item label { font-size: 11px; font-weight: 600; color: #9B9890; text-transform: uppercase; letter-spacing: 0.03em; }
+
+  /* ---- SIMULADOS PAGE ---- */
+  .sim-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .sim-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; }
+  .sim-title { font-size: 14px; font-weight: 600; }
+  .sim-meta { font-size: 12px; color: #6E6B63; margin-top: 2px; }
+  .sim-score { margin-left: auto; display: flex; gap: 10px; align-items: center; white-space: nowrap; }
+
+  /* ---- REVISOES PAGE ---- */
+  .rev-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+  .rev-tabs button { border: none; background: #fff; border: 1px solid #E3E0D8; padding: 7px 13px; border-radius: 8px; font-size: 12px; font-weight: 500; color: #6E6B63; cursor: pointer; }
+  .rev-tabs button.active { background: #C9A227; color: #fff; border-color: #C9A227; }
+  .rev-row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; }
+  .rev-check { width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid #C9C5BA; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; background: transparent; flex-shrink: 0; }
+  .rev-check.done { background: #C9A227; border: none; }
+  .rev-info { flex: 1; min-width: 0; }
+  .rev-name.done { color: #9B9890; text-decoration: line-through; }
+  .rev-date { font-size: 12px; color: #6E6B63; white-space: nowrap; }
+  .rev-date.late { color: #C0554F; font-weight: 600; }
+
+  /* ---- FLOATING TIMER ---- */
+  .fab-timer { position: fixed; bottom: 22px; right: 22px; width: 54px; height: 54px; border-radius: 50%; background: #C9A227; color: #1B2A4A; border: none; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 2px 10px rgba(30,26,10,0.3); z-index: 40; transition: background-color 0.15s ease, transform 0.1s ease; }
+  .fab-timer:hover { background: #BC981F; }
+  .fab-timer:active { transform: scale(0.96); }
+  .fab-timer.active { box-shadow: 0 0 0 3px rgba(201,162,39,0.3), 0 2px 10px rgba(30,26,10,0.3); }
+  .timer-card { background: #FFFFFF; border: 1px solid #E5E3DC; border-radius: 16px; padding: 2rem 2.2rem; width: 100%; max-width: 440px; text-align: center; color: #2A2926; box-shadow: 0 20px 45px -15px rgba(30,26,10,0.3); }
+  .timer-logo { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #2A2926; margin-bottom: 4px; }
+  .timer-tagline { font-size: 12.5px; color: #8A8780; margin: 0 0 20px; }
+  .timer-card .field-row { text-align: left; }
+  .timer-card .field-label { color: #6E6B63; }
+  .timer-card select, .timer-card input { background: #F8F6F0; border-color: #E3E0D8; color: #2A2926; }
+  .timer-progress-label { font-size: 11px; color: #6E6B63; text-align: right; margin-bottom: 4px; }
+  .timer-progress-track { height: 6px; background: #E3E0D8; border-radius: 3px; overflow: hidden; margin-bottom: 26px; }
+  .timer-progress-fill { height: 100%; background: #C9A227; }
+  .timer-big-display { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 48px; letter-spacing: 1px; color: #1B2A4A; margin-bottom: 20px; }
+  .timer-round-btn-lg { width: 52px; height: 52px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+  .timer-round-btn-lg.white { background: #F1EFE8; color: #2A2926; border: 1px solid #E3E0D8; }
+  .timer-round-btn-lg.teal { background: #C9A227; color: #fff; }
+  .timer-add-label { font-size: 12px; color: #6E6B63; margin-bottom: 10px; }
+  .timer-controls-big { display: flex; justify-content: center; gap: 16px; margin-bottom: 22px; }
+  .timer-add-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .timer-add-pill { background: #24365C; color: #fff; border: none; border-radius: 20px; padding: 9px 18px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+  .timer-add-pill:active { transform: scale(0.96); }
+
+  /* ---- MODAL ---- */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(20,18,10,0.5); display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: #FFFFFF; border-radius: 14px; padding: 1.5rem; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; box-shadow: 0 16px 40px -12px rgba(20,15,5,0.25); }
+  .modal-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 17px; margin: 0 0 16px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+  /* Import panel (reused) */
+  .import-panel { padding: 1.25rem 1.4rem; margin-bottom: 20px; display: none; }
+  .import-panel.open { display: block; }
+  .import-step { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #EFEBE1; }
+  .import-step:last-of-type { border-bottom: none; padding-bottom: 0; margin-bottom: 10px; }
+  .step-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .step-num { width: 20px; height: 20px; border-radius: 50%; background: #C9A227; color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .field-hint { font-size: 12px; color: #6E6B63; margin: 6px 0 0; line-height: 1.5; }
+  .prompt-box { width: 100%; min-height: 120px; font-family: monospace; font-size: 12px; background: #F5F2EA; }
+  .row-with-btn { display: flex; gap: 8px; align-items: flex-start; }
+  .row-with-btn textarea { flex: 1; }
+  .import-status { font-size: 13px; color: #6E6B63; margin-top: 10px; min-height: 18px; }
+  .import-status.error { color: #C0554F; }
+  .import-status.success { color: #8A6A14; }
+  .import-results { margin-top: 16px; border-top: 1px solid #EFEBE1; padding-top: 14px; }
+  .result-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F5F2EA; }
+  .result-info { flex: 1; }
+  .result-name { font-size: 14px; font-weight: 500; }
+  .result-topics { font-size: 12px; color: #6E6B63; margin-top: 2px; }
+
+  @media (max-width: 1024px) {
+    .cycle-layout { grid-template-columns: 1fr; }
+    .sim-stats { grid-template-columns: 1fr 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .week-grid { grid-template-columns: repeat(4, 1fr); }
+    .plan-layout { grid-template-columns: 1fr; }
+    .plan-sidebar { flex-direction: row; flex-wrap: wrap; }
+    .plan-sidebar .card { flex: 1; min-width: 220px; }
+    table.topics-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+    header { gap: 12px; }
+    .header-actions { width: 100%; flex-wrap: wrap; justify-content: flex-end; }
+  }
+  @media (max-width: 780px) {
+    .field-grid-2, .field-grid-3 { grid-template-columns: 1fr; }
+    .fab-timer { bottom: 16px; right: 16px; width: 56px; height: 56px; }
+    .timer-card { padding: 1.6rem 1.4rem; }
+    .timer-big-display { font-size: 38px; }
+    .wrap { padding: 1rem 1rem 5rem; }
+  }
+
+  /* ---- MODO ESCURO ---- */
+  [data-theme="dark"] body,
+  body[data-theme="dark"] { background: #14171C; color: #E3E0D8; }
+  [data-theme="dark"] .card, [data-theme="dark"] .modal-box { background: #1C2028; border-color: #2B303B; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+  [data-theme="dark"] .stat-card:hover, [data-theme="dark"] .subject-card:hover, [data-theme="dark"] .sim-row:hover, [data-theme="dark"] .hist-entry:hover, [data-theme="dark"] .week-day:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.4); border-color: #3A4150; }
+  [data-theme="dark"] .profile-dropdown { background: #1C2028; }
+  [data-theme="dark"] .profile-row { color: #E3E0D8; }
+  [data-theme="dark"] .profile-row:hover { background: #232833; }
+  [data-theme="dark"] .profile-row.active { background: #24365C; }
+  [data-theme="dark"] .profile-add-row, [data-theme="dark"] .account-row { border-color: #2B303B; }
+  [data-theme="dark"] .sync-status, [data-theme="dark"] .account-email { color: #9C978D; }
+  [data-theme="dark"] .btn-outline { background: #1C2028; color: #E3E0D8; border-color: #2B303B; }
+  [data-theme="dark"] .btn-outline:hover { background: #232833; }
+  [data-theme="dark"] .btn-ghost { background: transparent; }
+  [data-theme="dark"] .week-day { background: #1C2028; border-color: #2B303B; }
+  [data-theme="dark"] .week-range-label, [data-theme="dark"] .week-day-num { color: #F2F4F8; }
+  [data-theme="dark"] .mini-cal-day { color: #E3E0D8; }
+  [data-theme="dark"] .mini-cal-day:hover { background: #2B303B; }
+  [data-theme="dark"] .mini-cal-day.other-month { color: #4A4E58; }
+  [data-theme="dark"] .mini-cal-day.in-week { background: #24365C; }
+  [data-theme="dark"] .hist-block { background: #2A2416; border-color: #4A3F1C; color: #D9C67E; }
+  [data-theme="dark"] .hist-block .hb-check { color: #C9A227; }
+  [data-theme="dark"] .week-day-label { color: #9C978D; }
+  [data-theme="dark"] .rev-tabs button { background: #1C2028; border-color: #2B303B; color: #9C978D; }
+  [data-theme="dark"] input[type="text"], [data-theme="dark"] input[type="number"],
+  [data-theme="dark"] input[type="date"], [data-theme="dark"] select, [data-theme="dark"] textarea {
+    background: #232833; border-color: #2B303B; color: #E3E0D8;
+  }
+  [data-theme="dark"] .icon-btn { color: #9C978D; }
+  [data-theme="dark"] .icon-btn:hover, [data-theme="dark"] .icon-btn:focus-visible { color: #fff; background: #2B303B; }
+  [data-theme="dark"] .del-btn:hover { background: #3A2530; }
+  [data-theme="dark"] .subtitle, [data-theme="dark"] .empty-hint, [data-theme="dark"] .field-hint,
+  [data-theme="dark"] .stat-sub, [data-theme="dark"] .field-label, [data-theme="dark"] .chart-title,
+  [data-theme="dark"] .stat-card .stat-label, [data-theme="dark"] .hist-day-header, [data-theme="dark"] .hist-topic,
+  [data-theme="dark"] .hist-duration, [data-theme="dark"] .hist-day-total, [data-theme="dark"] .last-study-cell,
+  [data-theme="dark"] .cycle-item-time, [data-theme="dark"] .sim-meta, [data-theme="dark"] .rev-date,
+  [data-theme="dark"] .subject-header-meta, [data-theme="dark"] .import-status, [data-theme="dark"] .hist-note,
+  [data-theme="dark"] table.topics-table th, [data-theme="dark"] .chevron { color: #9C978D; }
+  [data-theme="dark"] .topic-num, [data-theme="dark"] .pct-none, [data-theme="dark"] .rev-name.done,
+  [data-theme="dark"] .topic-name-cell.done { color: #7C766B; }
+  [data-theme="dark"] table.topics-table td, [data-theme="dark"] table.topics-table th,
+  [data-theme="dark"] .subject-body, [data-theme="dark"] .hist-note,
+  [data-theme="dark"] .import-step, [data-theme="dark"] .cycle-item, [data-theme="dark"] .hist-day-header {
+    border-color: #2B303B;
+  }
+  [data-theme="dark"] tr.topic-row-tr:hover, [data-theme="dark"] tr.total-row, [data-theme="dark"] tr.total-row td,
+  [data-theme="dark"] .prompt-box, [data-theme="dark"] #pdfTextBox { background: #232833; }
+  [data-theme="dark"] .edital-progress-bar, [data-theme="dark"] .cycle-bar-track,
+  [data-theme="dark"] .check-topic, [data-theme="dark"] .rev-check, [data-theme="dark"] .check {
+    border-color: #3A4150;
+  }
+  [data-theme="dark"] .edital-progress-bar, [data-theme="dark"] .cycle-bar-track { background: #2B303B; }
+  [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.6); }
+  [data-theme="dark"] .save-warning { background: #2A1A1D; border-color: #5A2A30; color: #F2A6A6; }
+  [data-theme="dark"] .fab-timer { box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+  [data-theme="dark"] .fab-timer.active { box-shadow: 0 0 0 3px rgba(201,162,39,0.35), 0 2px 10px rgba(0,0,0,0.5); }
+  [data-theme="dark"] .timer-card { background: #1B1E24; border-color: rgba(255,255,255,0.08); color: #E3E0D8; box-shadow: 0 20px 45px -15px rgba(0,0,0,0.45); }
+  [data-theme="dark"] .timer-logo { color: #E3E0D8; }
+  [data-theme="dark"] .timer-card .field-label, [data-theme="dark"] .timer-progress-label, [data-theme="dark"] .timer-add-label { color: #9C978D; }
+  [data-theme="dark"] .timer-card select, [data-theme="dark"] .timer-card input { background: #232833; border-color: #2B303B; color: #E3E0D8; }
+  [data-theme="dark"] .timer-progress-track { background: #2B303B; }
+  [data-theme="dark"] .timer-big-display { color: #F2F4F8; }
+  [data-theme="dark"] .timer-round-btn-lg.white { background: #232833; color: #E3E0D8; border-color: #2B303B; }
+  [data-theme="dark"] .logo-text, [data-theme="dark"] .edital-title, [data-theme="dark"] .subject-header-name,
+  [data-theme="dark"] .hist-subject, [data-theme="dark"] .sim-title, [data-theme="dark"] .cycle-item-name,
+  [data-theme="dark"] .modal-title, [data-theme="dark"] .stat-value, [data-theme="dark"] .edital-progress-pct,
+  [data-theme="dark"] .ring-time {
+    color: #F2F4F8;
+  }
+  .header-inner .btn-outline { background: rgba(255,255,255,0.94); color: #1B2A4A; border-color: transparent; }
+  .header-inner .btn-outline:hover { background: #fff; }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-badge">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 1 4 17.5v-13Z"></path>
+          <path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20"></path>
+          <path d="M8 7h8M8 10.5h5"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">Meus Estudos</div>
+        <div class="profile-switcher-wrap">
+          <button class="profile-switcher" id="profileSwitcherBtn">
+            <span id="activeProfileName">Meu Edital</span> <span class="chevron-down">&#9662;</span>
+          </button>
+          <div class="profile-dropdown" id="profileDropdown">
+            <div class="profile-dropdown-title">Seus editais</div>
+            <div id="profileList"></div>
+            <div class="profile-add-row">
+              <input type="text" id="newProfileNameInput" placeholder="Nome do novo edital (ex: PRF)" />
+              <button class="btn btn-primary btn-small" id="addProfileBtn">Criar</button>
+            </div>
+            <div class="profile-add-row" style="flex-direction:column; align-items:stretch; gap:6px;">
+              <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#9B9890;">Backup completo (todos os editais)</div>
+              <div style="display:flex; gap:6px;">
+                <button type="button" class="btn btn-outline btn-small" id="exportAllBackupBtn" style="flex:1;">&#11015; Exportar tudo</button>
+                <button type="button" class="btn btn-outline btn-small" id="importAllBackupBtn" style="flex:1;">&#11014; Importar tudo</button>
+              </div>
+              <input type="file" id="importAllBackupInput" accept="application/json,.json" style="display:none;" />
+            </div>
+            <div class="account-row" id="accountRow" style="display:none;">
+              <div>
+                <div class="sync-status" id="syncStatusLabel"><span class="sync-dot" id="syncDot"></span><span id="syncStatusText">—</span></div>
+                <div class="account-email" id="accountEmailLabel"></div>
+              </div>
+              <button type="button" class="btn btn-outline btn-small" id="signOutBtn">Sair</button>
+            </div>
+          </div>
+        </div>
+        <button class="exam-countdown" id="examCountdownBtn" title="Clique para definir a data e o nº de questões da prova">
+          <span id="examCountdownText">Definir data da prova</span>
+        </button>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button data-page="edital" class="active">Edital</button>
+      <button data-page="estatisticas">Estatísticas</button>
+      <button data-page="historico">Histórico</button>
+      <button data-page="planejamento">Planejamento</button>
+      <button data-page="simulados">Simulados</button>
+      <button data-page="revisoes">Revisões</button>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn-outline btn-small" id="themeToggleBtn" title="Alternar modo claro/escuro">&#127769;</button>
+      <button class="btn btn-outline btn-small" id="exportBackupBtn" title="Baixar um arquivo com todos os seus dados">&#11015; Backup</button>
+      <button class="btn btn-outline btn-small" id="importBackupBtn" title="Restaurar dados a partir de um arquivo de backup">&#11014; Restaurar</button>
+      <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none;" />
+      <button class="btn btn-outline" id="toggleImportBtn">Importar edital</button>
+      <button class="btn btn-primary" id="openAddSessionBtn">Adicionar Estudo</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="save-warning" id="saveWarning">
+    Não consegui salvar os dados neste navegador (armazenamento local indisponível ou cheio).
+  </div>
+
+  <!-- Import panel -->
+  <div class="card import-panel" id="importPanel">
+    <div style="font-size:12px;font-weight:600;color:#6E6B63;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:14px;">Importar edital (analisado por qualquer IA, sem custo)</div>
+
+    <div class="import-step">
+      <div class="step-title"><span class="step-num">0</span> Ainda não sabe qual edital? Busque em sites reais e atualizados</div>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <a href="https://www.pciconcursos.com.br/" target="_blank" rel="noopener" class="btn btn-outline btn-small">PCI Concursos &#8599;</a>
+        <a href="https://www.qconcursos.com/" target="_blank" rel="noopener" class="btn btn-outline btn-small">QConcursos &#8599;</a>
+        <a href="https://www.gov.br/gestao/pt-br/concursonacional" target="_blank" rel="noopener" class="btn btn-outline btn-small">Concurso Nacional Unificado &#8599;</a>
+        <a href="https://www.in.gov.br/" target="_blank" rel="noopener" class="btn btn-outline btn-small">Diário Oficial da União &#8599;</a>
+      </div>
+      <p class="field-hint">Esses são atalhos fixos para sites externos reais — abrem em uma nova aba. Depois de achar o edital, volte aqui e siga os passos abaixo.</p>
+    </div>
+    <div class="import-step">
+      <div class="step-title"><span class="step-num">1</span> Pegue o texto do edital</div>
+      <label class="field-label" for="pdfInput">Enviar PDF do edital (opcional, extrai o texto automaticamente)</label>
+      <input type="file" id="pdfInput" accept="application/pdf,.pdf,.txt,text/plain" />
+      <p class="field-hint">Ou copie manualmente o trecho do "conteúdo programático" do edital.</p>
+    </div>
+    <div class="import-step">
+      <div class="step-title"><span class="step-num">2</span> Copie o prompt e cole numa IA gratuita</div>
+      <div class="row-with-btn">
+        <textarea class="prompt-box" id="promptBox" readonly></textarea>
+        <button class="btn btn-outline btn-small" id="copyPromptBtn" style="white-space:nowrap;">Copiar prompt</button>
+      </div>
+      <p class="field-hint" id="pdfTextHint" style="display:none;">Texto extraído do PDF pronto abaixo — copie e cole junto com o prompt na IA que preferir.</p>
+      <div id="pdfTextRow" style="display:none; margin-top:10px;">
+        <label class="field-label">Texto extraído do edital</label>
+        <div class="row-with-btn">
+          <textarea id="pdfTextBox" readonly style="min-height:90px;"></textarea>
+          <button class="btn btn-outline btn-small" id="copyPdfTextBtn" style="white-space:nowrap;">Copiar texto</button>
+        </div>
+      </div>
+    </div>
+    <div class="import-step">
+      <div class="step-title"><span class="step-num">3</span> Cole aqui a resposta que a IA te devolveu</div>
+      <textarea id="aiResponseBox" placeholder="Cole aqui a resposta formatada que a IA gerou..." style="width:100%;min-height:100px;"></textarea>
+      <p class="field-hint">Formato esperado: títulos com <code>##</code> para cada matéria e linhas com <code>-</code> para cada tópico.</p>
+    </div>
+    <div class="import-step">
+      <div class="step-title"><span class="step-num">4</span> Onde salvar esse conteúdo?</div>
+      <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:8px; cursor:pointer;">
+        <input type="radio" name="importDest" id="importDestCurrent" value="current" checked>
+        Adicionar ao edital atual (<span id="importDestCurrentName">Meu Edital</span>)
+      </label>
+      <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+        <input type="radio" name="importDest" id="importDestNew" value="new">
+        Salvar como um edital novo
+      </label>
+      <input type="text" id="importNewEditalName" placeholder="Nome do novo edital (ex: GCM PVH)" style="margin-top:8px; display:none;" />
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button class="btn btn-primary" id="processBtn">Processar</button>
+      <button class="btn btn-outline" id="cancelImportBtn">Fechar</button>
+    </div>
+    <div class="import-status" id="importStatus"></div>
+    <div class="import-results" id="importResults" style="display:none;"></div>
+  </div>
+
+  <!-- PAGE: EDITAL -->
+  <div class="page active" id="page-edital">
+    <div class="edital-head">
+      <h1 class="edital-title">Edital Verticalizado</h1>
+      <button class="btn btn-outline btn-small" id="toggleCollapseAllBtn">Recolher todas</button>
+    </div>
+    <div class="edital-progress-wrap">
+      <span class="edital-progress-label" id="editalProgressLabel">0 de 0 tópicos concluídos</span>
+      <div class="edital-progress-bar"><div class="edital-progress-fill" id="editalProgressFill" style="width:0%;"></div></div>
+      <span class="edital-progress-pct" id="editalProgressPct">0%</span>
+    </div>
+    <div id="subjectsContainer"></div>
+    <div class="card" style="padding:14px 16px;">
+      <label class="field-label">Adicionar matéria</label>
+      <div class="add-subject-row">
+        <input type="text" id="subjectInput" placeholder="Nome da matéria" autocomplete="off" />
+        <button class="btn btn-primary" id="addSubjectBtn">Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: ESTATISTICAS -->
+  <div class="page" id="page-estatisticas">
+    <h1 class="edital-title" style="margin-bottom:16px;">Estatísticas</h1>
+    <div class="stats-grid">
+      <div class="card stat-card donut-card">
+        <div id="desempenhoDonut"></div>
+        <div>
+          <div class="stat-label">Desempenho</div>
+          <div class="stat-value" id="statDesempenho">0%</div>
+        </div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Tempo de estudo</div>
+        <div class="stat-value" id="statTempo">0min</div>
+        <div class="stat-sub" id="statTempoSub">0 dias estudados</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Constância nos estudos</div>
+        <div class="stat-value" id="statConstancia">0%</div>
+        <div class="stat-sub" id="statConstanciaSub">0 dias estudados / 0 dias totais</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Progresso no edital</div>
+        <div class="stat-value" id="statProgressoEdital">0%</div>
+        <div class="stat-sub" id="statProgressoSub">0 tópicos concluídos</div>
+      </div>
+    </div>
+    <div class="card chart-card">
+      <div class="chart-title">Evolução no tempo (questões respondidas e desempenho por dia)</div>
+      <div id="evolutionChart"></div>
+      <p class="empty-hint" id="chartEmptyHint" style="display:none;">Registre sessões do tipo "Questões" com acertos/erros para ver a evolução aqui.</p>
+    </div>
+  </div>
+
+  <!-- PAGE: HISTORICO -->
+  <div class="page" id="page-historico">
+    <h1 class="edital-title" style="margin-bottom:16px;">Histórico</h1>
+    <p class="empty-hint" id="historicoEmptyHint">Nenhuma sessão de estudo registrada ainda.</p>
+    <div id="historicoContainer"></div>
+  </div>
+
+  <!-- PAGE: PLANEJAMENTO -->
+  <div class="page" id="page-planejamento">
+    <div class="edital-head">
+      <h1 class="edital-title">Planejamento</h1>
+      <div class="rev-tabs" id="planTabs">
+        <button data-plan-view="semanal" class="active">Semanal</button>
+        <button data-plan-view="ciclo">Ciclo</button>
+      </div>
+    </div>
+
+    <div class="plan-subpage active" id="plan-semanal">
+      <div class="edital-head" style="margin-bottom:10px;">
+        <p class="empty-hint" style="margin:0;">O cronograma se repete toda semana. As camadas de Revisões e Histórico mostram o que está agendado e o que você já estudou nos dias reais.</p>
+        <button class="btn btn-outline btn-small" id="openAutoScheduleBtn" style="white-space:nowrap;">&#9889; Gerar automaticamente</button>
+      </div>
+
+      <div class="week-toolbar">
+        <div class="week-nav">
+          <button class="icon-btn" id="prevWeekBtn" aria-label="Semana anterior">&#8592;</button>
+          <span class="week-range-label" id="weekRangeLabel">—</span>
+          <button class="icon-btn" id="nextWeekBtn" aria-label="Próxima semana">&#8594;</button>
+        </div>
+        <button class="btn btn-outline btn-small" id="todayWeekBtn">Hoje</button>
+      </div>
+
+      <div class="plan-layout">
+        <div class="week-grid" id="weekGrid"></div>
+        <div class="plan-sidebar">
+          <div class="card" style="padding:14px;">
+            <div class="panel-title" style="margin-bottom:8px;">Camadas</div>
+            <label class="layer-check"><input type="checkbox" id="layerCronograma" checked> Cronograma</label>
+            <label class="layer-check"><input type="checkbox" id="layerRevisoes" checked> Revisões</label>
+            <label class="layer-check"><input type="checkbox" id="layerHistorico" checked> Histórico</label>
+          </div>
+          <div class="card" style="padding:14px;">
+            <div class="mini-cal-header">
+              <button class="icon-btn" id="miniCalPrevBtn" aria-label="Mês anterior">&#8249;</button>
+              <span id="miniCalLabel">—</span>
+              <button class="icon-btn" id="miniCalNextBtn" aria-label="Próximo mês">&#8250;</button>
+            </div>
+            <div class="mini-cal-grid" id="miniCalGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:14px 16px; margin-top:14px;">
+        <label class="field-label">Adicionar bloco ao cronograma</label>
+        <div class="add-cycle-row">
+          <div class="field-item">
+            <label for="scheduleDaySelect">Dia da semana</label>
+            <select id="scheduleDaySelect">
+              <option value="0">Domingo</option><option value="1">Segunda</option><option value="2">Terça</option>
+              <option value="3">Quarta</option><option value="4">Quinta</option><option value="5">Sexta</option><option value="6">Sábado</option>
+            </select>
+          </div>
+          <div class="field-item grow">
+            <label for="scheduleSubjectSelect">Matéria</label>
+            <select id="scheduleSubjectSelect"></select>
+          </div>
+          <div class="field-item small">
+            <label for="scheduleMinutesInput">Minutos</label>
+            <input type="number" id="scheduleMinutesInput" placeholder="minutos" min="5" value="60" />
+          </div>
+          <button class="btn btn-primary btn-small" id="addScheduleItemBtn">Adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="plan-subpage" id="plan-ciclo">
+      <p class="empty-hint" style="margin-bottom:14px;">Monte a sequência de matérias do seu ciclo com uma meta de tempo para cada uma. O progresso é calculado pelo tempo já estudado de cada matéria no Histórico.</p>
+      <div class="cycle-layout">
+        <div class="card">
+          <div id="cycleList"></div>
+          <div class="add-cycle-row">
+            <div class="field-item grow">
+              <label for="cycleSubjectSelect">Matéria</label>
+              <select id="cycleSubjectSelect"></select>
+            </div>
+            <div class="field-item small">
+              <label for="cycleMinutesInput">Meta (min)</label>
+              <input type="number" id="cycleMinutesInput" placeholder="minutos" min="5" value="60" />
+            </div>
+            <button class="btn btn-primary btn-small" id="addCycleItemBtn">Adicionar</button>
+          </div>
+        </div>
+        <div class="card" style="padding:1.25rem;">
+          <div class="cycle-ring-wrap" id="cycleRing"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: SIMULADOS -->
+  <div class="page" id="page-simulados">
+    <div class="edital-head">
+      <h1 class="edital-title">Simulados</h1>
+      <button class="btn btn-primary" id="openAddSimBtn">Novo Simulado</button>
+    </div>
+    <div class="sim-stats">
+      <div class="card stat-card">
+        <div class="stat-label">Simulados realizados</div>
+        <div class="stat-value" id="statSimCount">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Último desempenho</div>
+        <div class="stat-value" id="statSimLast">-</div>
+      </div>
+    </div>
+    <div class="card chart-card" style="margin-bottom:16px;">
+      <div class="chart-title">Evolução do desempenho</div>
+      <div id="simChart"></div>
+      <p class="empty-hint" id="simChartEmptyHint">Cadastre simulados para ver a evolução aqui.</p>
+    </div>
+    <div id="simList"></div>
+  </div>
+
+  <!-- PAGE: REVISOES -->
+  <div class="page" id="page-revisoes">
+    <div class="edital-head">
+      <h1 class="edital-title">Revisões</h1>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline" id="openAutoRevBtn">&#9889; Gerar automaticamente</button>
+        <button class="btn btn-primary" id="openAddRevBtn">Agendar Revisão</button>
+      </div>
+    </div>
+    <div class="rev-tabs" id="revTabs">
+      <button data-rev-filter="programadas" class="active">Programadas</button>
+      <button data-rev-filter="atrasadas">Atrasadas</button>
+      <button data-rev-filter="ignoradas">Ignoradas</button>
+      <button data-rev-filter="concluidas">Concluídas</button>
+    </div>
+    <p class="empty-hint" id="revEmptyHint">Nenhuma revisão nesta lista.</p>
+    <div class="card" id="revList"></div>
+  </div>
+</div>
+
+<!-- Floating timer -->
+<button class="fab-timer" id="fabTimerBtn" aria-label="Cronômetro">&#9201;</button>
+<div class="modal-overlay" id="timerOverlay">
+  <div class="timer-card">
+    <!-- Setup -->
+    <div id="timerSetupView">
+      <div class="timer-logo">Cronômetro de estudo</div>
+      <p class="timer-tagline">Escolha o que vai estudar e defina uma meta de tempo.</p>
+      <div class="field-row">
+        <label class="field-label">Matéria</label>
+        <select id="timerSubjectSelect"></select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Tópico</label>
+        <select id="timerTopicSelect"></select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Meta de tempo</label>
+        <div style="display:flex; gap:8px;">
+          <div class="field-item small">
+            <label for="timerGoalHoursInput">Horas</label>
+            <input type="number" id="timerGoalHoursInput" min="0" value="1" />
+          </div>
+          <div class="field-item small">
+            <label for="timerGoalMinutesInput">Minutos</label>
+            <input type="number" id="timerGoalMinutesInput" min="0" max="59" value="0" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions" style="justify-content:center;">
+        <button type="button" class="btn btn-outline" id="cancelTimerSetupBtn">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="startTimerSetupBtn">Iniciar cronômetro</button>
+      </div>
+    </div>
+
+    <!-- Em execução -->
+    <div id="timerRunningView" style="display:none;">
+      <div class="timer-logo">Cronômetro de estudo</div>
+      <p class="timer-tagline">Em andamento — pause ou finalize quando quiser.</p>
+      <div class="timer-progress-label" id="timerProgressLabel">00h00 / 01h00</div>
+      <div class="timer-progress-track"><div class="timer-progress-fill" id="timerProgressFill" style="width:0%;"></div></div>
+      <div class="timer-big-display" id="timerBigDisplay">00:00:00</div>
+      <div class="timer-controls-big">
+        <button class="timer-round-btn-lg white" id="timerPauseBtn" aria-label="Pausar/retomar">&#10074;&#10074;</button>
+        <button class="timer-round-btn-lg teal" id="timerStopBtnBig" aria-label="Parar e salvar">&#9632;</button>
+      </div>
+      <p class="timer-add-label">Adicione mais tempo se quiser continuar estudando:</p>
+      <div class="timer-add-row">
+        <button type="button" class="timer-add-pill" data-add-min="1">+ 1min</button>
+        <button type="button" class="timer-add-pill" data-add-min="5">+ 5min</button>
+        <button type="button" class="timer-add-pill" data-add-min="15">+ 15min</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Adicionar/editar sessão -->
+<div class="modal-overlay" id="sessionModalOverlay">
+  <div class="modal-box">
+    <h2 class="modal-title" id="sessionModalTitle">Adicionar estudo</h2>
+    <form id="sessionForm">
+      <div class="field-row">
+        <label class="field-label">Matéria</label>
+        <select id="formSubjectSelect"></select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Tópico</label>
+        <select id="formTopicSelect"></select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Novo tópico (opcional, se não estiver na lista)</label>
+        <input type="text" id="formNewTopicInput" placeholder="Digite para criar um novo tópico" />
+      </div>
+      <div class="field-grid-2 field-row">
+        <div>
+          <label class="field-label">Tipo</label>
+          <select id="formTipoSelect">
+            <option value="teoria">Teoria</option>
+            <option value="revisao">Revisão</option>
+            <option value="questoes">Questões</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Data</label>
+          <input type="date" id="formDateInput" />
+        </div>
+      </div>
+      <div class="field-grid-3 field-row">
+        <div>
+          <label class="field-label">Duração (min)</label>
+          <input type="number" id="formMinutesInput" min="0" value="0" />
+        </div>
+        <div>
+          <label class="field-label">Acertos</label>
+          <input type="number" id="formCorretasInput" min="0" value="0" />
+        </div>
+        <div>
+          <label class="field-label">Erros</label>
+          <input type="number" id="formErradasInput" min="0" value="0" />
+        </div>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Dúvidas / anotações (opcional)</label>
+        <textarea id="formNotesInput" placeholder="O que ficou de dúvida ou vale anotar sobre esse estudo..." style="min-height:70px;"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancelSessionBtn">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Novo Simulado -->
+<div class="modal-overlay" id="simModalOverlay">
+  <div class="modal-box">
+    <h2 class="modal-title">Novo simulado</h2>
+    <form id="simForm">
+      <div class="field-row">
+        <label class="field-label">Nome do simulado</label>
+        <input type="text" id="simTitleInput" placeholder="Ex: Prova simulada" required />
+      </div>
+      <div class="field-grid-2 field-row">
+        <div><label class="field-label">Data</label><input type="date" id="simDateInput" /></div>
+        <div><label class="field-label">Duração (min)</label><input type="number" id="simDurationInput" min="0" value="0" /></div>
+      </div>
+      <div class="field-grid-3 field-row">
+        <div><label class="field-label">Acertos</label><input type="number" id="simCorretasInput" min="0" value="0" /></div>
+        <div><label class="field-label">Erros</label><input type="number" id="simErradasInput" min="0" value="0" /></div>
+        <div><label class="field-label">Brancos</label><input type="number" id="simBrancosInput" min="0" value="0" /></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancelSimBtn">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Gerar cronograma automaticamente -->
+<div class="modal-overlay" id="autoScheduleModalOverlay">
+  <div class="modal-box">
+    <h2 class="modal-title">Gerar cronograma automaticamente</h2>
+    <p class="field-hint" style="margin-bottom:12px;">Distribui o tempo entre as matérias de acordo com o peso de cada uma (definido no Edital, manualmente ou pela quantidade de tópicos) — matérias com mais peso aparecem em mais dias e recebem mais tempo. Os dias variam entre si, sem repetir sempre a mesma coisa. Isso substitui o cronograma semanal atual.</p>
+    <p class="field-hint" id="examSuggestionHint" style="display:none; margin-bottom:12px; color:#8A6A14; background:#FBF3DC; padding:8px 10px; border-radius:8px;"></p>
+    <form id="autoScheduleForm">
+      <div class="field-row">
+        <label class="field-label">Dias de estudo</label>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:13px;">
+          <label><input type="checkbox" class="auto-day-check" value="1" checked> Seg</label>
+          <label><input type="checkbox" class="auto-day-check" value="2" checked> Ter</label>
+          <label><input type="checkbox" class="auto-day-check" value="3" checked> Qua</label>
+          <label><input type="checkbox" class="auto-day-check" value="4" checked> Qui</label>
+          <label><input type="checkbox" class="auto-day-check" value="5" checked> Sex</label>
+          <label><input type="checkbox" class="auto-day-check" value="6"> Sáb</label>
+          <label><input type="checkbox" class="auto-day-check" value="0"> Dom</label>
+        </div>
+      </div>
+      <div class="field-grid-2 field-row">
+        <div>
+          <label class="field-label">Minutos de estudo por dia</label>
+          <input type="number" id="autoScheduleMinutesInput" min="10" value="120" />
+        </div>
+        <div>
+          <label class="field-label">Matérias diferentes por dia</label>
+          <input type="number" id="autoScheduleBlocksInput" min="1" max="5" value="2" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancelAutoScheduleBtn">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Gerar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Gerar revisões automaticamente -->
+<div class="modal-overlay" id="autoRevModalOverlay">
+  <div class="modal-box">
+    <h2 class="modal-title">Gerar revisões automaticamente</h2>
+    <p class="field-hint" style="margin-bottom:12px;">Agenda revisões para os tópicos já estudados e sem revisão pendente, priorizando matérias com mais conteúdo no Edital e tópicos estudados há mais tempo.</p>
+    <form id="autoRevForm">
+      <div class="field-grid-2 field-row">
+        <div>
+          <label class="field-label">Período (dias)</label>
+          <input type="number" id="autoRevPeriodoInput" min="1" value="14" />
+        </div>
+        <div>
+          <label class="field-label">Revisões por dia</label>
+          <input type="number" id="autoRevPerDayInput" min="1" value="2" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancelAutoRevBtn">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Gerar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Entrar / Criar conta (sincronização entre aparelhos) -->
+<div class="modal-overlay" id="authOverlay">
+  <div class="modal-box" style="max-width:380px;">
+    <h2 class="modal-title" id="authTitle">Entrar</h2>
+    <p class="field-hint" style="margin-bottom:14px;">Use a mesma conta neste e nos outros aparelhos (computador, tablet) para manter os dados sincronizados automaticamente.</p>
+    <form id="authForm">
+      <div class="field-row">
+        <label class="field-label">E-mail</label>
+        <input type="email" id="authEmailInput" required autocomplete="email" />
+      </div>
+      <div class="field-row">
+        <label class="field-label">Senha</label>
+        <input type="password" id="authPasswordInput" required minlength="6" autocomplete="current-password" />
+      </div>
+      <p class="import-status error" id="authError" style="display:none;"></p>
+      <div class="modal-actions" style="justify-content:space-between;">
+        <button type="button" class="btn btn-outline btn-small" id="authToggleModeBtn">Criar conta</button>
+        <button type="submit" class="btn btn-primary" id="authSubmitBtn">Entrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Data da prova -->
+<div class="modal-overlay" id="examModalOverlay">
+  <div class="modal-box">
+    <h2 class="modal-title">Data da prova</h2>
+    <p class="field-hint" style="margin-bottom:14px;">Usado para mostrar a contagem no cabeçalho e para calibrar a geração automática do cronograma semanal (quanto menos tempo falta, maior a intensidade sugerida).</p>
+    <form id="examForm">
+      <div class="field-row">
+        <label class="field-label">Data da prova</label>
+        <input type="date" id="examDateInput" />
+      </div>
+      <div class="field-row">
+        <label class="field-label">Quantidade de questões da prova (opcional)</label>
+        <input type="number" id="examQuestionsInput" min="0" placeholder="ex: 120" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="clearExamBtn">Limpar</button>
+        <button type="button" class="btn btn-outline" id="cancelExamBtn">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Nova Revisão -->
+<div class="modal-overlay" id="revModalOverlay">
+  <div class="modal-box">
+    <h2 class="modal-title">Agendar revisão</h2>
+    <form id="revForm">
+      <div class="field-row">
+        <label class="field-label">Matéria</label>
+        <select id="revSubjectSelect" required></select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Tópico</label>
+        <select id="revTopicSelect" required></select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Data da revisão</label>
+        <input type="date" id="revDateInput" required />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancelRevBtn">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+  createUserWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+// ============ CONFIGURAÇÃO DO FIREBASE ============
+// Substitua pelos valores do SEU projeto (console.firebase.google.com > Configurações do projeto > Seus apps).
+// Enquanto os valores abaixo estiverem com "COLE_AQUI", o app funciona só localmente (sem sincronizar).
+const firebaseConfig = {
+  apiKey: "AIzaSyCImN2fNEBC_u021e1ZOMbfmjL51p6ayKk",
+  authDomain: "meu-estudo-plus.firebaseapp.com",
+  projectId: "meu-estudo-plus",
+  storageBucket: "meu-estudo-plus.firebasestorage.app",
+  messagingSenderId: "529525625889",
+  appId: "1:529525625889:web:a880ff845cb5e6ebec3f60",
+  measurementId: "G-0FR7CCR558"
+};
+
+let firebaseReady = false;
+let auth = null, db = null, currentUser = null;
+try {
+  if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "COLE_AQUI_SUA_API_KEY") {
+    const firebaseApp = initializeApp(firebaseConfig);
+    auth = getAuth(firebaseApp);
+    db = getFirestore(firebaseApp);
+    firebaseReady = true;
+  }
+} catch (e) {
+  console.warn("Firebase não pôde ser iniciado — o app vai funcionar só localmente.", e);
+}
+
+(function () {
+  const LEGACY_STORAGE_KEY = "meus-estudos:dados-v2";
+  const PROFILES_KEY = "meus-estudos:perfis-v1";
+  function profileDataKey(id) { return "meus-estudos:dados:" + id; }
+  const COLORS = ["#2C3E63", "#C9A227", "#EA7C2C", "#24365C", "#E1527A", "#1B2A4A", "#C9A227", "#1B2A4A"];
+  const PROMPT_TEMPLATE =
+    "Analise o edital de concurso abaixo.\n" +
+    "Primeiro, procure no texto a DATA DA PROVA (prova objetiva/primeira fase) e a QUANTIDADE TOTAL DE QUESTÕES da prova. Responda essas duas informações nas duas primeiras linhas, exatamente neste formato (use 'não informado' se não encontrar):\n" +
+    "DATA_PROVA: AAAA-MM-DD\n" +
+    "QUESTOES_PROVA: número\n\n" +
+    "Depois, organize o conteúdo programático por matéria e tópicos. Para cada matéria, com base no que o edital indica sobre a importância dela na prova (quantidade de questões, ênfase, ordem de apresentação, peso declarado no edital etc.), atribua um peso de 1 (baixa importância) a 5 (altíssima importância/prioridade). Se o edital não informar isso claramente, estime pela quantidade de questões ou pelo destaque dado a cada matéria.\n" +
+    "Responda o restante SOMENTE no formato abaixo, sem nenhum texto extra, sem markdown adicional:\n\n" +
+    "## Nome da matéria 1 (peso: 4)\n- tópico 1\n- tópico 2\n\n## Nome da matéria 2 (peso: 2)\n- tópico 1\n- tópico 2\n\n" +
+    "Mantenha os tópicos como aparecem no edital, sem resumir ou inventar conteúdo. Aqui está o edital:\n\n" +
+    "[COLE AQUI O TEXTO DO EDITAL]";
+
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
+
+  function uid() { return Math.random().toString(36).slice(2, 10); }
+  function todayKey(d) { d = d || new Date(); return d.toISOString().slice(0, 10); }
+  function escapeHtml(str) { const div = document.createElement("div"); div.textContent = str == null ? "" : String(str); return div.innerHTML; }
+  function fmtHMS(totalSeconds) {
+    const s = Math.max(0, Math.floor(totalSeconds));
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return [h, m, sec].map(v => String(v).padStart(2, "0")).join(":");
+  }
+  function fmtHoursLong(totalSeconds) {
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.round((totalSeconds % 3600) / 60);
+    if (h === 0) return m + "min";
+    return h + "h" + String(m).padStart(2, "0") + "min";
+  }
+  function fmtDateLabel(dateStr) {
+    if (dateStr === todayKey()) return "HOJE";
+    const d = new Date(dateStr + "T00:00:00");
+    const months = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
+    return String(d.getDate()).padStart(2,"0") + " " + months[d.getMonth()] + "/" + String(d.getFullYear()).slice(2);
+  }
+  function pctClass(p) {
+    if (p == null) return "pct-none";
+    if (p >= 70) return "pct-good";
+    if (p >= 40) return "pct-mid";
+    return "pct-bad";
+  }
+
+  let state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [] };
+  let running = null; // { startedAt }
+  let tickInterval = null;
+  let editingSessionId = null;
+  let pendingTimerSave = null; // { subjectId, topicId, seconds }
+  let profiles = []; // [{ id, name }]
+  let activeProfileId = null;
+
+  function loadProfilesList() {
+    try {
+      const raw = localStorage.getItem(PROFILES_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        profiles = parsed.profiles || [];
+        activeProfileId = parsed.activeId || (profiles[0] ? profiles[0].id : null);
+        if (profiles.length) return;
+      }
+    } catch (e) { /* nada salvo ainda */ }
+
+    // primeira vez: migra dados antigos (chave única) para o novo formato de perfis
+    let legacyState = null;
+    try {
+      const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacyRaw) legacyState = JSON.parse(legacyRaw);
+    } catch (e) { /* sem dados antigos */ }
+
+    const id = uid();
+    profiles = [{ id: id, name: "Meu Edital" }];
+    activeProfileId = id;
+    if (legacyState) {
+      try { localStorage.setItem(profileDataKey(id), JSON.stringify(legacyState)); } catch (e) {}
+    }
+    saveProfilesList();
+  }
+  function saveProfilesList() {
+    try { localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: profiles, activeId: activeProfileId })); } catch (e) {}
+    pushProfilesToCloud();
+  }
+
+  // ---------- Sincronização com a nuvem (Firebase) ----------
+  function setSyncStatus(status) {
+    const dot = document.getElementById("syncDot");
+    const text = document.getElementById("syncStatusText");
+    if (!dot || !text) return;
+    dot.className = "sync-dot" + (status ? " " + status : "");
+    text.textContent = status === "syncing" ? "Sincronizando..." : status === "ok" ? "Sincronizado" : status === "error" ? "Falha ao sincronizar" : "—";
+  }
+  let pushDataTimer = null;
+  function schedulePushProfileData() {
+    if (!firebaseReady || !currentUser) return;
+    if (pushDataTimer) clearTimeout(pushDataTimer);
+    const profileId = activeProfileId, snapshot = JSON.parse(JSON.stringify(state));
+    pushDataTimer = setTimeout(() => pushProfileDataToCloud(profileId, snapshot), 800);
+  }
+  async function pushProfileDataToCloud(profileId, data) {
+    if (!firebaseReady || !currentUser || !profileId) return;
+    setSyncStatus("syncing");
+    try {
+      await setDoc(doc(db, "users", currentUser.uid, "profileData", profileId), data);
+      setSyncStatus("ok");
+    } catch (e) { setSyncStatus("error"); }
+  }
+  async function pushProfilesToCloud() {
+    if (!firebaseReady || !currentUser) return;
+    setSyncStatus("syncing");
+    try {
+      await setDoc(doc(db, "users", currentUser.uid), { profiles: profiles, activeId: activeProfileId });
+      setSyncStatus("ok");
+    } catch (e) { setSyncStatus("error"); }
+  }
+  async function deleteProfileDataFromCloud(profileId) {
+    if (!firebaseReady || !currentUser) return;
+    try { await deleteDoc(doc(db, "users", currentUser.uid, "profileData", profileId)); } catch (e) {}
+  }
+  async function pullFromCloud() {
+    if (!firebaseReady || !currentUser) return;
+    setSyncStatus("syncing");
+    try {
+      const metaSnap = await getDoc(doc(db, "users", currentUser.uid));
+      if (metaSnap.exists()) {
+        const meta = metaSnap.data();
+        const cloudProfiles = meta.profiles || [];
+        if (cloudProfiles.length) {
+          const dataSnaps = await getDocs(collection(db, "users", currentUser.uid, "profileData"));
+          const dataMap = {};
+          dataSnaps.forEach(d => { dataMap[d.id] = d.data(); });
+          const nextActiveId = (meta.activeId && cloudProfiles.some(p => p.id === meta.activeId)) ? meta.activeId : cloudProfiles[0].id;
+          localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: cloudProfiles, activeId: nextActiveId }));
+          cloudProfiles.forEach(p => {
+            localStorage.setItem(profileDataKey(p.id), JSON.stringify(dataMap[p.id] || {}));
+          });
+        }
+      }
+      setSyncStatus("ok");
+    } catch (e) { setSyncStatus("error"); }
+  }
+
+  function loadActiveProfileData() {
+    state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null };
+    try {
+      const raw = localStorage.getItem(profileDataKey(activeProfileId));
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        state.subjects = parsed.subjects || [];
+        state.sessions = parsed.sessions || [];
+        state.cycle = parsed.cycle || [];
+        state.simulados = parsed.simulados || [];
+        state.revisions = parsed.revisions || [];
+        state.schedule = parsed.schedule || [];
+        state.examDate = parsed.examDate || null;
+        state.examQuestions = parsed.examQuestions || null;
+      }
+    } catch (e) { /* perfil novo, sem dados ainda */ }
+  }
+
+  function load() {
+    loadProfilesList();
+    loadActiveProfileData();
+  }
+  function save() {
+    try {
+      localStorage.setItem(profileDataKey(activeProfileId), JSON.stringify(state));
+      document.getElementById("saveWarning").style.display = "none";
+    } catch (e) {
+      document.getElementById("saveWarning").style.display = "block";
+    }
+    schedulePushProfileData();
+  }
+
+  function switchProfile(id) {
+    if (id === activeProfileId) return;
+    if (running) {
+      const ok = confirm("Você tem um cronômetro em andamento. Trocar de edital vai descartar esse tempo não salvo. Continuar?");
+      if (!ok) return;
+      running = null;
+      if (tickInterval) { clearInterval(tickInterval); tickInterval = null; }
+    }
+    activeProfileId = id;
+    saveProfilesList();
+    loadActiveProfileData();
+    renderAll();
+    renderProfileSwitcher();
+  }
+  function createProfile(name) {
+    name = (name || "").trim() || "Novo edital";
+    const id = uid();
+    profiles.push({ id: id, name: name });
+    activeProfileId = id;
+    state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null };
+    saveProfilesList();
+    save();
+    return id;
+  }
+  function renameProfile(id, name) {
+    const p = profiles.find(x => x.id === id);
+    if (p && name && name.trim()) { p.name = name.trim(); saveProfilesList(); renderProfileSwitcher(); }
+  }
+  function deleteProfile(id) {
+    if (profiles.length <= 1) { alert("Esse é o único edital que você tem — não é possível excluir."); return; }
+    const p = profiles.find(x => x.id === id);
+    if (!p) return;
+    if (!confirm('Excluir o edital "' + p.name + '" e todos os dados dele (matérias, histórico, cronograma etc.)? Essa ação não pode ser desfeita.')) return;
+    profiles = profiles.filter(x => x.id !== id);
+    try { localStorage.removeItem(profileDataKey(id)); } catch (e) {}
+    deleteProfileDataFromCloud(id);
+    if (activeProfileId === id) {
+      activeProfileId = profiles[0].id;
+      loadActiveProfileData();
+      renderAll();
+    }
+    saveProfilesList();
+    renderProfileSwitcher();
+  }
+
+  function renderProfileSwitcher() {
+    const active = profiles.find(p => p.id === activeProfileId);
+    document.getElementById("activeProfileName").textContent = active ? active.name : "Meu Edital";
+    const listEl = document.getElementById("profileList");
+    if (!listEl) return;
+    listEl.innerHTML = profiles.map(p => {
+      const isActive = p.id === activeProfileId;
+      return '<div class="profile-row' + (isActive ? " active" : "") + '" data-select-profile="' + p.id + '">' +
+        '<span class="profile-row-name">' + escapeHtml(p.name) + (isActive ? ' &#10003;' : '') + '</span>' +
+        '<button class="icon-btn" data-rename-profile="' + p.id + '" title="Renomear" onclick="event.stopPropagation()">&#9998;</button>' +
+        '<button class="icon-btn" data-delete-profile="' + p.id + '" title="Excluir" onclick="event.stopPropagation()">&#128465;</button>' +
+      '</div>';
+    }).join("");
+    listEl.querySelectorAll("[data-select-profile]").forEach(el => {
+      el.addEventListener("click", () => {
+        switchProfile(el.getAttribute("data-select-profile"));
+        document.getElementById("profileDropdown").classList.remove("open");
+      });
+    });
+    listEl.querySelectorAll("[data-rename-profile]").forEach(el => {
+      el.addEventListener("click", () => {
+        const id = el.getAttribute("data-rename-profile");
+        const p = profiles.find(x => x.id === id);
+        const novo = prompt("Novo nome para este edital:", p ? p.name : "");
+        if (novo != null) renameProfile(id, novo);
+      });
+    });
+    listEl.querySelectorAll("[data-delete-profile]").forEach(el => {
+      el.addEventListener("click", () => deleteProfile(el.getAttribute("data-delete-profile")));
+    });
+    renderExamCountdown();
+  }
+
+  function renderExamCountdown() {
+    const el = document.getElementById("examCountdownText");
+    const btn = document.getElementById("examCountdownBtn");
+    if (!el || !btn) return;
+    if (!state.examDate) {
+      el.textContent = "Definir data da prova";
+      btn.classList.remove("urgent");
+      return;
+    }
+    const today = new Date(todayKey() + "T00:00:00");
+    const exam = new Date(state.examDate + "T00:00:00");
+    const diffDays = Math.round((exam - today) / 86400000);
+    if (diffDays > 0) {
+      el.textContent = "Faltam " + diffDays + (diffDays === 1 ? " dia" : " dias") + " para a prova";
+      btn.classList.toggle("urgent", diffDays <= 14);
+    } else if (diffDays === 0) {
+      el.textContent = "A prova é hoje!";
+      btn.classList.add("urgent");
+    } else {
+      el.textContent = "Prova foi há " + Math.abs(diffDays) + " dias";
+      btn.classList.remove("urgent");
+    }
+  }
+
+  function subjectColor(subject) {
+    const idx = state.subjects.findIndex(s => s.id === subject.id);
+    return COLORS[idx % COLORS.length];
+  }
+
+  function sessionsForTopic(topicId) {
+    return state.sessions.filter(s => s.topicId === topicId);
+  }
+  function getSubjectWeight(subject) {
+    return (subject.weight != null && subject.weight > 0) ? subject.weight : Math.max(1, subject.topics.length);
+  }
+  function topicAgg(topicId) {
+    const sess = sessionsForTopic(topicId);
+    const corretas = sess.reduce((a, s) => a + (s.corretas || 0), 0);
+    const erradas = sess.reduce((a, s) => a + (s.erradas || 0), 0);
+    const seconds = sess.reduce((a, s) => a + (s.seconds || 0), 0);
+    const lastStudy = sess.reduce((max, s) => (!max || s.date > max ? s.date : max), null);
+    const pct = (corretas + erradas) > 0 ? Math.round((corretas / (corretas + erradas)) * 100) : null;
+    return { corretas, erradas, seconds, lastStudy, pct };
+  }
+  function subjectAgg(subject) {
+    let corretas = 0, erradas = 0, seconds = 0;
+    subject.topics.forEach(t => {
+      const a = topicAgg(t.id);
+      corretas += a.corretas; erradas += a.erradas; seconds += a.seconds;
+    });
+    state.sessions.filter(s => s.subjectId === subject.id && !s.topicId).forEach(s => {
+      corretas += s.corretas || 0; erradas += s.erradas || 0; seconds += s.seconds || 0;
+    });
+    const pct = (corretas + erradas) > 0 ? Math.round((corretas / (corretas + erradas)) * 100) : null;
+    const done = subject.topics.filter(t => t.done).length;
+    const total = subject.topics.length;
+    return { corretas, erradas, seconds, pct, done, total };
+  }
+
+  // ---------- Navigation ----------
+  document.querySelectorAll("nav.tabs button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("nav.tabs button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.getElementById("page-" + btn.getAttribute("data-page")).classList.add("active");
+      renderAll();
+    });
+  });
+
+  // ---------- Subjects / topics ----------
+  const collapsedState = {};
+
+  function addSubject(name) {
+    name = name.trim();
+    if (!name) return;
+    state.subjects.push({ id: uid(), name: name, weight: null, topics: [] });
+    save(); renderAll();
+  }
+  function deleteSubject(subjectId) {
+    state.subjects = state.subjects.filter(s => s.id !== subjectId);
+    state.sessions = state.sessions.filter(s => s.subjectId !== subjectId);
+    save(); renderAll();
+  }
+  function addTopic(subjectId, name) {
+    name = name.trim();
+    if (!name) return null;
+    const subj = state.subjects.find(s => s.id === subjectId);
+    if (!subj) return null;
+    const topic = { id: uid(), name: name, done: false };
+    subj.topics.push(topic);
+    save();
+    return topic;
+  }
+  function deleteTopic(subjectId, topicId) {
+    const subj = state.subjects.find(s => s.id === subjectId);
+    if (subj) subj.topics = subj.topics.filter(t => t.id !== topicId);
+    state.sessions = state.sessions.filter(s => s.topicId !== topicId);
+    save(); renderAll();
+  }
+  function toggleTopicDone(subjectId, topicId) {
+    const subj = state.subjects.find(s => s.id === subjectId);
+    if (subj) {
+      const t = subj.topics.find(t => t.id === topicId);
+      if (t) t.done = !t.done;
+    }
+    save(); renderAll();
+  }
+
+  document.getElementById("addSubjectBtn").addEventListener("click", () => {
+    const input = document.getElementById("subjectInput");
+    addSubject(input.value);
+    input.value = "";
+  });
+
+  document.getElementById("toggleCollapseAllBtn").addEventListener("click", () => {
+    const anyExpanded = state.subjects.some(s => !collapsedState[s.id]);
+    state.subjects.forEach(s => { collapsedState[s.id] = anyExpanded; });
+    renderEdital();
+  });
+
+  // ---------- Render: Edital ----------
+  function renderEdital() {
+    const totalTopics = state.subjects.reduce((a, s) => a + s.topics.length, 0);
+    const doneTopics = state.subjects.reduce((a, s) => a + s.topics.filter(t => t.done).length, 0);
+    const overallPct = totalTopics ? Math.round((doneTopics / totalTopics) * 100) : 0;
+    document.getElementById("editalProgressLabel").textContent = doneTopics + " de " + totalTopics + " tópicos concluídos";
+    document.getElementById("editalProgressFill").style.width = overallPct + "%";
+    document.getElementById("editalProgressPct").textContent = overallPct + "%";
+
+    const collapseAllBtn = document.getElementById("toggleCollapseAllBtn");
+    if (state.subjects.length === 0) {
+      collapseAllBtn.style.display = "none";
+    } else {
+      collapseAllBtn.style.display = "inline-flex";
+      const anyExpanded = state.subjects.some(s => !collapsedState[s.id]);
+      collapseAllBtn.textContent = anyExpanded ? "Recolher todas" : "Expandir todas";
+    }
+
+    const container = document.getElementById("subjectsContainer");
+    if (state.subjects.length === 0) {
+      container.innerHTML = '<p class="empty-hint">Nenhuma matéria cadastrada ainda. Adicione uma abaixo ou importe um edital.</p>';
+      return;
+    }
+
+    container.innerHTML = state.subjects.map(subject => {
+      const color = subjectColor(subject);
+      const agg = subjectAgg(subject);
+      const collapsed = !!collapsedState[subject.id];
+      const rows = subject.topics.map((t, i) => {
+        const a = topicAgg(t.id);
+        return '<tr class="topic-row-tr">' +
+          '<td class="check-cell"><button class="check-topic' + (t.done ? " done" : "") + '" data-toggle-topic="' + subject.id + '|' + t.id + '">' + (t.done ? "&check;" : "") + '</button></td>' +
+          '<td class="topic-name-cell' + (t.done ? " done" : "") + '"><span class="topic-num">' + (i + 1) + '.</span> ' + escapeHtml(t.name) + '</td>' +
+          '<td>' + a.corretas + '</td>' +
+          '<td>' + a.erradas + '</td>' +
+          '<td>' + (a.pct == null ? '<span class="pct-none">-</span>' : '<span class="pct-badge ' + pctClass(a.pct) + '">' + a.pct + '</span>') + '</td>' +
+          '<td class="last-study-cell">' + (a.lastStudy ? fmtDateLabel(a.lastStudy) : "-") + '</td>' +
+          '<td><span class="link-add" data-quick-add="' + subject.id + '|' + t.id + '">Adicionar</span></td>' +
+          '<td><button class="icon-btn" data-edit-topic="' + subject.id + '|' + t.id + '" aria-label="Editar tópico">&#9998;</button></td>' +
+          '<td><button class="icon-btn" data-del-topic="' + subject.id + '|' + t.id + '" aria-label="Excluir tópico">&#128465;</button></td>' +
+        '</tr>';
+      }).join("");
+
+      return '<div class="card subject-card">' +
+        '<div class="subject-header" data-toggle-collapse="' + subject.id + '">' +
+          '<div class="subject-color-bar" style="background:' + color + ';"></div>' +
+          '<div class="subject-header-name">' + escapeHtml(subject.name) + '</div>' +
+          '<div class="subject-header-meta">' + agg.done + '/' + agg.total + ' tópicos &middot; ' + fmtHoursLong(agg.seconds) + '</div>' +
+          '<span class="weight-badge" data-edit-weight="' + subject.id + '" title="Peso desta matéria no edital — clique para ajustar. Usado para focar o cronograma e as revisões.">Peso ' + getSubjectWeight(subject) + (subject.weight != null ? '' : ' &middot; auto') + '</span>' +
+          '<svg class="chevron' + (collapsed ? " collapsed" : "") + '" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
+        '</div>' +
+        (collapsed ? "" :
+          '<div class="subject-body">' +
+            (subject.topics.length === 0 ? '<p class="empty-hint" style="padding:14px 16px;">Nenhum tópico nesta matéria ainda.</p>' :
+            '<table class="topics-table"><thead><tr><th></th><th>Tópicos</th><th>Acertos</th><th>Erros</th><th>%</th><th>Último estudo</th><th></th><th></th><th></th></tr></thead><tbody>' +
+              rows +
+              '<tr class="total-row"><td></td><td>TOTAL</td><td>' + agg.corretas + '</td><td>' + agg.erradas + '</td><td>' + (agg.pct == null ? '-' : agg.pct + '%') + '</td><td></td><td></td><td></td><td></td></tr>' +
+            '</tbody></table>') +
+            '<div class="subject-actions-row">' +
+              '<input type="text" class="new-topic-input" data-subject-topic-input="' + subject.id + '" placeholder="Novo tópico..." style="max-width:260px;" />' +
+              '<button class="btn btn-outline btn-small" data-add-topic-btn="' + subject.id + '">Adicionar tópico</button>' +
+              '<button class="btn btn-outline btn-small del-subject-btn" data-del-subject="' + subject.id + '">Excluir matéria</button>' +
+            '</div>' +
+          '</div>'
+        ) +
+      '</div>';
+    }).join("");
+
+    container.querySelectorAll("[data-toggle-collapse]").forEach(el => {
+      el.addEventListener("click", () => {
+        const id = el.getAttribute("data-toggle-collapse");
+        collapsedState[id] = !collapsedState[id];
+        renderEdital();
+      });
+    });
+    container.querySelectorAll("[data-edit-weight]").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const subject = state.subjects.find(s => s.id === el.getAttribute("data-edit-weight"));
+        if (!subject) return;
+        const atual = subject.weight != null ? String(subject.weight) : "";
+        const novo = prompt("Peso desta matéria no edital (1 a 5 — quanto maior, mais foco ela recebe no cronograma e nas revisões).\nDeixe em branco para calcular automaticamente pelo número de tópicos:", atual);
+        if (novo === null) return;
+        if (novo.trim() === "") { subject.weight = null; }
+        else {
+          const n = Math.min(5, Math.max(1, Math.round(Number(novo))));
+          if (!isNaN(n)) subject.weight = n;
+        }
+        save(); renderAll();
+      });
+    });
+    container.querySelectorAll("[data-toggle-topic]").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const [subjectId, topicId] = el.getAttribute("data-toggle-topic").split("|");
+        toggleTopicDone(subjectId, topicId);
+      });
+    });
+    container.querySelectorAll("[data-del-topic]").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const [subjectId, topicId] = el.getAttribute("data-del-topic").split("|");
+        deleteTopic(subjectId, topicId);
+      });
+    });
+    container.querySelectorAll("[data-del-subject]").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deleteSubject(el.getAttribute("data-del-subject"));
+      });
+    });
+    container.querySelectorAll("[data-edit-topic]").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const [subjectId, topicId] = el.getAttribute("data-edit-topic").split("|");
+        const subj = state.subjects.find(s => s.id === subjectId);
+        const topic = subj ? subj.topics.find(t => t.id === topicId) : null;
+        if (!topic) return;
+        const novoNome = prompt("Editar nome do tópico:", topic.name);
+        if (novoNome != null && novoNome.trim()) {
+          topic.name = novoNome.trim();
+          save(); renderAll();
+        }
+      });
+    });
+    container.querySelectorAll("[data-quick-add]").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const [subjectId, topicId] = el.getAttribute("data-quick-add").split("|");
+        openSessionModal({ subjectId: subjectId, topicId: topicId });
+      });
+    });
+    container.querySelectorAll("[data-add-topic-btn]").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const subjectId = el.getAttribute("data-add-topic-btn");
+        const input = container.querySelector('[data-subject-topic-input="' + subjectId + '"]');
+        addTopic(subjectId, input.value);
+        input.value = "";
+        renderAll();
+      });
+    });
+  }
+
+  // ---------- Render: Estatísticas ----------
+  function donutSVG(pct) {
+    const size = 68, stroke = 9, r = (size - stroke) / 2, c = 2 * Math.PI * r;
+    const offset = c - (Math.min(pct, 100) / 100) * c;
+    return '<svg width="' + size + '" height="' + size + '" style="transform:rotate(-90deg);">' +
+      '<circle cx="' + size/2 + '" cy="' + size/2 + '" r="' + r + '" stroke="#EDEAE0" stroke-width="' + stroke + '" fill="none"/>' +
+      '<circle cx="' + size/2 + '" cy="' + size/2 + '" r="' + r + '" stroke="#C9A227" stroke-width="' + stroke + '" fill="none" stroke-dasharray="' + c + '" stroke-dashoffset="' + offset + '" stroke-linecap="round"/>' +
+      '</svg>';
+  }
+
+  function renderEstatisticas() {
+    const allCorretas = state.sessions.reduce((a, s) => a + (s.corretas || 0), 0);
+    const allErradas = state.sessions.reduce((a, s) => a + (s.erradas || 0), 0);
+    const desempenho = (allCorretas + allErradas) > 0 ? Math.round((allCorretas / (allCorretas + allErradas)) * 100) : 0;
+    document.getElementById("desempenhoDonut").innerHTML = donutSVG(desempenho);
+    document.getElementById("statDesempenho").textContent = desempenho + "%";
+
+    const totalSeconds = state.sessions.reduce((a, s) => a + (s.seconds || 0), 0);
+    const studyDates = Array.from(new Set(state.sessions.map(s => s.date))).sort();
+    document.getElementById("statTempo").textContent = fmtHoursLong(totalSeconds);
+    document.getElementById("statTempoSub").textContent = studyDates.length + (studyDates.length === 1 ? " dia estudado" : " dias estudados");
+
+    let constancia = 0, diasTotais = 0;
+    if (studyDates.length > 0) {
+      const first = new Date(studyDates[0] + "T00:00:00");
+      const today = new Date(todayKey() + "T00:00:00");
+      diasTotais = Math.max(1, Math.round((today - first) / 86400000) + 1);
+      constancia = Math.round((studyDates.length / diasTotais) * 100);
+    }
+    document.getElementById("statConstancia").textContent = constancia + "%";
+    document.getElementById("statConstanciaSub").textContent = studyDates.length + " dias estudados / " + diasTotais + " dias totais";
+
+    const totalTopics = state.subjects.reduce((a, s) => a + s.topics.length, 0);
+    const doneTopics = state.subjects.reduce((a, s) => a + s.topics.filter(t => t.done).length, 0);
+    const progresso = totalTopics ? Math.round((doneTopics / totalTopics) * 100) : 0;
+    document.getElementById("statProgressoEdital").textContent = progresso + "%";
+    document.getElementById("statProgressoSub").textContent = doneTopics + " de " + totalTopics + " tópicos";
+
+    renderEvolutionChart();
+  }
+
+  function renderEvolutionChart() {
+    const byDate = {};
+    state.sessions.forEach(s => {
+      if (!byDate[s.date]) byDate[s.date] = { corretas: 0, erradas: 0 };
+      byDate[s.date].corretas += (s.corretas || 0);
+      byDate[s.date].erradas += (s.erradas || 0);
+    });
+    const dates = Object.keys(byDate).sort().slice(-20);
+    const el = document.getElementById("evolutionChart");
+    const hint = document.getElementById("chartEmptyHint");
+    if (dates.length === 0) {
+      el.innerHTML = "";
+      hint.style.display = "block";
+      return;
+    }
+    hint.style.display = "none";
+
+    const width = Math.max(500, dates.length * 46);
+    const height = 220;
+    const padBottom = 26, padTop = 10;
+    const plotH = height - padBottom - padTop;
+    const maxQ = Math.max(1, ...dates.map(d => byDate[d].corretas + byDate[d].erradas));
+    const barW = 20;
+
+    let bars = "", points = [], labels = "";
+    dates.forEach((d, i) => {
+      const x = i * 46 + 23;
+      const q = byDate[d].corretas + byDate[d].erradas;
+      const pct = q > 0 ? (byDate[d].corretas / q) * 100 : 0;
+      const barH = (q / maxQ) * plotH;
+      bars += '<rect x="' + (x - barW/2) + '" y="' + (height - padBottom - barH) + '" width="' + barW + '" height="' + barH + '" rx="3" fill="#F1E6B8"></rect>';
+      bars += '<text x="' + x + '" y="' + (height - padBottom - barH - 6) + '" font-size="10" fill="#6E6B63" text-anchor="middle">' + q + '</text>';
+      const py = height - padBottom - (pct / 100) * plotH;
+      points.push(x + "," + py);
+      labels += '<text x="' + x + '" y="' + (height - 8) + '" font-size="10" fill="#9B9890" text-anchor="middle">' + fmtDateLabel(d).slice(0,5) + '</text>';
+    });
+
+    let lineDots = dates.map((d, i) => {
+      const x = i * 46 + 23;
+      const q = byDate[d].corretas + byDate[d].erradas;
+      const pct = q > 0 ? (byDate[d].corretas / q) * 100 : 0;
+      const py = height - padBottom - (pct / 100) * plotH;
+      return '<circle cx="' + x + '" cy="' + py + '" r="3.5" fill="#2C3E63"></circle>';
+    }).join("");
+
+    el.innerHTML = '<div style="overflow-x:auto;"><svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '">' +
+      bars +
+      '<polyline points="' + points.join(" ") + '" fill="none" stroke="#2C3E63" stroke-width="2"></polyline>' +
+      lineDots +
+      labels +
+      '</svg></div>' +
+      '<div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:#6E6B63;">' +
+      '<span><span style="display:inline-block;width:10px;height:10px;background:#F1E6B8;border-radius:2px;margin-right:5px;"></span>Questões respondidas</span>' +
+      '<span><span style="display:inline-block;width:10px;height:10px;background:#2C3E63;border-radius:50%;margin-right:5px;"></span>% de acerto no dia</span>' +
+      '</div>';
+  }
+
+  // ---------- Render: Histórico ----------
+  function renderHistorico() {
+    const container = document.getElementById("historicoContainer");
+    const hint = document.getElementById("historicoEmptyHint");
+    if (state.sessions.length === 0) {
+      container.innerHTML = "";
+      hint.style.display = "block";
+      return;
+    }
+    hint.style.display = "none";
+
+    const byDate = {};
+    state.sessions.forEach(s => { (byDate[s.date] = byDate[s.date] || []).push(s); });
+    const dates = Object.keys(byDate).sort().reverse();
+
+    container.innerHTML = dates.map(date => {
+      const entries = byDate[date].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      const totalSec = entries.reduce((a, s) => a + (s.seconds || 0), 0);
+      const rows = entries.map(s => {
+        const subject = state.subjects.find(sub => sub.id === s.subjectId);
+        const topic = subject ? subject.topics.find(t => t.id === s.topicId) : null;
+        const color = subject ? subjectColor(subject) : "#C9C5BA";
+        const pct = (s.corretas + s.erradas) > 0 ? Math.round((s.corretas / (s.corretas + s.erradas)) * 100) : null;
+        const tagClass = s.tipo === "teoria" ? "tag-teoria" : s.tipo === "revisao" ? "tag-revisao" : "tag-questoes";
+        const tagLabel = s.tipo === "teoria" ? "Teoria" : s.tipo === "revisao" ? "Revisão" : "Questões";
+        return '<div class="card hist-entry">' +
+          '<div class="hist-color-bar" style="background:' + color + ';"></div>' +
+          '<div class="hist-info">' +
+            '<div class="hist-subject">' + escapeHtml(subject ? subject.name : (s.subjectId ? "Matéria removida" : "Estudo geral")) + '</div>' +
+            (s.subjectId ? '<div class="hist-topic">' + escapeHtml(topic ? topic.name : (s.topicId ? "Tópico removido" : "Sem tópico específico")) + '</div>' : '') +
+            (s.notes ? '<div class="hist-note">&#128221; ' + escapeHtml(s.notes) + '</div>' : '') +
+          '</div>' +
+          '<div class="hist-duration">' + fmtHMS(s.seconds) + '</div>' +
+          '<div class="hist-score">' +
+            '<span class="ok">' + s.corretas + '</span>' +
+            '<span class="err">' + s.erradas + '</span>' +
+            (pct == null ? '<span class="pct-none">-</span>' : '<span class="pct-badge ' + pctClass(pct) + '">' + pct + '</span>') +
+          '</div>' +
+          '<span class="tag ' + tagClass + '">' + tagLabel + '</span>' +
+          '<div class="hist-actions">' +
+            '<button class="icon-btn" data-edit-session="' + s.id + '" aria-label="Editar">&#9998;</button>' +
+            '<button class="icon-btn" data-del-session="' + s.id + '" aria-label="Excluir">&#128465;</button>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+      return '<div class="hist-day-header">' + fmtDateLabel(date) + '<span class="hist-day-total">' + fmtHMS(totalSec) + '</span></div>' + rows;
+    }).join("");
+
+    container.querySelectorAll("[data-edit-session]").forEach(el => {
+      el.addEventListener("click", () => openSessionModal({ editId: el.getAttribute("data-edit-session") }));
+    });
+    container.querySelectorAll("[data-del-session]").forEach(el => {
+      el.addEventListener("click", () => {
+        state.sessions = state.sessions.filter(s => s.id !== el.getAttribute("data-del-session"));
+        save(); renderAll();
+      });
+    });
+  }
+
+  function renderAll() {
+    renderEdital();
+    renderEstatisticas();
+    renderHistorico();
+    renderCiclo();
+    renderSemanal();
+    renderSimulados();
+    renderRevisoes();
+  }
+
+  // ---------- PLANEJAMENTO: sub-abas ----------
+  document.querySelectorAll("#planTabs button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#planTabs button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".plan-subpage").forEach(p => p.classList.remove("active"));
+      document.getElementById("plan-" + btn.getAttribute("data-plan-view")).classList.add("active");
+    });
+  });
+
+  const WEEK_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const MONTH_LABELS = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const MONTH_SHORT = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+  function getWeekStart(date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - d.getDay());
+    return d;
+  }
+  let planWeekStart = getWeekStart(new Date());
+  let miniCalMonth = new Date(planWeekStart.getFullYear(), planWeekStart.getMonth(), 1);
+  let layerState = { cronograma: true, revisoes: true, historico: true };
+
+  function addDays(date, n) { const d = new Date(date); d.setDate(d.getDate() + n); return d; }
+
+  function renderSemanal() {
+    const select = document.getElementById("scheduleSubjectSelect");
+    populateSubjectSelect(select, select.value);
+
+    // rótulo do intervalo da semana
+    const weekEnd = addDays(planWeekStart, 6);
+    const sameMonth = planWeekStart.getMonth() === weekEnd.getMonth();
+    const label = sameMonth
+      ? planWeekStart.getDate() + " a " + weekEnd.getDate() + " de " + MONTH_SHORT[weekEnd.getMonth()] + ". de " + weekEnd.getFullYear()
+      : planWeekStart.getDate() + " " + MONTH_SHORT[planWeekStart.getMonth()] + ". a " + weekEnd.getDate() + " " + MONTH_SHORT[weekEnd.getMonth()] + ". de " + weekEnd.getFullYear();
+    document.getElementById("weekRangeLabel").textContent = label;
+
+    const grid = document.getElementById("weekGrid");
+    if (state.subjects.length === 0) {
+      grid.innerHTML = '<p class="empty-hint">Cadastre matérias no Edital antes de montar o cronograma.</p>';
+    } else {
+      const todayStr = todayKey();
+      grid.innerHTML = WEEK_LABELS.map((label2, day) => {
+        const dateObj = addDays(planWeekStart, day);
+        const dateStr = todayKey(dateObj);
+        const isToday = dateStr === todayStr;
+
+        let sections = "";
+
+        if (layerState.revisoes) {
+          const revs = state.revisions.filter(r => r.date === dateStr);
+          if (revs.length) {
+            sections += '<div class="week-section-label">Revisões</div>' + revs.map(r => {
+              const subject = state.subjects.find(s => s.id === r.subjectId);
+              const topic = subject ? subject.topics.find(t => t.id === r.topicId) : null;
+              return '<div class="rev-block' + (r.done ? " done" : "") + (r.ignored ? " is-ignored" : "") + '">' +
+                '<div class="rb-name">' + escapeHtml(subject ? subject.name : "Matéria removida") + '</div>' +
+                (topic ? '<div style="opacity:0.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(topic.name) + '</div>' : '') +
+              '</div>';
+            }).join("");
+          }
+        }
+
+        if (layerState.cronograma) {
+          const blocks = state.schedule.filter(b => b.day === day);
+          if (blocks.length) {
+            sections += '<div class="week-section-label">Cronograma</div>' + blocks.map(b => {
+              const subject = state.subjects.find(s => s.id === b.subjectId);
+              if (!subject) return "";
+              const color = subjectColor(subject);
+              return '<div class="week-block" style="background:' + color + ';">' +
+                '<div><span class="wb-name">' + escapeHtml(subject.name) + '</span><span class="wb-time">' + b.minutes + 'min</span></div>' +
+                '<span class="wb-del" data-del-schedule="' + b.id + '">&times;</span>' +
+              '</div>';
+            }).join("");
+          }
+        }
+
+        if (layerState.historico) {
+          const sessions = state.sessions.filter(s => s.date === dateStr);
+          if (sessions.length) {
+            sections += '<div class="week-section-label">Histórico</div>' + sessions.map(s => {
+              const subject = state.subjects.find(sub => sub.id === s.subjectId);
+              const name = subject ? subject.name : (s.subjectId ? "Matéria removida" : "Estudo geral");
+              return '<div class="hist-block"><span class="hb-check">&#10003;</span><span class="hb-name">' + escapeHtml(name) + '</span><span style="margin-left:auto;flex-shrink:0;">' + fmtHShort(s.seconds) + '</span></div>';
+            }).join("");
+          }
+        }
+
+        return '<div class="week-day' + (isToday ? " is-today" : "") + '">' +
+          '<div class="week-day-header"><div class="week-day-dow">' + label2 + '</div><div class="week-day-num">' + dateObj.getDate() + '</div></div>' +
+          sections +
+        '</div>';
+      }).join("");
+
+      grid.querySelectorAll("[data-del-schedule]").forEach(el => {
+        el.addEventListener("click", () => {
+          state.schedule = state.schedule.filter(b => b.id !== el.getAttribute("data-del-schedule"));
+          save(); renderSemanal();
+        });
+      });
+    }
+
+    renderMiniCalendar();
+  }
+
+  function renderMiniCalendar() {
+    document.getElementById("miniCalLabel").textContent = MONTH_LABELS[miniCalMonth.getMonth()] + " " + miniCalMonth.getFullYear();
+    const grid = document.getElementById("miniCalGrid");
+    const weekEnd = addDays(planWeekStart, 6);
+    const firstOfMonth = new Date(miniCalMonth.getFullYear(), miniCalMonth.getMonth(), 1);
+    const gridStart = addDays(firstOfMonth, -firstOfMonth.getDay());
+    const todayStr = todayKey();
+
+    let html = WEEK_LABELS.map(d => '<div class="mini-cal-dow">' + d[0] + '</div>').join("");
+    for (let i = 0; i < 42; i++) {
+      const d = addDays(gridStart, i);
+      const inWeek = d >= planWeekStart && d <= weekEnd;
+      const otherMonth = d.getMonth() !== miniCalMonth.getMonth();
+      const isToday = todayKey(d) === todayStr;
+      html += '<div class="mini-cal-day' + (otherMonth ? " other-month" : "") + (isToday ? " today" : "") + (inWeek ? " in-week" : "") + '" data-mini-day="' + todayKey(d) + '">' + d.getDate() + '</div>';
+      if (i === 41 && d.getMonth() === miniCalMonth.getMonth() && i < 34) break;
+    }
+    grid.innerHTML = html;
+    grid.querySelectorAll("[data-mini-day]").forEach(el => {
+      el.addEventListener("click", () => {
+        planWeekStart = getWeekStart(new Date(el.getAttribute("data-mini-day") + "T00:00:00"));
+        miniCalMonth = new Date(planWeekStart.getFullYear(), planWeekStart.getMonth(), 1);
+        renderSemanal();
+      });
+    });
+  }
+
+  document.getElementById("prevWeekBtn").addEventListener("click", () => {
+    planWeekStart = addDays(planWeekStart, -7);
+    miniCalMonth = new Date(planWeekStart.getFullYear(), planWeekStart.getMonth(), 1);
+    renderSemanal();
+  });
+  document.getElementById("nextWeekBtn").addEventListener("click", () => {
+    planWeekStart = addDays(planWeekStart, 7);
+    miniCalMonth = new Date(planWeekStart.getFullYear(), planWeekStart.getMonth(), 1);
+    renderSemanal();
+  });
+  document.getElementById("todayWeekBtn").addEventListener("click", () => {
+    planWeekStart = getWeekStart(new Date());
+    miniCalMonth = new Date(planWeekStart.getFullYear(), planWeekStart.getMonth(), 1);
+    renderSemanal();
+  });
+  document.getElementById("miniCalPrevBtn").addEventListener("click", () => {
+    miniCalMonth = new Date(miniCalMonth.getFullYear(), miniCalMonth.getMonth() - 1, 1);
+    renderMiniCalendar();
+  });
+  document.getElementById("miniCalNextBtn").addEventListener("click", () => {
+    miniCalMonth = new Date(miniCalMonth.getFullYear(), miniCalMonth.getMonth() + 1, 1);
+    renderMiniCalendar();
+  });
+  ["layerCronograma", "layerRevisoes", "layerHistorico"].forEach(id => {
+    document.getElementById(id).addEventListener("change", (e) => {
+      layerState[id.replace("layer", "").toLowerCase()] = e.target.checked;
+      renderSemanal();
+    });
+  });
+
+  document.getElementById("addScheduleItemBtn").addEventListener("click", () => {
+    const day = Number(document.getElementById("scheduleDaySelect").value);
+    const subjectId = document.getElementById("scheduleSubjectSelect").value;
+    const minutes = Number(document.getElementById("scheduleMinutesInput").value) || 60;
+    if (!subjectId) return;
+    state.schedule.push({ id: uid(), day: day, subjectId: subjectId, minutes: minutes });
+    save(); renderSemanal();
+  });
+
+  // ---------- Geração automática do cronograma (rodízio ponderado por peso) ----------
+  const autoScheduleOverlay = document.getElementById("autoScheduleModalOverlay");
+  document.getElementById("openAutoScheduleBtn").addEventListener("click", () => {
+    if (state.subjects.length === 0) { alert("Cadastre matérias no Edital antes de gerar o cronograma."); return; }
+    applyExamBasedSuggestion();
+    autoScheduleOverlay.classList.add("open");
+  });
+  document.getElementById("cancelAutoScheduleBtn").addEventListener("click", () => autoScheduleOverlay.classList.remove("open"));
+
+  function applyExamBasedSuggestion() {
+    const hint = document.getElementById("examSuggestionHint");
+    if (!state.examDate) { hint.style.display = "none"; return; }
+    const today = new Date(todayKey() + "T00:00:00");
+    const exam = new Date(state.examDate + "T00:00:00");
+    const diasRestantes = Math.round((exam - today) / 86400000);
+    if (diasRestantes <= 0) { hint.style.display = "none"; return; }
+
+    // ~12 min de estudo por questão da prova é uma estimativa simples para cobrir o conteúdo com folga
+    const questoes = state.examQuestions || (state.subjects.reduce((a, s) => a + s.topics.length, 0) * 3);
+    const minutosTotaisEstimados = questoes * 12;
+    const minutosPorDiaSugerido = Math.min(240, Math.max(30, Math.round((minutosTotaisEstimados / diasRestantes) / 5) * 5));
+
+    document.getElementById("autoScheduleMinutesInput").value = minutosPorDiaSugerido;
+    if (diasRestantes <= 14) {
+      document.querySelectorAll(".auto-day-check").forEach(c => { c.checked = true; });
+    }
+
+    hint.style.display = "block";
+    hint.textContent = "Faltam " + diasRestantes + " dias para a prova" +
+      (state.examQuestions ? " (" + state.examQuestions + " questões)" : "") +
+      ". Sugestão: " + minutosPorDiaSugerido + " min/dia para cobrir o conteúdo com folga — ajuste como preferir.";
+  }
+
+  // Sequência ponderada (smooth weighted round-robin): dá mais slots às matérias de maior peso,
+  // mas intercala em vez de agrupar tudo junto — evita repetir a mesma coisa todo dia.
+  function weightedRoundRobinSequence(items, totalSlots) {
+    const pool = items.map(it => ({ id: it.id, weight: it.weight, current: 0 }));
+    const totalWeight = pool.reduce((a, p) => a + p.weight, 0) || 1;
+    const seq = [];
+    for (let i = 0; i < totalSlots; i++) {
+      pool.forEach(p => { p.current += p.weight; });
+      let best = pool[0];
+      pool.forEach(p => { if (p.current > best.current) best = p; });
+      seq.push(best.id);
+      best.current -= totalWeight;
+    }
+    return seq;
+  }
+
+  document.getElementById("autoScheduleForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const days = Array.from(document.querySelectorAll(".auto-day-check:checked")).map(c => Number(c.value)).sort((a, b) => a - b);
+    if (days.length === 0) { alert("Selecione pelo menos um dia da semana."); return; }
+    const minutesPerDay = Number(document.getElementById("autoScheduleMinutesInput").value) || 60;
+    const blocksPerDay = Math.max(1, Math.min(5, Number(document.getElementById("autoScheduleBlocksInput").value) || 2));
+    if (state.schedule.length > 0 && !confirm("Isso vai substituir o cronograma semanal atual pelo gerado automaticamente. Continuar?")) return;
+
+    const items = state.subjects.map(s => ({ id: s.id, weight: getSubjectWeight(s) }));
+    const totalSlots = days.length * blocksPerDay;
+    const sequence = weightedRoundRobinSequence(items, totalSlots);
+    const minutesPerBlock = Math.max(5, Math.round((minutesPerDay / blocksPerDay) / 5) * 5);
+
+    state.schedule = [];
+    let idx = 0;
+    days.forEach(day => {
+      const dayMinutes = {};
+      for (let b = 0; b < blocksPerDay; b++) {
+        const subjectId = sequence[idx++];
+        dayMinutes[subjectId] = (dayMinutes[subjectId] || 0) + minutesPerBlock;
+      }
+      Object.keys(dayMinutes).forEach(subjectId => {
+        state.schedule.push({ id: uid(), day: day, subjectId: subjectId, minutes: dayMinutes[subjectId] });
+      });
+    });
+    save(); renderSemanal();
+    autoScheduleOverlay.classList.remove("open");
+  });
+
+  // ---------- CICLO ----------
+  function renderCiclo() {
+    const listEl = document.getElementById("cycleList");
+    const select = document.getElementById("cycleSubjectSelect");
+    populateSubjectSelect(select, select.value);
+    if (state.subjects.length === 0) {
+      listEl.innerHTML = '<p class="empty-hint" style="padding:14px;">Cadastre matérias no Edital antes de montar o ciclo.</p>';
+      document.getElementById("cycleRing").innerHTML = "";
+      return;
+    }
+    if (state.cycle.length === 0) {
+      listEl.innerHTML = '<p class="empty-hint" style="padding:14px;">Nenhum item no ciclo ainda. Adicione matérias com uma meta de tempo abaixo.</p>';
+    } else {
+      listEl.innerHTML = state.cycle.map(item => {
+        const subject = state.subjects.find(s => s.id === item.subjectId);
+        if (!subject) return "";
+        const color = subjectColor(subject);
+        const studiedSec = subjectAgg(subject).seconds;
+        const targetSec = item.minutes * 60;
+        const pct = targetSec > 0 ? Math.min(100, Math.round((studiedSec / targetSec) * 100)) : 0;
+        return '<div class="cycle-item">' +
+          '<div class="cycle-color-dot" style="background:' + color + ';"></div>' +
+          '<div class="cycle-item-info">' +
+            '<div class="cycle-item-name">' + escapeHtml(subject.name) + '</div>' +
+            '<div class="cycle-bar-track"><div class="cycle-bar-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>' +
+          '</div>' +
+          '<div class="cycle-item-time">' + fmtHoursLong(studiedSec) + ' / ' + fmtHoursLong(targetSec) + '</div>' +
+          '<button class="icon-btn" data-del-cycle="' + item.id + '">&#128465;</button>' +
+        '</div>';
+      }).join("");
+      listEl.querySelectorAll("[data-del-cycle]").forEach(el => {
+        el.addEventListener("click", () => {
+          state.cycle = state.cycle.filter(c => c.id !== el.getAttribute("data-del-cycle"));
+          save(); renderCiclo();
+        });
+      });
+    }
+
+    const totalTargetSec = state.cycle.reduce((a, c) => a + c.minutes * 60, 0);
+    const totalStudiedSec = state.cycle.reduce((a, c) => {
+      const subj = state.subjects.find(s => s.id === c.subjectId);
+      return a + (subj ? subjectAgg(subj).seconds : 0);
+    }, 0);
+    const ringPct = totalTargetSec > 0 ? Math.round((totalStudiedSec / totalTargetSec) * 100) : 0;
+    const size = 220, stroke = 16, r = (size - stroke) / 2, c = 2 * Math.PI * r;
+    const offset = c - (Math.min(ringPct, 100) / 100) * c;
+    document.getElementById("cycleRing").innerHTML =
+      '<svg width="' + size + '" height="' + size + '" style="transform:rotate(-90deg);">' +
+      '<circle cx="' + size/2 + '" cy="' + size/2 + '" r="' + r + '" stroke="#E3E0D8" stroke-width="' + stroke + '" fill="none"/>' +
+      '<circle cx="' + size/2 + '" cy="' + size/2 + '" r="' + r + '" stroke="#C9A227" stroke-width="' + stroke + '" fill="none" stroke-dasharray="' + c + '" stroke-dashoffset="' + offset + '" stroke-linecap="round"/>' +
+      '</svg>' +
+      '<div class="cycle-ring-center"><div style="font-family:\'Poppins\',sans-serif;font-weight:700;font-size:22px;">' + fmtHoursLong(totalStudiedSec) + '</div>' +
+      '<div style="font-size:11px;color:#9B9890;margin-top:2px;">meta: ' + fmtHoursLong(totalTargetSec) + '</div></div>';
+  }
+  document.getElementById("addCycleItemBtn").addEventListener("click", () => {
+    const subjectId = document.getElementById("cycleSubjectSelect").value;
+    const minutes = Number(document.getElementById("cycleMinutesInput").value) || 60;
+    if (!subjectId) return;
+    state.cycle.push({ id: uid(), subjectId: subjectId, minutes: minutes });
+    save(); renderCiclo();
+  });
+
+  // ---------- SIMULADOS ----------
+  function renderSimulados() {
+    document.getElementById("statSimCount").textContent = state.simulados.length;
+    const sorted = [...state.simulados].sort((a, b) => (a.date < b.date ? -1 : 1));
+    const last = sorted[sorted.length - 1];
+    document.getElementById("statSimLast").textContent = last ? simPct(last) + "%" : "-";
+
+    const chartEl = document.getElementById("simChart");
+    const hint = document.getElementById("simChartEmptyHint");
+    if (sorted.length === 0) {
+      chartEl.innerHTML = ""; hint.style.display = "block";
+    } else {
+      hint.style.display = "none";
+      const width = Math.max(400, sorted.length * 60), height = 160, pad = 24;
+      const points = sorted.map((s, i) => {
+        const x = i * 60 + 30;
+        const y = height - pad - (simPct(s) / 100) * (height - pad * 2);
+        return x + "," + y;
+      }).join(" ");
+      const dots = sorted.map((s, i) => {
+        const x = i * 60 + 30;
+        const y = height - pad - (simPct(s) / 100) * (height - pad * 2);
+        return '<circle cx="' + x + '" cy="' + y + '" r="4" fill="#C9A227"></circle><text x="' + x + '" y="' + (y - 10) + '" font-size="10" fill="#6E6B63" text-anchor="middle">' + simPct(s) + '%</text>';
+      }).join("");
+      chartEl.innerHTML = '<div style="overflow-x:auto;"><svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '">' +
+        '<polyline points="' + points + '" fill="none" stroke="#C9A227" stroke-width="2"></polyline>' + dots + '</svg></div>';
+    }
+
+    const listEl = document.getElementById("simList");
+    if (state.simulados.length === 0) { listEl.innerHTML = ""; return; }
+    listEl.innerHTML = [...state.simulados].sort((a, b) => (a.date < b.date ? 1 : -1)).map(s => {
+      const pct = simPct(s);
+      return '<div class="card sim-row" style="margin-bottom:8px;">' +
+        '<div><div class="sim-title">' + escapeHtml(s.title) + '</div>' +
+        '<div class="sim-meta">' + fmtDateLabel(s.date) + ' &middot; ' + fmtHMS(s.duration * 60) + '</div></div>' +
+        '<div class="sim-score">' +
+          '<span class="ok">' + s.corretas + '</span><span class="err">' + s.erradas + '</span>' +
+          '<span style="color:#9B9890;font-size:12px;">' + s.brancos + ' em branco</span>' +
+          '<span class="pct-badge ' + pctClass(pct) + '">' + pct + '%</span>' +
+          '<button class="icon-btn" data-del-sim="' + s.id + '">&#128465;</button>' +
+        '</div></div>';
+    }).join("");
+    listEl.querySelectorAll("[data-del-sim]").forEach(el => {
+      el.addEventListener("click", () => {
+        state.simulados = state.simulados.filter(s => s.id !== el.getAttribute("data-del-sim"));
+        save(); renderSimulados();
+      });
+    });
+  }
+  function simPct(s) {
+    const total = s.corretas + s.erradas;
+    return total > 0 ? Math.round((s.corretas / total) * 100) : 0;
+  }
+  const simOverlay = document.getElementById("simModalOverlay");
+  document.getElementById("openAddSimBtn").addEventListener("click", () => {
+    document.getElementById("simTitleInput").value = "";
+    document.getElementById("simDateInput").value = todayKey();
+    document.getElementById("simDurationInput").value = 0;
+    document.getElementById("simCorretasInput").value = 0;
+    document.getElementById("simErradasInput").value = 0;
+    document.getElementById("simBrancosInput").value = 0;
+    simOverlay.classList.add("open");
+  });
+  document.getElementById("cancelSimBtn").addEventListener("click", () => simOverlay.classList.remove("open"));
+  document.getElementById("simForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    state.simulados.push({
+      id: uid(),
+      title: document.getElementById("simTitleInput").value.trim() || "Simulado",
+      date: document.getElementById("simDateInput").value || todayKey(),
+      duration: Number(document.getElementById("simDurationInput").value) || 0,
+      corretas: Number(document.getElementById("simCorretasInput").value) || 0,
+      erradas: Number(document.getElementById("simErradasInput").value) || 0,
+      brancos: Number(document.getElementById("simBrancosInput").value) || 0
+    });
+    save(); renderSimulados();
+    simOverlay.classList.remove("open");
+  });
+
+  // ---------- REVISOES ----------
+  let revFilter = "programadas";
+  document.querySelectorAll("#revTabs button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#revTabs button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      revFilter = btn.getAttribute("data-rev-filter");
+      renderRevisoes();
+    });
+  });
+  function renderRevisoes() {
+    const today = todayKey();
+    let filtered = state.revisions.filter(r => {
+      if (revFilter === "concluidas") return r.done;
+      if (revFilter === "ignoradas") return !r.done && r.ignored;
+      if (revFilter === "atrasadas") return !r.done && !r.ignored && r.date < today;
+      return !r.done && !r.ignored && r.date >= today;
+    }).sort((a, b) => (a.date < b.date ? -1 : 1));
+
+    const listEl = document.getElementById("revList");
+    const hint = document.getElementById("revEmptyHint");
+    if (filtered.length === 0) {
+      listEl.innerHTML = ""; hint.style.display = "block"; return;
+    }
+    hint.style.display = "none";
+    listEl.innerHTML = filtered.map(r => {
+      const subject = state.subjects.find(s => s.id === r.subjectId);
+      const topic = subject ? subject.topics.find(t => t.id === r.topicId) : null;
+      const late = !r.done && !r.ignored && r.date < today;
+      return '<div class="rev-row">' +
+        '<button class="rev-check' + (r.done ? " done" : "") + '" data-toggle-rev="' + r.id + '">' + (r.done ? "&check;" : "") + '</button>' +
+        '<div class="rev-info">' +
+          '<div class="rev-name' + (r.done ? " done" : "") + '">' + escapeHtml(subject ? subject.name : "Matéria removida") + '</div>' +
+          '<div style="font-size:12px;color:#6E6B63;">' + escapeHtml(topic ? topic.name : "Tópico removido") + '</div>' +
+        '</div>' +
+        '<div class="rev-date' + (late ? " late" : "") + '">' + fmtDateLabel(r.date) + '</div>' +
+        (revFilter !== "concluidas" && revFilter !== "ignoradas" ? '<button class="icon-btn" data-ignore-rev="' + r.id + '" title="Ignorar">&#128683;</button>' : '') +
+        '<button class="icon-btn" data-del-rev="' + r.id + '" title="Excluir">&#128465;</button>' +
+      '</div>';
+    }).join("");
+    listEl.querySelectorAll("[data-toggle-rev]").forEach(el => {
+      el.addEventListener("click", () => {
+        const r = state.revisions.find(x => x.id === el.getAttribute("data-toggle-rev"));
+        if (r) { r.done = !r.done; r.ignored = false; }
+        save(); renderRevisoes();
+      });
+    });
+    listEl.querySelectorAll("[data-ignore-rev]").forEach(el => {
+      el.addEventListener("click", () => {
+        const r = state.revisions.find(x => x.id === el.getAttribute("data-ignore-rev"));
+        if (r) r.ignored = true;
+        save(); renderRevisoes();
+      });
+    });
+    listEl.querySelectorAll("[data-del-rev]").forEach(el => {
+      el.addEventListener("click", () => {
+        state.revisions = state.revisions.filter(x => x.id !== el.getAttribute("data-del-rev"));
+        save(); renderRevisoes();
+      });
+    });
+  }
+  const revOverlay = document.getElementById("revModalOverlay");
+  const revSubjectSelect = document.getElementById("revSubjectSelect");
+  const revTopicSelect = document.getElementById("revTopicSelect");
+  document.getElementById("openAddRevBtn").addEventListener("click", () => {
+    if (state.subjects.length === 0) { alert("Cadastre uma matéria no Edital antes de agendar uma revisão."); return; }
+    populateSubjectSelect(revSubjectSelect, state.subjects[0].id);
+    populateTopicSelect(revTopicSelect, revSubjectSelect.value, null);
+    document.getElementById("revDateInput").value = todayKey();
+    revOverlay.classList.add("open");
+  });
+  revSubjectSelect.addEventListener("change", () => populateTopicSelect(revTopicSelect, revSubjectSelect.value, null));
+  document.getElementById("cancelRevBtn").addEventListener("click", () => revOverlay.classList.remove("open"));
+  document.getElementById("revForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!revTopicSelect.value) { alert("Esta matéria ainda não tem tópicos cadastrados."); return; }
+    state.revisions.push({
+      id: uid(), subjectId: revSubjectSelect.value, topicId: revTopicSelect.value,
+      date: document.getElementById("revDateInput").value || todayKey(), done: false
+    });
+    save(); renderRevisoes();
+    revOverlay.classList.remove("open");
+  });
+
+  // ---------- Geração automática de revisões (por peso = nº de tópicos no edital) ----------
+  const autoRevOverlay = document.getElementById("autoRevModalOverlay");
+  document.getElementById("openAutoRevBtn").addEventListener("click", () => {
+    if (state.subjects.length === 0) { alert("Cadastre matérias e estude algum conteúdo antes de gerar revisões."); return; }
+    autoRevOverlay.classList.add("open");
+  });
+  document.getElementById("cancelAutoRevBtn").addEventListener("click", () => autoRevOverlay.classList.remove("open"));
+  document.getElementById("autoRevForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const periodo = Math.max(1, Number(document.getElementById("autoRevPeriodoInput").value) || 14);
+    const perDay = Math.max(1, Number(document.getElementById("autoRevPerDayInput").value) || 2);
+    const totalSlots = periodo * perDay;
+
+    const pendingTopicIds = new Set(state.revisions.filter(r => !r.done && !r.ignored).map(r => r.topicId));
+    let pool = [];
+    state.subjects.forEach(subject => {
+      const weight = getSubjectWeight(subject);
+      subject.topics.forEach(t => {
+        const agg = topicAgg(t.id);
+        if (agg.seconds > 0 && !pendingTopicIds.has(t.id)) {
+          pool.push({ subjectId: subject.id, topicId: t.id, weight: weight, lastStudy: agg.lastStudy || "0000-00-00" });
+        }
+      });
+    });
+    if (pool.length === 0) {
+      alert("Não encontrei tópicos já estudados e sem revisão pendente para agendar. Registre alguns estudos primeiro.");
+      return;
+    }
+    // prioriza matérias com mais conteúdo (peso) e, dentro delas, quem foi estudado há mais tempo
+    pool.sort((a, b) => b.weight - a.weight || (a.lastStudy < b.lastStudy ? -1 : 1));
+    const selected = pool.slice(0, totalSlots);
+
+    const today = todayKey();
+    selected.forEach((item, i) => {
+      const dayOffset = 1 + (i % periodo);
+      const d = new Date(today + "T00:00:00");
+      d.setDate(d.getDate() + dayOffset);
+      state.revisions.push({ id: uid(), subjectId: item.subjectId, topicId: item.topicId, date: todayKey(d), done: false, ignored: false });
+    });
+    save(); renderRevisoes();
+    autoRevOverlay.classList.remove("open");
+    alert(selected.length + " revisão(ões) agendada(s), distribuídas nos próximos " + periodo + " dias.");
+  });
+
+  // ---------- Session modal ----------
+  const overlay = document.getElementById("sessionModalOverlay");
+  const formSubjectSelect = document.getElementById("formSubjectSelect");
+  const formTopicSelect = document.getElementById("formTopicSelect");
+
+  function populateSubjectSelect(selectEl, selectedId, allowGeneral) {
+    let html = "";
+    if (allowGeneral) html += '<option value="">&#8212; Estudo geral (sem matéria específica) &#8212;</option>';
+    html += state.subjects.map(s => '<option value="' + s.id + '">' + escapeHtml(s.name) + '</option>').join("");
+    selectEl.innerHTML = html;
+    if (selectedId != null) selectEl.value = selectedId;
+  }
+  function populateTopicSelect(selectEl, subjectId, selectedId, allowNone) {
+    const subj = state.subjects.find(s => s.id === subjectId);
+    const topics = subj ? subj.topics : [];
+    let html = "";
+    if (allowNone || !subj) html += '<option value="">&#8212; Sem tópico específico &#8212;</option>';
+    html += topics.map(t => '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>').join("");
+    selectEl.innerHTML = html;
+    if (selectedId != null) selectEl.value = selectedId;
+  }
+
+  function openSessionModal(opts) {
+    opts = opts || {};
+    editingSessionId = null;
+    document.getElementById("formNewTopicInput").value = "";
+    document.getElementById("formMinutesInput").value = 0;
+    document.getElementById("formCorretasInput").value = 0;
+    document.getElementById("formErradasInput").value = 0;
+    document.getElementById("formNotesInput").value = "";
+    document.getElementById("formDateInput").value = todayKey();
+    document.getElementById("formTipoSelect").value = "teoria";
+    document.getElementById("sessionModalTitle").textContent = "Adicionar estudo";
+
+    if (opts.editId) {
+      const s = state.sessions.find(x => x.id === opts.editId);
+      if (s) {
+        editingSessionId = s.id;
+        document.getElementById("sessionModalTitle").textContent = "Editar estudo";
+        populateSubjectSelect(formSubjectSelect, s.subjectId || "", true);
+        populateTopicSelect(formTopicSelect, s.subjectId, s.topicId || "", true);
+        document.getElementById("formTipoSelect").value = s.tipo;
+        document.getElementById("formDateInput").value = s.date;
+        document.getElementById("formMinutesInput").value = Math.round(s.seconds / 60);
+        document.getElementById("formCorretasInput").value = s.corretas;
+        document.getElementById("formErradasInput").value = s.erradas;
+        document.getElementById("formNotesInput").value = s.notes || "";
+      }
+    } else {
+      const subjectId = opts.subjectId != null ? opts.subjectId : (state.subjects[0] ? state.subjects[0].id : "");
+      populateSubjectSelect(formSubjectSelect, subjectId, true);
+      populateTopicSelect(formTopicSelect, subjectId, opts.topicId != null ? opts.topicId : "", true);
+      if (opts.seconds) document.getElementById("formMinutesInput").value = Math.round(opts.seconds / 60);
+    }
+    overlay.classList.add("open");
+  }
+  function closeSessionModal() {
+    overlay.classList.remove("open");
+    editingSessionId = null;
+    pendingTimerSave = null;
+  }
+
+  formSubjectSelect.addEventListener("change", () => {
+    populateTopicSelect(formTopicSelect, formSubjectSelect.value, "", true);
+  });
+
+  document.getElementById("cancelSessionBtn").addEventListener("click", closeSessionModal);
+  document.getElementById("openAddSessionBtn").addEventListener("click", () => openSessionModal({}));
+
+  document.getElementById("sessionForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const subjectId = formSubjectSelect.value; // pode ser "" (estudo geral)
+    let topicId = subjectId ? formTopicSelect.value : ""; // sem matéria não há tópico
+    const newTopicName = document.getElementById("formNewTopicInput").value.trim();
+    if (newTopicName && subjectId) {
+      const t = addTopic(subjectId, newTopicName);
+      if (t) topicId = t.id;
+    }
+
+    const minutes = Number(document.getElementById("formMinutesInput").value) || 0;
+    const corretas = Number(document.getElementById("formCorretasInput").value) || 0;
+    const erradas = Number(document.getElementById("formErradasInput").value) || 0;
+    const tipo = document.getElementById("formTipoSelect").value;
+    const date = document.getElementById("formDateInput").value || todayKey();
+    const notes = document.getElementById("formNotesInput").value.trim();
+
+    if (editingSessionId) {
+      const s = state.sessions.find(x => x.id === editingSessionId);
+      if (s) {
+        s.subjectId = subjectId; s.topicId = topicId; s.tipo = tipo; s.date = date;
+        s.seconds = minutes * 60; s.corretas = corretas; s.erradas = erradas; s.notes = notes;
+      }
+    } else {
+      state.sessions.push({
+        id: uid(), subjectId: subjectId, topicId: topicId, tipo: tipo, date: date,
+        seconds: minutes * 60, corretas: corretas, erradas: erradas, notes: notes, createdAt: Date.now()
+      });
+    }
+    save();
+    closeSessionModal();
+    renderAll();
+  });
+
+  // ---------- Floating timer (tela cheia, com meta de tempo) ----------
+  const timerOverlay = document.getElementById("timerOverlay");
+  const timerSetupView = document.getElementById("timerSetupView");
+  const timerRunningView = document.getElementById("timerRunningView");
+  const timerSubjectSelect = document.getElementById("timerSubjectSelect");
+  const timerTopicSelect = document.getElementById("timerTopicSelect");
+  const fabTimerBtn = document.getElementById("fabTimerBtn");
+  let timerSeconds = 0;
+  let timerTargetSeconds = 3600;
+
+  function fmtHShort(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return String(h).padStart(2, "0") + "h" + String(m).padStart(2, "0");
+  }
+  function updateTimerRunningDisplay() {
+    const elapsed = timerSeconds + (running ? (Date.now() - running.startedAt) / 1000 : 0);
+    document.getElementById("timerBigDisplay").textContent = fmtHMS(elapsed);
+    const pct = Math.min(100, (elapsed / timerTargetSeconds) * 100);
+    document.getElementById("timerProgressFill").style.width = pct + "%";
+    document.getElementById("timerProgressLabel").textContent = fmtHShort(elapsed) + " / " + fmtHShort(timerTargetSeconds);
+    fabTimerBtn.classList.toggle("active", elapsed > 0);
+  }
+  function showTimerRunningView() {
+    timerSetupView.style.display = "none";
+    timerRunningView.style.display = "block";
+    updateTimerRunningDisplay();
+  }
+
+  fabTimerBtn.addEventListener("click", () => {
+    if (running || timerSeconds > 0) {
+      showTimerRunningView();
+    } else {
+      populateSubjectSelect(timerSubjectSelect, timerSubjectSelect.value || "", true);
+      populateTopicSelect(timerTopicSelect, timerSubjectSelect.value, timerTopicSelect.value || "", true);
+      timerSetupView.style.display = "block";
+      timerRunningView.style.display = "none";
+    }
+    timerOverlay.classList.add("open");
+  });
+  timerSubjectSelect.addEventListener("change", () => {
+    populateTopicSelect(timerTopicSelect, timerSubjectSelect.value, "", true);
+  });
+  document.getElementById("cancelTimerSetupBtn").addEventListener("click", () => timerOverlay.classList.remove("open"));
+  timerOverlay.addEventListener("click", (e) => { if (e.target === timerOverlay) timerOverlay.classList.remove("open"); });
+
+  document.getElementById("startTimerSetupBtn").addEventListener("click", () => {
+    const hours = Number(document.getElementById("timerGoalHoursInput").value) || 0;
+    const mins = Number(document.getElementById("timerGoalMinutesInput").value) || 0;
+    timerTargetSeconds = Math.max(60, hours * 3600 + mins * 60);
+    timerSeconds = 0;
+    running = { startedAt: Date.now() };
+    document.getElementById("timerPauseBtn").innerHTML = "&#10074;&#10074;";
+    showTimerRunningView();
+    if (tickInterval) clearInterval(tickInterval);
+    tickInterval = setInterval(updateTimerRunningDisplay, 1000);
+  });
+
+  document.getElementById("timerPauseBtn").addEventListener("click", (e) => {
+    if (running) {
+      timerSeconds += (Date.now() - running.startedAt) / 1000;
+      running = null;
+      e.currentTarget.innerHTML = "&#9654;";
+      if (tickInterval) { clearInterval(tickInterval); tickInterval = null; }
+    } else {
+      running = { startedAt: Date.now() };
+      e.currentTarget.innerHTML = "&#10074;&#10074;";
+      tickInterval = setInterval(updateTimerRunningDisplay, 1000);
+    }
+    updateTimerRunningDisplay();
+  });
+
+  document.querySelectorAll("[data-add-min]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      timerTargetSeconds += Number(btn.getAttribute("data-add-min")) * 60;
+      updateTimerRunningDisplay();
+    });
+  });
+
+  document.getElementById("timerStopBtnBig").addEventListener("click", () => {
+    let total = timerSeconds + (running ? (Date.now() - running.startedAt) / 1000 : 0);
+    running = null;
+    if (tickInterval) { clearInterval(tickInterval); tickInterval = null; }
+    timerSeconds = 0;
+    document.getElementById("timerPauseBtn").innerHTML = "&#10074;&#10074;";
+    fabTimerBtn.classList.remove("active");
+    timerOverlay.classList.remove("open");
+    if (total < 1) return;
+    openSessionModal({ subjectId: timerSubjectSelect.value, topicId: timerTopicSelect.value, seconds: total });
+  });
+
+  // ---------- Tema claro/escuro ----------
+  const THEME_KEY = "meus-estudos:tema";
+  const themeBtn = document.getElementById("themeToggleBtn");
+  function applyTheme(theme) {
+    if (theme === "dark") {
+      document.body.setAttribute("data-theme", "dark");
+      themeBtn.innerHTML = "&#9728;";
+    } else {
+      document.body.removeAttribute("data-theme");
+      themeBtn.innerHTML = "&#127769;";
+    }
+  }
+  const savedTheme = localStorage.getItem(THEME_KEY) || "light";
+  applyTheme(savedTheme);
+  themeBtn.addEventListener("click", () => {
+    const isDark = document.body.getAttribute("data-theme") === "dark";
+    const next = isDark ? "light" : "dark";
+    applyTheme(next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+
+  // ---------- Backup (exportar / importar tudo) ----------
+  document.getElementById("exportBackupBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "meus-estudos-backup-" + todayKey() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+  const importBackupInput = document.getElementById("importBackupInput");
+  document.getElementById("importBackupBtn").addEventListener("click", () => importBackupInput.click());
+  importBackupInput.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!parsed || !Array.isArray(parsed.subjects)) throw new Error("arquivo não parece ser um backup válido");
+      const ok = confirm("Isso vai substituir todos os dados atuais pelos dados desse arquivo de backup. Deseja continuar?");
+      if (!ok) { e.target.value = ""; return; }
+      state = {
+        subjects: parsed.subjects || [],
+        sessions: parsed.sessions || [],
+        cycle: parsed.cycle || [],
+        simulados: parsed.simulados || [],
+        revisions: parsed.revisions || [],
+        schedule: parsed.schedule || [],
+        examDate: parsed.examDate || null,
+        examQuestions: parsed.examQuestions || null
+      };
+      save();
+      renderAll();
+      alert("Backup importado com sucesso.");
+    } catch (err) {
+      alert("Não consegui importar esse arquivo: " + err.message);
+    }
+    e.target.value = "";
+  });
+
+  // ---------- Backup completo (todos os editais de uma vez) ----------
+  document.getElementById("exportAllBackupBtn").addEventListener("click", () => {
+    const allData = {};
+    profiles.forEach(p => {
+      try {
+        const raw = localStorage.getItem(profileDataKey(p.id));
+        allData[p.id] = raw ? JSON.parse(raw) : {};
+      } catch (e) { allData[p.id] = {}; }
+    });
+    const payload = { type: "meus-estudos-backup-completo", profiles: profiles, activeId: activeProfileId, data: allData };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "meus-estudos-backup-completo-" + todayKey() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+  const importAllBackupInput = document.getElementById("importAllBackupInput");
+  document.getElementById("importAllBackupBtn").addEventListener("click", () => importAllBackupInput.click());
+  importAllBackupInput.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!parsed || !Array.isArray(parsed.profiles) || typeof parsed.data !== "object") {
+        throw new Error("arquivo não parece ser um backup completo válido");
+      }
+      const ok = confirm("Isso vai substituir TODOS os seus editais (matérias, histórico, cronogramas etc. de todos eles) pelos dados desse arquivo. Deseja continuar?");
+      if (!ok) { e.target.value = ""; return; }
+
+      // remove editais atuais do armazenamento
+      profiles.forEach(p => { try { localStorage.removeItem(profileDataKey(p.id)); } catch (err) {} });
+
+      profiles = parsed.profiles.map(p => ({ id: p.id, name: p.name }));
+      profiles.forEach(p => {
+        const profileData = parsed.data[p.id] || {};
+        try { localStorage.setItem(profileDataKey(p.id), JSON.stringify(profileData)); } catch (err) {}
+      });
+      activeProfileId = (parsed.activeId && profiles.some(p => p.id === parsed.activeId)) ? parsed.activeId : (profiles[0] ? profiles[0].id : null);
+      if (!activeProfileId) {
+        const id = uid();
+        profiles = [{ id: id, name: "Meu Edital" }];
+        activeProfileId = id;
+      }
+      saveProfilesList();
+      loadActiveProfileData();
+      renderAll();
+      renderProfileSwitcher();
+      alert("Backup completo importado com sucesso: " + profiles.length + " edital(is) restaurado(s).");
+    } catch (err) {
+      alert("Não consegui importar esse arquivo: " + err.message);
+    }
+    e.target.value = "";
+  });
+
+  // ---------- Import edital (mesmo fluxo anterior) ----------
+  const importPanel = document.getElementById("importPanel");
+  const importStatus = document.getElementById("importStatus");
+  const importResults = document.getElementById("importResults");
+  document.getElementById("promptBox").value = PROMPT_TEMPLATE;
+
+  document.getElementById("toggleImportBtn").addEventListener("click", () => {
+    importPanel.classList.toggle("open");
+    const active = profiles.find(p => p.id === activeProfileId);
+    document.getElementById("importDestCurrentName").textContent = active ? active.name : "Meu Edital";
+  });
+  document.querySelectorAll('input[name="importDest"]').forEach(radio => {
+    radio.addEventListener("change", () => {
+      document.getElementById("importNewEditalName").style.display =
+        document.getElementById("importDestNew").checked ? "block" : "none";
+    });
+  });
+  document.getElementById("cancelImportBtn").addEventListener("click", () => {
+    importPanel.classList.remove("open");
+    importStatus.textContent = ""; importStatus.className = "import-status";
+    importResults.style.display = "none"; importResults.innerHTML = "";
+  });
+
+  async function copyToClipboard(text, btn) {
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = btn.textContent;
+      btn.textContent = "Copiado!";
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    } catch (e) {
+      importStatus.className = "import-status error";
+      importStatus.textContent = "Não consegui copiar automaticamente. Selecione o texto e copie manualmente.";
+    }
+  }
+  document.getElementById("copyPromptBtn").addEventListener("click", (e) => copyToClipboard(document.getElementById("promptBox").value, e.target));
+  document.getElementById("copyPdfTextBtn").addEventListener("click", (e) => copyToClipboard(document.getElementById("pdfTextBox").value, e.target));
+
+  document.getElementById("pdfInput").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    importStatus.className = "import-status";
+    importStatus.textContent = "Lendo arquivo...";
+    try {
+      let text = "";
+      if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+        text = await extractPdfText(file);
+      } else {
+        text = await file.text();
+      }
+      document.getElementById("pdfTextBox").value = text;
+      document.getElementById("pdfTextRow").style.display = "block";
+      document.getElementById("pdfTextHint").style.display = "block";
+      importStatus.textContent = "Texto extraído. Copie o prompt e o texto do edital e cole numa IA gratuita.";
+    } catch (err) {
+      importStatus.className = "import-status error";
+      importStatus.textContent = "Não consegui ler o arquivo: " + err.message;
+    }
+  });
+  async function extractPdfText(file) {
+    if (!window.pdfjsLib) throw new Error("biblioteca de leitura de PDF não carregou (verifique sua internet)");
+    const buffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+    let fullText = "";
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(it => it.str).join(" ") + "\n";
+    }
+    return fullText;
+  }
+
+  function parseAiResponse(text) {
+    const lines = text.split(/\r?\n/);
+    const materias = [];
+    let current = null;
+    let examDate = null, examQuestions = null;
+    const headerRe = /^\s{0,3}#{1,3}\s*(.+?)\s*$/;
+    const pesoRe = /^(.*?)\s*\(\s*peso:?\s*(\d)\s*\)\s*$/i;
+    const topicRe = /^\s*[-*•]\s+(.+?)\s*$/;
+    const numberedRe = /^\s*\d+[\.\)]\s+(.+?)\s*$/;
+    const dataProvaRe = /^DATA_PROVA:\s*(\d{4}-\d{2}-\d{2})\s*$/i;
+    const questoesProvaRe = /^QUESTOES_PROVA:\s*(\d+)\s*$/i;
+    lines.forEach(line => {
+      if (!line.trim()) return;
+      const dataMatch = line.match(dataProvaRe);
+      if (dataMatch) { examDate = dataMatch[1]; return; }
+      const questoesMatch = line.match(questoesProvaRe);
+      if (questoesMatch) { examQuestions = Number(questoesMatch[1]); return; }
+      if (/^(DATA_PROVA|QUESTOES_PROVA):/i.test(line.trim())) return; // "não informado" etc.
+      const headerMatch = line.match(headerRe);
+      if (headerMatch) {
+        let nome = headerMatch[1];
+        let peso = null;
+        const pesoMatch = nome.match(pesoRe);
+        if (pesoMatch) {
+          nome = pesoMatch[1].trim();
+          peso = Math.min(5, Math.max(1, Number(pesoMatch[2])));
+        }
+        current = { nome: nome, peso: peso, topicos: [] };
+        materias.push(current);
+        return;
+      }
+      const topicMatch = line.match(topicRe) || line.match(numberedRe);
+      if (topicMatch) {
+        if (!current) { current = { nome: "Matéria importada", peso: null, topicos: [] }; materias.push(current); }
+        current.topicos.push(topicMatch[1]);
+        return;
+      }
+      if (current && line.trim().length > 0 && !/^materias?:?$/i.test(line.trim())) current.topicos.push(line.trim());
+    });
+    return { materias: materias.filter(m => m.topicos.length > 0), examDate: examDate, examQuestions: examQuestions };
+  }
+
+  let pendingImportExam = { date: null, questions: null };
+  document.getElementById("processBtn").addEventListener("click", () => {
+    const raw = document.getElementById("aiResponseBox").value.trim();
+    importResults.style.display = "none"; importResults.innerHTML = "";
+    importStatus.className = "import-status";
+    if (!raw) { importStatus.className = "import-status error"; importStatus.textContent = "Cole a resposta da IA no campo acima antes de processar."; return; }
+    const parsed = parseAiResponse(raw);
+    const materias = parsed.materias;
+    pendingImportExam = { date: parsed.examDate, questions: parsed.examQuestions };
+    if (materias.length === 0) {
+      importStatus.className = "import-status error";
+      importStatus.textContent = "Não consegui reconhecer matérias e tópicos nesse texto. Confira o formato (## Matéria / - tópico).";
+      return;
+    }
+    renderImportResults(materias);
+    let statusMsg = "Encontrei " + materias.length + " matéria(s).";
+    if (parsed.examDate) statusMsg += " Data da prova identificada: " + parsed.examDate + ".";
+    importStatus.className = "import-status success";
+    importStatus.textContent = statusMsg + " Marque o que quer importar.";
+  });
+
+  function renderImportResults(materias) {
+    importResults.style.display = "block";
+    importResults.innerHTML = materias.map((m, i) =>
+      '<div class="result-row">' +
+        '<input type="checkbox" data-import-idx="' + i + '" checked style="margin-top:3px;" />' +
+        '<div class="result-info"><div class="result-name">' + escapeHtml(m.nome || "Sem nome") + (m.peso != null ? ' <span class="weight-badge" style="cursor:default;">Peso ' + m.peso + '</span>' : '') + '</div>' +
+        '<div class="result-topics">' + ((m.topicos || []).length) + ' tópicos</div></div>' +
+      '</div>'
+    ).join("") + '<div style="margin-top:14px;"><button class="btn btn-primary" id="confirmImportBtn">Importar selecionadas</button></div>';
+
+    document.getElementById("confirmImportBtn").addEventListener("click", () => {
+      if (document.getElementById("importDestNew").checked) {
+        const nomeNovoEdital = document.getElementById("importNewEditalName").value.trim();
+        if (!nomeNovoEdital) {
+          alert("Digite um nome para o novo edital (ex: GCM PVH).");
+          return;
+        }
+        createProfile(nomeNovoEdital);
+        renderProfileSwitcher();
+      }
+      const checked = importResults.querySelectorAll("[data-import-idx]:checked");
+      checked.forEach(chk => {
+        const idx = Number(chk.getAttribute("data-import-idx"));
+        const m = materias[idx];
+        if (!m) return;
+        const nome = (m.nome || "Sem nome").trim();
+        let subject = state.subjects.find(s => s.name.toLowerCase() === nome.toLowerCase());
+        if (!subject) { subject = { id: uid(), name: nome, weight: null, topics: [] }; state.subjects.push(subject); }
+        if (m.peso != null) subject.weight = m.peso;
+        (m.topicos || []).forEach(topicName => {
+          const nomeTopico = String(topicName).trim();
+          if (!nomeTopico) return;
+          const jaExiste = subject.topics.some(t => t.name.toLowerCase() === nomeTopico.toLowerCase());
+          if (!jaExiste) subject.topics.push({ id: uid(), name: nomeTopico, done: false });
+        });
+      });
+      if (pendingImportExam.date) state.examDate = pendingImportExam.date;
+      if (pendingImportExam.questions) state.examQuestions = pendingImportExam.questions;
+      save(); renderAll(); renderExamCountdown();
+      importStatus.className = "import-status success";
+      let doneMsg = document.getElementById("importDestNew").checked ? "Importação concluída em um novo edital." : "Importação concluída.";
+      if (pendingImportExam.date) doneMsg += " Data da prova salva.";
+      importStatus.textContent = doneMsg;
+      importResults.style.display = "none"; importResults.innerHTML = "";
+      document.getElementById("aiResponseBox").value = "";
+      document.getElementById("importDestCurrent").checked = true;
+      document.getElementById("importNewEditalName").value = "";
+      document.getElementById("importNewEditalName").style.display = "none";
+    });
+  }
+
+  document.getElementById("profileSwitcherBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("profileDropdown").classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    const dropdown = document.getElementById("profileDropdown");
+    if (dropdown.classList.contains("open") && !dropdown.contains(e.target) && e.target.id !== "profileSwitcherBtn") {
+      dropdown.classList.remove("open");
+    }
+  });
+  document.getElementById("addProfileBtn").addEventListener("click", () => {
+    const input = document.getElementById("newProfileNameInput");
+    if (!input.value.trim()) return;
+    createProfile(input.value);
+    input.value = "";
+    renderProfileSwitcher();
+    renderAll();
+    document.getElementById("profileDropdown").classList.remove("open");
+  });
+
+  // ---------- Data e nº de questões da prova ----------
+  const examOverlay = document.getElementById("examModalOverlay");
+  document.getElementById("examCountdownBtn").addEventListener("click", () => {
+    document.getElementById("examDateInput").value = state.examDate || "";
+    document.getElementById("examQuestionsInput").value = state.examQuestions || "";
+    examOverlay.classList.add("open");
+  });
+  document.getElementById("cancelExamBtn").addEventListener("click", () => examOverlay.classList.remove("open"));
+  document.getElementById("clearExamBtn").addEventListener("click", () => {
+    state.examDate = null;
+    state.examQuestions = null;
+    save();
+    renderExamCountdown();
+    examOverlay.classList.remove("open");
+  });
+  document.getElementById("examForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const date = document.getElementById("examDateInput").value;
+    const questions = Number(document.getElementById("examQuestionsInput").value) || null;
+    state.examDate = date || null;
+    state.examQuestions = questions;
+    save();
+    renderExamCountdown();
+    examOverlay.classList.remove("open");
+  });
+
+  // ---------- Autenticação (entrar / criar conta / sair) ----------
+  const authOverlay = document.getElementById("authOverlay");
+  let authMode = "login";
+
+  function startApp() {
+    load();
+    renderProfileSwitcher();
+    renderAll();
+  }
+
+  if (firebaseReady) {
+    const accountRow = document.getElementById("accountRow");
+
+    document.getElementById("authToggleModeBtn").addEventListener("click", () => {
+      authMode = authMode === "login" ? "signup" : "login";
+      document.getElementById("authTitle").textContent = authMode === "login" ? "Entrar" : "Criar conta";
+      document.getElementById("authSubmitBtn").textContent = authMode === "login" ? "Entrar" : "Criar conta";
+      document.getElementById("authToggleModeBtn").textContent = authMode === "login" ? "Criar conta" : "Já tenho conta";
+      document.getElementById("authError").style.display = "none";
+    });
+
+    document.getElementById("authForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("authEmailInput").value.trim();
+      const password = document.getElementById("authPasswordInput").value;
+      const errEl = document.getElementById("authError");
+      const submitBtn = document.getElementById("authSubmitBtn");
+      errEl.style.display = "none";
+      submitBtn.disabled = true;
+      try {
+        if (authMode === "login") {
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password);
+        }
+      } catch (err) {
+        const messages = {
+          "auth/invalid-email": "E-mail inválido.",
+          "auth/user-not-found": "Conta não encontrada. Toque em \"Criar conta\" se for a primeira vez.",
+          "auth/wrong-password": "Senha incorreta.",
+          "auth/email-already-in-use": "Já existe uma conta com esse e-mail. Toque em \"Já tenho conta\".",
+          "auth/weak-password": "A senha precisa ter pelo menos 6 caracteres.",
+          "auth/invalid-credential": "E-mail ou senha incorretos."
+        };
+        errEl.textContent = messages[err.code] || "Não consegui entrar. Verifique os dados e tente novamente.";
+        errEl.style.display = "block";
+      }
+      submitBtn.disabled = false;
+    });
+
+    document.getElementById("signOutBtn").addEventListener("click", () => {
+      if (running) { alert("Pare o cronômetro antes de sair da conta."); return; }
+      signOut(auth);
+    });
+
+    setPersistence(auth, browserLocalPersistence).catch(() => {});
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (user) {
+        authOverlay.classList.remove("open");
+        accountRow.style.display = "flex";
+        document.getElementById("accountEmailLabel").textContent = user.email || "";
+        setSyncStatus("syncing");
+        await pullFromCloud();
+        startApp();
+      } else {
+        accountRow.style.display = "none";
+        authOverlay.classList.add("open");
+      }
+    });
+  } else {
+    startApp();
+  }
+})();
+</script>
+</body>
+</html>
