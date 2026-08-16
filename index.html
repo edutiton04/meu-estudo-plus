@@ -50,7 +50,19 @@
   nav.tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
   nav.tabs button { border: none; background: transparent; padding: 10px 15px; border-radius: 8px; font-size: 13.5px; font-weight: 500; color: #C7CCDB; cursor: pointer; white-space: nowrap; min-height: 40px; flex-shrink: 0; }
   nav.tabs button.active { background: #C9A227; color: #1B2A4A; font-weight: 700; }
-  .header-actions { margin-left: auto; display: flex; gap: 8px; }
+  .header-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .more-menu-wrap { position: relative; }
+  .dropdown-right { left: auto; right: 0; }
+  .menu-item { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 9px 8px; border-radius: 8px; border: none; background: transparent; font-size: 13px; color: #2A2926; cursor: pointer; }
+  .menu-item:hover { background: #F1EFE8; }
+  .examinfo-card { margin-bottom: 16px; overflow: hidden; }
+  .examinfo-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; }
+  .examinfo-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; }
+  #examInfoBody { padding: 0 16px 16px; border-top: 1px solid #F0F1F5; }
+  .examinfo-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid #F7F8FA; }
+  .examinfo-row:last-child { border-bottom: none; }
+  .examinfo-label { font-size: 11.5px; font-weight: 700; color: #6E6B63; text-transform: uppercase; letter-spacing: 0.03em; width: 150px; flex-shrink: 0; padding-top: 1px; }
+  .examinfo-value { flex: 1; font-size: 13.5px; color: #2A2926; line-height: 1.5; }
 
   .card { background: #FFFFFF; border-radius: 12px; border: 1px solid #E5E3DC; box-shadow: 0 1px 3px rgba(30,26,10,0.05); transition: box-shadow 0.15s ease, border-color 0.15s ease; }
   .stat-card, .subject-card, .sim-row, .hist-entry, .week-day { transition: box-shadow 0.15s ease, border-color 0.15s ease; }
@@ -321,6 +333,12 @@
   [data-theme="dark"] .profile-dropdown { background: #1C2028; }
   [data-theme="dark"] .profile-row { color: #E3E0D8; }
   [data-theme="dark"] .profile-row:hover { background: #232833; }
+  [data-theme="dark"] .menu-item { color: #E3E0D8; }
+  [data-theme="dark"] .menu-item:hover { background: #232833; }
+  [data-theme="dark"] #examInfoBody { border-color: #2B303B; }
+  [data-theme="dark"] .examinfo-row { border-color: #2A2E38; }
+  [data-theme="dark"] .examinfo-label { color: #9C978D; }
+  [data-theme="dark"] .examinfo-value { color: #E3E0D8; }
   [data-theme="dark"] .profile-row.active { background: #24365C; }
   [data-theme="dark"] .profile-add-row, [data-theme="dark"] .account-row { border-color: #2B303B; }
   [data-theme="dark"] .sync-status, [data-theme="dark"] .account-email { color: #9C978D; }
@@ -450,10 +468,16 @@
     </nav>
     <div class="header-actions">
       <button class="btn btn-outline btn-small" id="themeToggleBtn" title="Alternar modo claro/escuro">&#127769;</button>
-      <button class="btn btn-outline btn-small" id="exportBackupBtn" title="Baixar um arquivo com todos os seus dados">&#11015; Backup</button>
-      <button class="btn btn-outline btn-small" id="importBackupBtn" title="Restaurar dados a partir de um arquivo de backup">&#11014; Restaurar</button>
-      <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none;" />
-      <button class="btn btn-outline" id="toggleImportBtn">Importar edital</button>
+      <div class="more-menu-wrap">
+        <button class="btn btn-outline btn-small" id="moreMenuBtn">&#8942; Mais</button>
+        <div class="profile-dropdown dropdown-right" id="moreMenuDropdown">
+          <div class="profile-dropdown-title">Este edital</div>
+          <button type="button" class="menu-item" id="toggleImportBtn">&#128196; Importar edital (IA)</button>
+          <button type="button" class="menu-item" id="exportBackupBtn">&#11015; Baixar backup</button>
+          <button type="button" class="menu-item" id="importBackupBtn">&#11014; Restaurar backup</button>
+          <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none;" />
+        </div>
+      </div>
       <button class="btn btn-primary" id="openAddSessionBtn">Adicionar Estudo</button>
     </div>
   </div>
@@ -529,6 +553,26 @@
     <div class="edital-head">
       <h1 class="edital-title">Edital Verticalizado</h1>
       <button class="btn btn-outline btn-small" id="toggleCollapseAllBtn">Recolher todas</button>
+    </div>
+    <div class="card examinfo-card" id="examInfoCard" style="display:none;">
+      <div class="examinfo-header" id="examInfoHeader">
+        <span class="examinfo-title">Sobre o concurso</span>
+        <svg class="chevron" id="examInfoChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div id="examInfoBody">
+        <div id="examInfoList"></div>
+        <div class="add-cycle-row">
+          <div class="field-item grow">
+            <label for="examInfoLabelInput">Rótulo</label>
+            <input type="text" id="examInfoLabelInput" placeholder="ex: TAF - Teste de Aptidão Física" />
+          </div>
+          <div class="field-item grow">
+            <label for="examInfoValueInput">Valor</label>
+            <input type="text" id="examInfoValueInput" placeholder="ex: Barra fixa, corrida 12min..." />
+          </div>
+          <button class="btn btn-primary btn-small" id="addExamInfoBtn">Adicionar</button>
+        </div>
+      </div>
     </div>
     <div class="edital-progress-wrap">
       <span class="edital-progress-label" id="editalProgressLabel">0 de 0 tópicos concluídos</span>
@@ -1081,6 +1125,24 @@ try {
     "Primeiro, procure no texto a DATA DA PROVA (prova objetiva/primeira fase) e a QUANTIDADE TOTAL DE QUESTÕES da prova. Responda essas duas informações nas duas primeiras linhas, exatamente neste formato (use 'não informado' se não encontrar):\n" +
     "DATA_PROVA: AAAA-MM-DD\n" +
     "QUESTOES_PROVA: número\n\n" +
+    "Depois, extraia informações gerais sobre o concurso — principalmente as que exigem algum tipo de preparo além do conteúdo teórico (ex: TAF/teste físico, exame psicológico, curso de formação, exame toxicológico, investigação social). Responda no formato \"Rótulo: valor\", uma por linha, dentro do bloco abaixo (pule qualquer item que o edital não mencione, não invente informação):\n" +
+    "INFORMACOES_CONCURSO:\n" +
+    "Órgão/Banca: ...\n" +
+    "Cargo: ...\n" +
+    "Vagas: ... (imediatas e cadastro de reserva)\n" +
+    "Escolaridade exigida: ...\n" +
+    "Idade mínima: ...\n" +
+    "Requisitos específicos: ... (CNH, registro profissional etc.)\n" +
+    "Remuneração: ...\n" +
+    "Validade do concurso: ...\n" +
+    "Fases do concurso: ... (liste todas as fases na ordem, indicando se cada uma é eliminatória e/ou classificatória)\n" +
+    "TAF - Teste de Aptidão Física: ... (se houver: quais exercícios, índices mínimos por sexo/idade, prazo do atestado médico exigido)\n" +
+    "Avaliação psicológica: ... (se houver, o que é avaliado e se é eliminatória)\n" +
+    "Exame toxicológico: ... (se houver, tipo de exame e prazo de validade)\n" +
+    "Investigação social: ... (se houver, o que é exigido)\n" +
+    "Curso de formação: ... (se houver, carga horária, frequência mínima, se é eliminatório)\n" +
+    "Nota de corte / critério de aprovação: ...\n" +
+    "Critérios de desempate: ... (resuma a ordem dos critérios)\n\n" +
     "Depois, organize o conteúdo programático por matéria e tópicos. Para cada matéria, com base no que o edital indica sobre a importância dela na prova (quantidade de questões, ênfase, ordem de apresentação, peso declarado no edital etc.), atribua um peso de 1 (baixa importância) a 5 (altíssima importância/prioridade). Se o edital não informar isso claramente, estime pela quantidade de questões ou pelo destaque dado a cada matéria.\n" +
     "Responda o restante SOMENTE no formato abaixo, sem nenhum texto extra, sem markdown adicional:\n\n" +
     "## Nome da matéria 1 (peso: 4)\n- tópico 1\n- tópico 2\n\n## Nome da matéria 2 (peso: 2)\n- tópico 1\n- tópico 2\n\n" +
@@ -1216,7 +1278,7 @@ try {
   }
 
   function loadActiveProfileData() {
-    state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null };
+    state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null, examInfo: [] };
     try {
       const raw = localStorage.getItem(profileDataKey(activeProfileId));
       if (raw) {
@@ -1229,6 +1291,7 @@ try {
         state.schedule = parsed.schedule || [];
         state.examDate = parsed.examDate || null;
         state.examQuestions = parsed.examQuestions || null;
+        state.examInfo = parsed.examInfo || [];
       }
     } catch (e) { /* perfil novo, sem dados ainda */ }
   }
@@ -1266,7 +1329,7 @@ try {
     const id = uid();
     profiles.push({ id: id, name: name });
     activeProfileId = id;
-    state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null };
+    state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null, examInfo: [] };
     saveProfilesList();
     save();
     return id;
@@ -1447,7 +1510,69 @@ try {
   });
 
   // ---------- Render: Edital ----------
+  let examInfoCollapsed = true;
+  function renderExamInfo() {
+    const card = document.getElementById("examInfoCard");
+    const list = document.getElementById("examInfoList");
+    const body = document.getElementById("examInfoBody");
+    const chevron = document.getElementById("examInfoChevron");
+    const info = state.examInfo || [];
+
+    card.style.display = "block";
+    body.style.display = examInfoCollapsed ? "none" : "block";
+    chevron.classList.toggle("collapsed", examInfoCollapsed);
+
+    if (info.length === 0) {
+      list.innerHTML = '<p class="empty-hint">Nenhuma informação cadastrada ainda. Importe um edital ou adicione manualmente abaixo (ex: TAF, nota de corte, vagas...).</p>';
+    } else {
+      list.innerHTML = info.map((item, idx) =>
+        '<div class="examinfo-row">' +
+          '<div class="examinfo-label">' + escapeHtml(item.label) + '</div>' +
+          '<div class="examinfo-value">' + escapeHtml(item.value) + '</div>' +
+          '<button class="icon-btn" data-edit-examinfo="' + idx + '" title="Editar">&#9998;</button>' +
+          '<button class="icon-btn" data-del-examinfo="' + idx + '" title="Excluir">&#128465;</button>' +
+        '</div>'
+      ).join("");
+      list.querySelectorAll("[data-edit-examinfo]").forEach(el => {
+        el.addEventListener("click", () => {
+          const idx = Number(el.getAttribute("data-edit-examinfo"));
+          const item = state.examInfo[idx];
+          const novoValor = prompt('Editar valor de "' + item.label + '":', item.value);
+          if (novoValor != null && novoValor.trim()) {
+            item.value = novoValor.trim();
+            save(); renderExamInfo();
+          }
+        });
+      });
+      list.querySelectorAll("[data-del-examinfo]").forEach(el => {
+        el.addEventListener("click", () => {
+          const idx = Number(el.getAttribute("data-del-examinfo"));
+          state.examInfo.splice(idx, 1);
+          save(); renderExamInfo();
+        });
+      });
+    }
+  }
+  document.getElementById("examInfoHeader").addEventListener("click", () => {
+    examInfoCollapsed = !examInfoCollapsed;
+    renderExamInfo();
+  });
+  document.getElementById("addExamInfoBtn").addEventListener("click", () => {
+    const labelInput = document.getElementById("examInfoLabelInput");
+    const valueInput = document.getElementById("examInfoValueInput");
+    const label = labelInput.value.trim();
+    const value = valueInput.value.trim();
+    if (!label || !value) return;
+    state.examInfo = state.examInfo || [];
+    const existing = state.examInfo.find(x => x.label.toLowerCase() === label.toLowerCase());
+    if (existing) existing.value = value;
+    else state.examInfo.push({ label: label, value: value });
+    labelInput.value = ""; valueInput.value = "";
+    save(); renderExamInfo();
+  });
+
   function renderEdital() {
+    renderExamInfo();
     const totalTopics = state.subjects.reduce((a, s) => a + s.topics.length, 0);
     const doneTopics = state.subjects.reduce((a, s) => a + s.topics.filter(t => t.done).length, 0);
     const overallPct = totalTopics ? Math.round((doneTopics / totalTopics) * 100) : 0;
@@ -2640,6 +2765,7 @@ try {
 
   // ---------- Backup (exportar / importar tudo) ----------
   document.getElementById("exportBackupBtn").addEventListener("click", () => {
+    document.getElementById("moreMenuDropdown").classList.remove("open");
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -2651,7 +2777,10 @@ try {
     URL.revokeObjectURL(url);
   });
   const importBackupInput = document.getElementById("importBackupInput");
-  document.getElementById("importBackupBtn").addEventListener("click", () => importBackupInput.click());
+  document.getElementById("importBackupBtn").addEventListener("click", () => {
+    document.getElementById("moreMenuDropdown").classList.remove("open");
+    importBackupInput.click();
+  });
   importBackupInput.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -2669,7 +2798,8 @@ try {
         revisions: parsed.revisions || [],
         schedule: parsed.schedule || [],
         examDate: parsed.examDate || null,
-        examQuestions: parsed.examQuestions || null
+        examQuestions: parsed.examQuestions || null,
+        examInfo: parsed.examInfo || []
       };
       save();
       renderAll();
@@ -2746,6 +2876,7 @@ try {
   document.getElementById("promptBox").value = PROMPT_TEMPLATE;
 
   document.getElementById("toggleImportBtn").addEventListener("click", () => {
+    document.getElementById("moreMenuDropdown").classList.remove("open");
     importPanel.classList.toggle("open");
     const active = profiles.find(p => p.id === activeProfileId);
     document.getElementById("importDestCurrentName").textContent = active ? active.name : "Meu Edital";
@@ -2813,14 +2944,18 @@ try {
   function parseAiResponse(text) {
     const lines = text.split(/\r?\n/);
     const materias = [];
+    const examInfo = [];
     let current = null;
     let examDate = null, examQuestions = null;
+    let inInfoBlock = false;
     const headerRe = /^\s{0,3}#{1,3}\s*(.+?)\s*$/;
     const pesoRe = /^(.*?)\s*\(\s*peso:?\s*(\d)\s*\)\s*$/i;
     const topicRe = /^\s*[-*•]\s+(.+?)\s*$/;
     const numberedRe = /^\s*\d+[\.\)]\s+(.+?)\s*$/;
     const dataProvaRe = /^DATA_PROVA:\s*(\d{4}-\d{2}-\d{2})\s*$/i;
     const questoesProvaRe = /^QUESTOES_PROVA:\s*(\d+)\s*$/i;
+    const infoBlockStartRe = /^INFORMACOES_CONCURSO:?\s*$/i;
+    const labelValueRe = /^([^:]{2,60}):\s*(.+)$/;
     lines.forEach(line => {
       if (!line.trim()) return;
       const dataMatch = line.match(dataProvaRe);
@@ -2828,6 +2963,21 @@ try {
       const questoesMatch = line.match(questoesProvaRe);
       if (questoesMatch) { examQuestions = Number(questoesMatch[1]); return; }
       if (/^(DATA_PROVA|QUESTOES_PROVA):/i.test(line.trim())) return; // "não informado" etc.
+      if (infoBlockStartRe.test(line.trim())) { inInfoBlock = true; return; }
+      if (inInfoBlock) {
+        const headerCheck = line.match(headerRe);
+        if (!headerCheck) {
+          const lv = line.match(labelValueRe);
+          if (lv) {
+            const value = lv[2].trim();
+            if (value && !/^n[ãa]o (informad[oa]|se aplica|h[áa])\.?$/i.test(value)) {
+              examInfo.push({ label: lv[1].trim(), value: value });
+            }
+          }
+          return;
+        }
+        inInfoBlock = false; // uma linha "## ..." encerra o bloco e cai no parsing normal abaixo
+      }
       const headerMatch = line.match(headerRe);
       if (headerMatch) {
         let nome = headerMatch[1];
@@ -2849,10 +2999,10 @@ try {
       }
       if (current && line.trim().length > 0 && !/^materias?:?$/i.test(line.trim())) current.topicos.push(line.trim());
     });
-    return { materias: materias.filter(m => m.topicos.length > 0), examDate: examDate, examQuestions: examQuestions };
+    return { materias: materias.filter(m => m.topicos.length > 0), examDate: examDate, examQuestions: examQuestions, examInfo: examInfo };
   }
 
-  let pendingImportExam = { date: null, questions: null };
+  let pendingImportExam = { date: null, questions: null, info: [] };
   document.getElementById("processBtn").addEventListener("click", () => {
     const raw = document.getElementById("aiResponseBox").value.trim();
     importResults.style.display = "none"; importResults.innerHTML = "";
@@ -2860,7 +3010,7 @@ try {
     if (!raw) { importStatus.className = "import-status error"; importStatus.textContent = "Cole a resposta da IA no campo acima antes de processar."; return; }
     const parsed = parseAiResponse(raw);
     const materias = parsed.materias;
-    pendingImportExam = { date: parsed.examDate, questions: parsed.examQuestions };
+    pendingImportExam = { date: parsed.examDate, questions: parsed.examQuestions, info: parsed.examInfo || [] };
     if (materias.length === 0) {
       importStatus.className = "import-status error";
       importStatus.textContent = "Não consegui reconhecer matérias e tópicos nesse texto. Confira o formato (## Matéria / - tópico).";
@@ -2911,10 +3061,19 @@ try {
       });
       if (pendingImportExam.date) state.examDate = pendingImportExam.date;
       if (pendingImportExam.questions) state.examQuestions = pendingImportExam.questions;
+      if (pendingImportExam.info && pendingImportExam.info.length) {
+        state.examInfo = state.examInfo || [];
+        pendingImportExam.info.forEach(item => {
+          const existing = state.examInfo.find(x => x.label.toLowerCase() === item.label.toLowerCase());
+          if (existing) existing.value = item.value;
+          else state.examInfo.push({ label: item.label, value: item.value });
+        });
+      }
       save(); renderAll(); renderExamCountdown();
       importStatus.className = "import-status success";
       let doneMsg = document.getElementById("importDestNew").checked ? "Importação concluída em um novo edital." : "Importação concluída.";
       if (pendingImportExam.date) doneMsg += " Data da prova salva.";
+      if (pendingImportExam.info && pendingImportExam.info.length) doneMsg += " Informações do concurso atualizadas.";
       importStatus.textContent = doneMsg;
       importResults.style.display = "none"; importResults.innerHTML = "";
       document.getElementById("aiResponseBox").value = "";
@@ -2926,12 +3085,22 @@ try {
 
   document.getElementById("profileSwitcherBtn").addEventListener("click", (e) => {
     e.stopPropagation();
+    document.getElementById("moreMenuDropdown").classList.remove("open");
     document.getElementById("profileDropdown").classList.toggle("open");
+  });
+  document.getElementById("moreMenuBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("profileDropdown").classList.remove("open");
+    document.getElementById("moreMenuDropdown").classList.toggle("open");
   });
   document.addEventListener("click", (e) => {
     const dropdown = document.getElementById("profileDropdown");
     if (dropdown.classList.contains("open") && !dropdown.contains(e.target) && e.target.id !== "profileSwitcherBtn") {
       dropdown.classList.remove("open");
+    }
+    const moreDropdown = document.getElementById("moreMenuDropdown");
+    if (moreDropdown.classList.contains("open") && !moreDropdown.contains(e.target) && e.target.id !== "moreMenuBtn") {
+      moreDropdown.classList.remove("open");
     }
   });
   document.getElementById("addProfileBtn").addEventListener("click", () => {
