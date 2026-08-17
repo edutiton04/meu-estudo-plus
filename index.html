@@ -1246,9 +1246,15 @@ try {
     if (!firebaseReady || !currentUser) return;
     setSyncStatus("syncing");
     try {
-      await setDoc(doc(db, "users", currentUser.uid), { profiles: profiles, activeId: activeProfileId });
+      await setDoc(doc(db, "users", currentUser.uid), { profiles: profiles, activeId: activeProfileId }, { merge: true });
       setSyncStatus("ok");
     } catch (e) { setSyncStatus("error"); }
+  }
+  async function pushThemeToCloud(theme) {
+    if (!firebaseReady || !currentUser) return;
+    try {
+      await setDoc(doc(db, "users", currentUser.uid), { theme: theme }, { merge: true });
+    } catch (e) { /* preferência de tema não é crítica, falha silenciosa */ }
   }
   async function deleteProfileDataFromCloud(profileId) {
     if (!firebaseReady || !currentUser) return;
@@ -1261,6 +1267,10 @@ try {
       const metaSnap = await getDoc(doc(db, "users", currentUser.uid));
       if (metaSnap.exists()) {
         const meta = metaSnap.data();
+        if (meta.theme === "dark" || meta.theme === "light") {
+          localStorage.setItem(THEME_KEY, meta.theme);
+          applyTheme(meta.theme);
+        }
         const cloudProfiles = meta.profiles || [];
         if (cloudProfiles.length) {
           const dataSnaps = await getDocs(collection(db, "users", currentUser.uid, "profileData"));
@@ -2761,6 +2771,7 @@ try {
     const next = isDark ? "light" : "dark";
     applyTheme(next);
     localStorage.setItem(THEME_KEY, next);
+    pushThemeToCloud(next);
   });
 
   // ---------- Backup (exportar / importar tudo) ----------
@@ -3226,21 +3237,23 @@ try {
       signOut(auth);
     });
 
-    setPersistence(auth, browserLocalPersistence).catch(() => {});
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
-      if (user) {
-        authOverlay.classList.remove("open");
-        accountRow.style.display = "flex";
-        document.getElementById("accountEmailLabel").textContent = user.email || "";
-        setSyncStatus("syncing");
-        await pullFromCloud();
-        startApp();
-      } else {
-        accountRow.style.display = "none";
-        authOverlay.classList.add("open");
-      }
-    });
+    (async () => {
+      try { await setPersistence(auth, browserLocalPersistence); } catch (e) { /* segue com a persistência padrão do navegador */ }
+      onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        if (user) {
+          authOverlay.classList.remove("open");
+          accountRow.style.display = "flex";
+          document.getElementById("accountEmailLabel").textContent = user.email || "";
+          setSyncStatus("syncing");
+          await pullFromCloud();
+          startApp();
+        } else {
+          accountRow.style.display = "none";
+          authOverlay.classList.add("open");
+        }
+      });
+    })();
   } else {
     startApp();
   }
