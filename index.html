@@ -1122,7 +1122,7 @@ import {
   sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs
+  getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 // ============ CONFIGURAÇÃO DO FIREBASE ============
@@ -1153,7 +1153,29 @@ try {
 (function () {
   const LEGACY_STORAGE_KEY = "meus-estudos:dados-v2";
   const PROFILES_KEY = "meus-estudos:perfis-v1";
+  const PROFILE_SYNC_META_PREFIX = "meus-estudos:sync-meta:";
+  const PROFILES_SYNC_META_KEY = "meus-estudos:sync-meta:profiles";
+  const TIMER_STATE_KEY_PREFIX = "meus-estudos:timer:";
+  const BACKUP_VERSION = 1;
   function profileDataKey(id) { return "meus-estudos:dados:" + id; }
+  function profileSyncMetaKey(id) { return PROFILE_SYNC_META_PREFIX + id; }
+  function readSyncMeta(key) {
+    try { return JSON.parse(localStorage.getItem(key) || "null") || {}; } catch (e) { return {}; }
+  }
+  function writeSyncMeta(key, meta) {
+    try { localStorage.setItem(key, JSON.stringify(meta)); } catch (e) {}
+  }
+  function markProfileChanged(profileId) {
+    if (!profileId) return 0;
+    const updatedAt = Date.now();
+    writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: updatedAt });
+    return updatedAt;
+  }
+  function markProfilesChanged() {
+    const updatedAt = Date.now();
+    writeSyncMeta(PROFILES_SYNC_META_KEY, { updatedAt: updatedAt });
+    return updatedAt;
+  }
   const COLORS = ["#2C3E63", "#C9A227", "#EA7C2C", "#24365C", "#E1527A", "#1B2A4A", "#C9A227", "#1B2A4A"];
   const PROMPT_TEMPLATE =
     "Analise o edital de concurso abaixo.\n" +
@@ -1254,7 +1276,8 @@ try {
   }
   function saveProfilesList() {
     try { localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: profiles, activeId: activeProfileId })); } catch (e) {}
-    pushProfilesToCloud();
+    const updatedAt = markProfilesChanged();
+    pushProfilesToCloud(updatedAt);
   }
 
   // ---------- Sincronização com a nuvem (Firebase) ----------
@@ -1267,32 +1290,56 @@ try {
   }
   let pushDataTimer = null;
   function schedulePushProfileData() {
-    if (!firebaseReady || !currentUser) return;
+    if (!firebaseReady || !currentUser || !activeProfileId) return;
     if (pushDataTimer) clearTimeout(pushDataTimer);
-    const profileId = activeProfileId, snapshot = JSON.parse(JSON.stringify(state));
-    pushDataTimer = setTimeout(() => pushProfileDataToCloud(profileId, snapshot), 800);
+    const profileId = activeProfileId;
+    const snapshot = JSON.parse(JSON.stringify(state));
+    const updatedAt = Number(readSyncMeta(profileSyncMetaKey(profileId)).updatedAt || 0) || markProfileChanged(profileId);
+    pushDataTimer = setTimeout(() => pushProfileDataToCloud(profileId, snapshot, updatedAt), 800);
   }
-  async function pushProfileDataToCloud(profileId, data) {
+  async function pushProfileDataToCloud(profileId, data, updatedAt) {
     if (!firebaseReady || !currentUser || !profileId) return;
     setSyncStatus("syncing");
     try {
-      await setDoc(doc(db, "users", currentUser.uid, "profileData", profileId), data);
+      const ref = doc(db, "users", currentUser.uid, "profileData", profileId);
+      const result = await runTransaction(db, async (tx) => {
+        const snap = await tx.get(ref);
+        const remote = snap.exists() ? (snap.data()._sync && Number(snap.data()._sync.updatedAt) || 0) : 0;
+        if (remote > updatedAt) return false;
+        tx.set(ref, Object.assign({}, data, { _sync: { updatedAt: updatedAt } }));
+        return true;
+      });
+      if (result === false) {
+        const latest = await getDoc(ref);
+        if (latest.exists()) {
+          const cloudData = Object.assign({}, latest.data());
+          delete cloudData._sync;
+          try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
+          writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: Number(latest.data()._sync && latest.data()._sync.updatedAt) || Date.now() });
+          if (profileId === activeProfileId) loadActiveProfileData();
+        }
+      }
       setSyncStatus("ok");
     } catch (e) { setSyncStatus("error"); }
   }
-  async function pushProfilesToCloud() {
+  async function pushProfilesToCloud(updatedAt) {
     if (!firebaseReady || !currentUser) return;
+    updatedAt = updatedAt || readSyncMeta(PROFILES_SYNC_META_KEY).updatedAt || Date.now();
     setSyncStatus("syncing");
     try {
-      await setDoc(doc(db, "users", currentUser.uid), { profiles: profiles, activeId: activeProfileId }, { merge: true });
+      const ref = doc(db, "users", currentUser.uid);
+      await runTransaction(db, async (tx) => {
+        const snap = await tx.get(ref);
+        const remote = snap.exists() ? (snap.data()._sync && Number(snap.data()._sync.profilesUpdatedAt) || 0) : 0;
+        if (remote > updatedAt) return;
+        tx.set(ref, { profiles: profiles, activeId: activeProfileId, _sync: Object.assign({}, snap.exists() ? (snap.data()._sync || {}) : {}, { profilesUpdatedAt: updatedAt }) }, { merge: true });
+      });
       setSyncStatus("ok");
     } catch (e) { setSyncStatus("error"); }
   }
   async function pushThemeToCloud(theme) {
     if (!firebaseReady || !currentUser) return;
-    try {
-      await setDoc(doc(db, "users", currentUser.uid), { theme: theme }, { merge: true });
-    } catch (e) { /* preferência de tema não é crítica, falha silenciosa */ }
+    try { await setDoc(doc(db, "users", currentUser.uid), { theme: theme }, { merge: true }); } catch (e) {}
   }
   async function deleteProfileDataFromCloud(profileId) {
     if (!firebaseReady || !currentUser) return;
@@ -1309,16 +1356,67 @@ try {
           localStorage.setItem(THEME_KEY, meta.theme);
           applyTheme(meta.theme);
         }
-        const cloudProfiles = meta.profiles || [];
-        if (cloudProfiles.length) {
-          const dataSnaps = await getDocs(collection(db, "users", currentUser.uid, "profileData"));
-          const dataMap = {};
-          dataSnaps.forEach(d => { dataMap[d.id] = d.data(); });
+
+        const cloudProfiles = Array.isArray(meta.profiles) ? meta.profiles : [];
+        const localProfilesMeta = readSyncMeta(PROFILES_SYNC_META_KEY);
+        const cloudProfilesUpdatedAt = Number(meta._sync && meta._sync.profilesUpdatedAt) || 0;
+        if (cloudProfiles.length && cloudProfilesUpdatedAt >= Number(localProfilesMeta.updatedAt || 0)) {
           const nextActiveId = (meta.activeId && cloudProfiles.some(p => p.id === meta.activeId)) ? meta.activeId : cloudProfiles[0].id;
-          localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: cloudProfiles, activeId: nextActiveId }));
-          cloudProfiles.forEach(p => {
-            localStorage.setItem(profileDataKey(p.id), JSON.stringify(dataMap[p.id] || {}));
-          });
+          profiles = cloudProfiles;
+          activeProfileId = nextActiveId;
+          try { localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: profiles, activeId: activeProfileId })); } catch (e) {}
+          writeSyncMeta(PROFILES_SYNC_META_KEY, { updatedAt: cloudProfilesUpdatedAt || Date.now() });
+        } else if (profiles.length) {
+          pushProfilesToCloud(Number(localProfilesMeta.updatedAt || Date.now()));
+        }
+
+        const dataSnaps = await getDocs(collection(db, "users", currentUser.uid, "profileData"));
+        const cloudDataMap = {};
+        dataSnaps.forEach(d => { cloudDataMap[d.id] = d.data(); });
+        const profileIds = Array.from(new Set([...(profiles || []).map(p => p.id), ...Object.keys(cloudDataMap)]));
+        for (const profileId of profileIds) {
+          const cloudRaw = cloudDataMap[profileId] || null;
+          const cloudSyncAt = cloudRaw ? (Number(cloudRaw._sync && cloudRaw._sync.updatedAt) || 0) : 0;
+          const localMeta = readSyncMeta(profileSyncMetaKey(profileId));
+          let localState = null;
+          try {
+            const raw = localStorage.getItem(profileDataKey(profileId));
+            localState = raw ? JSON.parse(raw) : null;
+          } catch (e) {}
+          const localHasData = !!(localState && ((Array.isArray(localState.subjects) && localState.subjects.length) || (Array.isArray(localState.sessions) && localState.sessions.length)));
+          const localUpdatedAt = Number(localMeta.updatedAt || 0);
+
+          if (cloudRaw && cloudSyncAt > localUpdatedAt) {
+            const cloudData = Object.assign({}, cloudRaw);
+            delete cloudData._sync;
+            try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
+            writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: cloudSyncAt });
+            continue;
+          }
+
+          if (localState && (!cloudRaw || localUpdatedAt >= cloudSyncAt || !cloudSyncAt)) {
+            const localAt = localUpdatedAt || markProfileChanged(profileId);
+            pushProfileDataToCloud(profileId, localState, localAt);
+            continue;
+          }
+
+          if (cloudRaw && !localHasData && cloudSyncAt > 0) {
+            const cloudData = Object.assign({}, cloudRaw);
+            delete cloudData._sync;
+            try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
+            writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: cloudSyncAt });
+          }
+        }
+      } else {
+        // Conta sem dados na nuvem: preserva os dados locais e envia-os.
+        if (profiles.length) pushProfilesToCloud(Number(readSyncMeta(PROFILES_SYNC_META_KEY).updatedAt || Date.now()));
+        for (const p of profiles) {
+          let localState = null;
+          try { const raw = localStorage.getItem(profileDataKey(p.id)); localState = raw ? JSON.parse(raw) : null; } catch (e) {}
+          if (localState) {
+            const localAt = Number(readSyncMeta(profileSyncMetaKey(p.id)).updatedAt || 0) || markProfileChanged(p.id);
+            pushProfileDataToCloud(p.id, localState, localAt);
+          }
         }
       }
       setSyncStatus("ok");
@@ -1333,7 +1431,12 @@ try {
         const parsed = JSON.parse(raw);
         state.subjects = parsed.subjects || [];
         state.sessions = parsed.sessions || [];
-        state.cycle = parsed.cycle || [];
+        state.cycle = (parsed.cycle || []).map(item => {
+          if (item.createdAt) return item;
+          // Ciclos antigos não tinham data de início; consideramos o momento da migração
+          // para impedir que o histórico anterior seja contado no novo ciclo.
+          return Object.assign({}, item, { createdAt: Date.now() });
+        });
         state.simulados = parsed.simulados || [];
         state.revisions = parsed.revisions || [];
         state.schedule = parsed.schedule || [];
@@ -1351,6 +1454,7 @@ try {
   function save() {
     try {
       localStorage.setItem(profileDataKey(activeProfileId), JSON.stringify(state));
+      markProfileChanged(activeProfileId);
       document.getElementById("saveWarning").style.display = "none";
     } catch (e) {
       document.getElementById("saveWarning").style.display = "block";
@@ -1364,6 +1468,7 @@ try {
       const ok = confirm("Você tem um cronômetro em andamento. Trocar de edital vai descartar esse tempo não salvo. Continuar?");
       if (!ok) return;
       running = null;
+      clearPersistedTimerState();
       if (tickInterval) { clearInterval(tickInterval); tickInterval = null; }
     }
     activeProfileId = id;
@@ -2385,7 +2490,9 @@ try {
         const subject = state.subjects.find(s => s.id === item.subjectId);
         if (!subject) return "";
         const color = subjectColor(subject);
-        const studiedSec = subjectAgg(subject).seconds;
+        const cycleStart = Number(item.createdAt || Date.now());
+        const studiedSec = state.sessions.filter(s => s.subjectId === subject.id && Number(s.createdAt || 0) >= cycleStart)
+          .reduce((sum, s) => sum + (s.seconds || 0), 0);
         const targetSec = item.minutes * 60;
         const pct = targetSec > 0 ? Math.min(100, Math.round((studiedSec / targetSec) * 100)) : 0;
         return '<div class="cycle-item">' +
@@ -2409,7 +2516,8 @@ try {
     const totalTargetSec = state.cycle.reduce((a, c) => a + c.minutes * 60, 0);
     const totalStudiedSec = state.cycle.reduce((a, c) => {
       const subj = state.subjects.find(s => s.id === c.subjectId);
-      return a + (subj ? subjectAgg(subj).seconds : 0);
+      const start = Number(c.createdAt || Date.now());
+      return a + (subj ? state.sessions.filter(s => s.subjectId === subj.id && Number(s.createdAt || 0) >= start).reduce((sum, s) => sum + (s.seconds || 0), 0) : 0);
     }, 0);
     const ringPct = totalTargetSec > 0 ? Math.round((totalStudiedSec / totalTargetSec) * 100) : 0;
     const size = 220, stroke = 16, r = (size - stroke) / 2, c = 2 * Math.PI * r;
@@ -2426,7 +2534,7 @@ try {
     const subjectId = document.getElementById("cycleSubjectSelect").value;
     const minutes = Number(document.getElementById("cycleMinutesInput").value) || 60;
     if (!subjectId) return;
-    state.cycle.push({ id: uid(), subjectId: subjectId, minutes: minutes });
+    state.cycle.push({ id: uid(), subjectId: subjectId, minutes: minutes, createdAt: Date.now() });
     save(); renderCiclo();
   });
 
@@ -2758,6 +2866,52 @@ try {
   let pomoPhaseElapsed = 0;
   let pomoPhaseTarget = 25 * 60;
   let pomoFocusAccumulated = 0;
+  let timerStateDirty = false;
+  function timerStateKey() { return TIMER_STATE_KEY_PREFIX + (activeProfileId || "sem-perfil"); }
+  function persistTimerState() {
+    if (!activeProfileId) return;
+    const snapshot = {
+      timerMode, timerSeconds, timerTargetSeconds, pomoConfig, pomoPhase, pomoCycleCount,
+      pomoPhaseElapsed, pomoPhaseTarget, pomoFocusAccumulated, running: running ? { startedAt: running.startedAt } : null,
+      subjectId: timerSubjectSelect.value || "", topicId: timerTopicSelect.value || "", savedAt: Date.now()
+    };
+    try { localStorage.setItem(timerStateKey(), JSON.stringify(snapshot)); timerStateDirty = false; } catch (e) {}
+  }
+  function clearPersistedTimerState() {
+    try { localStorage.removeItem(timerStateKey()); } catch (e) {}
+    timerStateDirty = false;
+  }
+  function restoreTimerState() {
+    if (!activeProfileId) return false;
+    try {
+      const raw = localStorage.getItem(timerStateKey());
+      if (!raw) return false;
+      const s = JSON.parse(raw);
+      if (!s || !s.timerMode) return false;
+      timerMode = s.timerMode === "pomodoro" ? "pomodoro" : "free";
+      timerSeconds = Number(s.timerSeconds) || 0;
+      timerTargetSeconds = Number(s.timerTargetSeconds) || 3600;
+      pomoConfig = Object.assign({ focus: 25, short: 5, long: 15, cycles: 4 }, s.pomoConfig || {});
+      pomoPhase = s.pomoPhase || "work";
+      pomoCycleCount = Number(s.pomoCycleCount) || 0;
+      pomoPhaseElapsed = Number(s.pomoPhaseElapsed) || 0;
+      pomoPhaseTarget = Number(s.pomoPhaseTarget) || pomoConfig.focus * 60;
+      pomoFocusAccumulated = Number(s.pomoFocusAccumulated) || 0;
+      if (s.subjectId) timerSubjectSelect.value = s.subjectId;
+      populateSubjectSelect(timerSubjectSelect, s.subjectId || "", true);
+      populateTopicSelect(timerTopicSelect, s.subjectId || timerSubjectSelect.value, s.topicId || "", true);
+      if (s.running && Number(s.running.startedAt) > 0) running = { startedAt: Number(s.running.startedAt) };
+      else running = null;
+      setTimerMode(timerMode);
+      if (running) {
+        if (tickInterval) clearInterval(tickInterval);
+        tickInterval = setInterval(tickTimer, 1000);
+        requestWakeLock();
+      }
+      timerStateDirty = false;
+      return true;
+    } catch (e) { return false; }
+  }
 
   // ---- Wake Lock: impede a tela de apagar enquanto o cronômetro está rodando ----
   let wakeLock = null;
@@ -2845,6 +2999,7 @@ try {
     }
     pomoPhaseElapsed = 0;
     running = { startedAt: Date.now() };
+    persistTimerState();
     updatePomoBadge();
     updatePomoCycleInfo();
     updatePomodoroDisplay();
@@ -2887,6 +3042,7 @@ try {
   }
 
   fabTimerBtn.addEventListener("click", () => {
+    if (!running && timerSeconds === 0 && pomoFocusAccumulated === 0 && pomoPhaseElapsed === 0) restoreTimerState();
     const hasActiveSession = running || timerSeconds > 0 || pomoFocusAccumulated > 0 || pomoPhaseElapsed > 0;
     if (hasActiveSession) {
       showTimerRunningView();
@@ -2925,6 +3081,7 @@ try {
       } catch (e) {}
     }
     running = { startedAt: Date.now() };
+    persistTimerState();
     document.getElementById("timerPauseBtn").innerHTML = "&#10074;&#10074;";
     requestWakeLock();
     showTimerRunningView();
@@ -2937,11 +3094,13 @@ try {
       if (timerMode === "free") timerSeconds += (Date.now() - running.startedAt) / 1000;
       else pomoPhaseElapsed += (Date.now() - running.startedAt) / 1000;
       running = null;
+      persistTimerState();
       e.currentTarget.innerHTML = "&#9654;";
       if (tickInterval) { clearInterval(tickInterval); tickInterval = null; }
       releaseWakeLock();
     } else {
       running = { startedAt: Date.now() };
+      persistTimerState();
       e.currentTarget.innerHTML = "&#10074;&#10074;";
       tickInterval = setInterval(tickTimer, 1000);
       requestWakeLock();
@@ -2953,6 +3112,7 @@ try {
     btn.addEventListener("click", () => {
       if (timerMode !== "free") return;
       timerTargetSeconds += Number(btn.getAttribute("data-add-min")) * 60;
+      persistTimerState();
       updateTimerRunningDisplay();
     });
   });
@@ -2970,6 +3130,7 @@ try {
     releaseWakeLock();
     timerSeconds = 0;
     pomoPhaseElapsed = 0; pomoFocusAccumulated = 0; pomoCycleCount = 0; pomoPhase = "work";
+    clearPersistedTimerState();
     document.getElementById("timerPauseBtn").innerHTML = "&#10074;&#10074;";
     fabTimerBtn.classList.remove("active");
     timerOverlay.classList.remove("open");
@@ -3002,7 +3163,8 @@ try {
   // ---------- Backup (exportar / importar tudo) ----------
   document.getElementById("exportBackupBtn").addEventListener("click", () => {
     document.getElementById("moreMenuDropdown").classList.remove("open");
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const payload = Object.assign({ type: "meus-estudos-backup", schemaVersion: BACKUP_VERSION, createdAt: Date.now() }, state);
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -3028,22 +3190,19 @@ try {
           !Array.isArray(parsed.revisions) || !Array.isArray(parsed.schedule)) {
         throw new Error("arquivo não parece ser um backup válido");
       }
-      const ok = confirm("Isso vai substituir todos os dados atuais pelos dados desse arquivo de backup. Deseja continuar?");
+      const ok = confirm("Isso vai substituir todos os dados atuais pelos dados desse arquivo de backup. Antes disso, farei um backup automático dos dados atuais. Deseja continuar?");
       if (!ok) { e.target.value = ""; return; }
-      state = {
-        subjects: parsed.subjects || [],
-        sessions: parsed.sessions || [],
-        cycle: parsed.cycle || [],
-        simulados: parsed.simulados || [],
-        revisions: parsed.revisions || [],
-        schedule: parsed.schedule || [],
-        examDate: parsed.examDate || null,
-        examQuestions: parsed.examQuestions || null,
-        examInfo: parsed.examInfo || []
+      const safetyKey = "meus-estudos:backup-seguranca:" + activeProfileId;
+      try { localStorage.setItem(safetyKey, JSON.stringify({ schemaVersion: BACKUP_VERSION, createdAt: Date.now(), data: state })); } catch (e) {}
+      const importedState = {
+        subjects: parsed.subjects || [], sessions: parsed.sessions || [], cycle: parsed.cycle || [],
+        simulados: parsed.simulados || [], revisions: parsed.revisions || [], schedule: parsed.schedule || [],
+        examDate: parsed.examDate || null, examQuestions: parsed.examQuestions || null, examInfo: parsed.examInfo || []
       };
+      state = importedState;
       save();
       renderAll();
-      alert("Backup importado com sucesso.");
+      alert("Backup importado com sucesso. Um backup de segurança do estado anterior também foi criado localmente.");
     } catch (err) {
       alert("Não consegui importar esse arquivo: " + err.message);
     }
@@ -3059,7 +3218,7 @@ try {
         allData[p.id] = raw ? JSON.parse(raw) : {};
       } catch (e) { allData[p.id] = {}; }
     });
-    const payload = { type: "meus-estudos-backup-completo", profiles: profiles, activeId: activeProfileId, data: allData };
+    const payload = { type: "meus-estudos-backup-completo", schemaVersion: BACKUP_VERSION, createdAt: Date.now(), profiles: profiles, activeId: activeProfileId, data: allData };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -3083,8 +3242,16 @@ try {
           !parsed.data || typeof parsed.data !== "object" || Array.isArray(parsed.data)) {
         throw new Error("arquivo não parece ser um backup completo válido");
       }
-      const ok = confirm("Isso vai substituir TODOS os seus editais (matérias, histórico, cronogramas etc. de todos eles) pelos dados desse arquivo. Deseja continuar?");
+      const ok = confirm("Isso vai substituir TODOS os seus editais (matérias, histórico, cronogramas etc. de todos eles). Antes disso, farei um backup automático dos dados atuais. Deseja continuar?");
       if (!ok) { e.target.value = ""; return; }
+
+      try {
+        const currentAllData = {};
+        profiles.forEach(p => {
+          try { const raw = localStorage.getItem(profileDataKey(p.id)); currentAllData[p.id] = raw ? JSON.parse(raw) : {}; } catch (err) { currentAllData[p.id] = {}; }
+        });
+        localStorage.setItem("meus-estudos:backup-seguranca-completo", JSON.stringify({ schemaVersion: BACKUP_VERSION, createdAt: Date.now(), profiles: profiles, activeId: activeProfileId, data: currentAllData }));
+      } catch (err) {}
 
       // remove editais atuais do armazenamento
       profiles.forEach(p => { try { localStorage.removeItem(profileDataKey(p.id)); } catch (err) {} });
@@ -3101,6 +3268,11 @@ try {
         activeProfileId = id;
       }
       saveProfilesList();
+      profiles.forEach(p => {
+        const profileData = parsed.data[p.id] || {};
+        const updatedAt = markProfileChanged(p.id);
+        if (firebaseReady && currentUser) pushProfileDataToCloud(p.id, profileData, updatedAt);
+      });
       loadActiveProfileData();
       renderAll();
       renderProfileSwitcher();
@@ -3389,6 +3561,7 @@ try {
     load();
     renderProfileSwitcher();
     renderAll();
+    restoreTimerState();
   }
 
   if (firebaseReady) {
@@ -3477,6 +3650,7 @@ try {
           accountRow.style.display = "flex";
           document.getElementById("accountEmailLabel").textContent = user.email || "";
           setSyncStatus("syncing");
+          load();
           await pullFromCloud();
           startApp();
         } else {
