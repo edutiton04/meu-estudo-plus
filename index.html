@@ -281,6 +281,7 @@
   /* ---- MODAL ---- */
   .modal-overlay { position: fixed; inset: 0; background: rgba(20,18,10,0.5); display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
   .modal-overlay.open { display: flex; }
+  #timerOverlay { background: rgba(20,18,10,0.58); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   .modal-box { background: #FFFFFF; border-radius: 14px; padding: 1.5rem; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; box-shadow: 0 16px 40px -12px rgba(20,15,5,0.25); }
   .modal-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 17px; margin: 0 0 16px; }
   .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
@@ -305,6 +306,32 @@
   .result-name { font-size: 14px; font-weight: 500; }
   .result-topics { font-size: 12px; color: #6E6B63; margin-top: 2px; }
 
+  /* ---- CENTRAL DE PRIORIDADES ---- */
+  .priority-card { margin-bottom: 18px; padding: 16px; }
+  .priority-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+  .priority-title { font-family:'Poppins',sans-serif; font-weight:600; font-size:15px; }
+  .priority-main { padding:14px; border:1px solid #E5E3DC; border-radius:10px; background:#FBFAF6; margin-bottom:10px; }
+  .priority-name { font-size:16px; font-weight:700; }
+  .priority-topic { font-size:12px; color:#6E6B63; margin-top:3px; }
+  .priority-score { font-size:13px; font-weight:700; color:#8A6A14; margin-top:8px; }
+  .priority-level { display:inline-block; margin-left:6px; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; text-transform:uppercase; }
+  .priority-level.high { background:#F7E4E2; color:#A34A43; }
+  .priority-level.medium { background:#FBF3DC; color:#8A6A14; }
+  .priority-level.low { background:#E8EAF0; color:#24365C; }
+  .priority-breakdown { margin:12px 0 10px; border-top:1px solid #E5E3DC; padding-top:8px; }
+  .priority-breakdown-row { display:flex; justify-content:space-between; gap:10px; font-size:11px; color:#6E6B63; padding:3px 0; }
+  .priority-breakdown-row strong { color:#2A2926; }
+  .priority-reasons { margin:8px 0 12px; padding-left:18px; font-size:12px; color:#6E6B63; line-height:1.6; }
+  .priority-list { display:flex; flex-direction:column; gap:6px; }
+  .priority-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid #E5E3DC; border-radius:8px; font-size:12px; }
+  .priority-item-score { margin-left:auto; font-weight:700; color:#8A6A14; }
+  [data-theme="dark"] .priority-breakdown { border-color:#2B303B; }
+  [data-theme="dark"] .priority-breakdown-row strong { color:#E3E0D8; }
+  [data-theme="dark"] .priority-level.high { background:#3A2524; color:#E39B95; }
+  [data-theme="dark"] .priority-level.medium { background:#2A2416; color:#D9C67E; }
+  [data-theme="dark"] .priority-level.low { background:#24365C; color:#C7CCDB; }
+  [data-theme="dark"] .priority-main { background:#232833; border-color:#2B303B; }
+  [data-theme="dark"] .priority-item { border-color:#2B303B; }
   @media (max-width: 1024px) {
     .cycle-layout { grid-template-columns: 1fr; }
     .sim-stats { grid-template-columns: 1fr 1fr; }
@@ -387,6 +414,7 @@
   }
   [data-theme="dark"] .edital-progress-bar, [data-theme="dark"] .cycle-bar-track { background: #2B303B; }
   [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.6); }
+  [data-theme="dark"] #timerOverlay { background: rgba(0,0,0,0.68); }
   [data-theme="dark"] .save-warning { background: #2A1A1D; border-color: #5A2A30; color: #F2A6A6; }
   [data-theme="dark"] .fab-timer { box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
   [data-theme="dark"] .fab-timer.active { box-shadow: 0 0 0 3px rgba(201,162,39,0.35), 0 2px 10px rgba(0,0,0,0.5); }
@@ -578,6 +606,13 @@
       <span class="edital-progress-label" id="editalProgressLabel">0 de 0 tópicos concluídos</span>
       <div class="edital-progress-bar"><div class="edital-progress-fill" id="editalProgressFill" style="width:0%;"></div></div>
       <span class="edital-progress-pct" id="editalProgressPct">0%</span>
+    </div>
+    <div class="card priority-card" id="priorityCard">
+      <div class="priority-head">
+        <div class="priority-title">🎯 Central de Prioridades</div>
+        <span class="empty-hint" id="priorityUpdatedLabel"></span>
+      </div>
+      <div id="priorityContent"></div>
     </div>
     <div id="subjectsContainer"></div>
     <div class="card" style="padding:14px 16px;">
@@ -1153,8 +1188,11 @@ try {
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
   }
 
-  function uid() { return Math.random().toString(36).slice(2, 10); }
-  function todayKey(d) { d = d || new Date(); return d.toISOString().slice(0, 10); }
+  function uid() { return crypto.randomUUID(); }
+  function todayKey(d) {
+    d = d || new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
   function escapeHtml(str) { const div = document.createElement("div"); div.textContent = str == null ? "" : String(str); return div.innerHTML; }
   function fmtHMS(totalSeconds) {
     const s = Math.max(0, Math.floor(totalSeconds));
@@ -1457,6 +1495,173 @@ try {
     return { corretas, erradas, seconds, pct, done, total };
   }
 
+  // ---------- Central de Prioridades ----------
+  function daysSince(dateStr) {
+    if (!dateStr) return null;
+    const a = new Date(dateStr + "T00:00:00");
+    const b = new Date(todayKey() + "T00:00:00");
+    return Math.max(0, Math.round((b - a) / 86400000));
+  }
+
+  function priorityLevel(score) {
+    if (score >= 70) return { label: "Alta", className: "high" };
+    if (score >= 40) return { label: "Média", className: "medium" };
+    return { label: "Baixa", className: "low" };
+  }
+
+  function calculatePriorityForTopic(subject, topic) {
+    const agg = topicAgg(topic.id);
+    const reasons = [];
+    const breakdown = {
+      revision: 0,
+      performance: 0,
+      importance: 0,
+      recency: 0,
+      pending: 0
+    };
+
+    const pendingRevision = state.revisions.find(r =>
+      r.topicId === topic.id && !r.done && !r.ignored
+    );
+
+    if (pendingRevision) {
+      if (pendingRevision.date < todayKey()) {
+        const days = Math.max(1, daysSince(pendingRevision.date));
+        breakdown.revision = Math.min(30, 15 + days * 3);
+        reasons.push("Revisão atrasada há " + days + " dia" + (days === 1 ? "" : "s"));
+      } else if (pendingRevision.date === todayKey()) {
+        breakdown.revision = 20;
+        reasons.push("Revisão programada para hoje");
+      } else {
+        breakdown.revision = 5;
+        reasons.push("Revisão programada");
+      }
+    }
+
+    if (agg.pct != null) {
+      if (agg.pct < 50) {
+        breakdown.performance = 25;
+        reasons.push("Desempenho baixo (" + agg.pct + "%)");
+      } else if (agg.pct < 70) {
+        breakdown.performance = 15;
+        reasons.push("Desempenho abaixo de 70% (" + agg.pct + "%)");
+      } else if (agg.pct < 80) {
+        breakdown.performance = 5;
+      }
+    }
+
+    const weight = getSubjectWeight(subject);
+    breakdown.importance = Math.min(20, weight * 4);
+    if (weight >= 4) reasons.push("Matéria de alta importância");
+
+    const days = agg.lastStudy ? daysSince(agg.lastStudy) : 30;
+    if (!agg.lastStudy) {
+      breakdown.recency = 15;
+      reasons.push("Ainda não estudado");
+    } else if (days >= 14) {
+      breakdown.recency = 15;
+      reasons.push(days + " dias sem estudar");
+    } else if (days >= 7) {
+      breakdown.recency = 10;
+      reasons.push(days + " dias sem estudar");
+    } else if (days >= 3) {
+      breakdown.recency = 5;
+    }
+
+    if (!topic.done) {
+      breakdown.pending = 10;
+      if (reasons.length < 3) reasons.push("Conteúdo ainda não concluído");
+    }
+
+    const score = Math.min(100, Math.round(
+      breakdown.revision + breakdown.performance + breakdown.importance + breakdown.recency + breakdown.pending
+    ));
+    const level = priorityLevel(score);
+
+    return {
+      subjectId: subject.id,
+      topicId: topic.id,
+      subjectName: subject.name,
+      topicName: topic.name,
+      score,
+      level: level.label,
+      levelClass: level.className,
+      breakdown,
+      reasons: reasons.slice(0, 3),
+      recommendedMinutes: score >= 80 ? 45 : score >= 60 ? 35 : 25
+    };
+  }
+
+  function getPriorityRecommendations() {
+    const items = [];
+    state.subjects.forEach(subject => {
+      subject.topics.forEach(topic => {
+        items.push(calculatePriorityForTopic(subject, topic));
+      });
+    });
+    return items.sort((a, b) =>
+      b.score - a.score ||
+      b.reasons.length - a.reasons.length ||
+      a.topicName.localeCompare(b.topicName)
+    ).slice(0, 3);
+  }
+
+  function renderPriorityBreakdown(b) {
+    const rows = [
+      ["Revisão", b.revision, 30],
+      ["Desempenho", b.performance, 25],
+      ["Importância", b.importance, 20],
+      ["Tempo sem estudar", b.recency, 15],
+      ["Conteúdo pendente", b.pending, 10]
+    ];
+    return '<div class="priority-breakdown">' + rows.map(r =>
+      '<div class="priority-breakdown-row"><span>' + r[0] + '</span><strong>' + r[1] + '/' + r[2] + '</strong></div>'
+    ).join('') + '</div>';
+  }
+
+  function renderPriorities() {
+    const content = document.getElementById("priorityContent");
+    if (!content) return;
+
+    const items = getPriorityRecommendations();
+    if (!items.length) {
+      content.innerHTML = '<p class="empty-hint">Cadastre matérias e tópicos para receber recomendações.</p>';
+      return;
+    }
+
+    const main = items[0];
+    content.innerHTML =
+      '<div class="priority-main">' +
+        '<div class="priority-name">' + escapeHtml(main.subjectName) + '</div>' +
+        '<div class="priority-topic">' + escapeHtml(main.topicName) + '</div>' +
+        '<div class="priority-score">Prioridade: ' + main.score + '/100 <span class="priority-level ' + main.levelClass + '">' + main.level + '</span> · ' + main.recommendedMinutes + ' min recomendados</div>' +
+        renderPriorityBreakdown(main.breakdown) +
+        (main.reasons.length ? '<ul class="priority-reasons">' + main.reasons.map(r => '<li>' + escapeHtml(r) + '</li>').join("") + '</ul>' : '') +
+        '<button class="btn btn-primary btn-small" id="priorityStudyNowBtn">Estudar agora</button>' +
+      '</div>' +
+      (items.length > 1 ?
+        '<div class="priority-list">' +
+          items.slice(1).map((x, i) =>
+            '<div class="priority-item"><span>' + (i + 2) + 'º</span><span>' +
+            escapeHtml(x.subjectName) + ' — ' + escapeHtml(x.topicName) +
+            '</span><span class="priority-item-score">' + x.score + '</span></div>'
+          ).join("") +
+        '</div>' : '');
+
+    const btn = document.getElementById("priorityStudyNowBtn");
+    if (btn) btn.addEventListener("click", () => {
+      setTimerMode("free");
+      populateSubjectSelect(timerSubjectSelect, main.subjectId, true);
+      populateTopicSelect(timerTopicSelect, main.subjectId, main.topicId, true);
+      const minutes = main.recommendedMinutes || 25;
+      document.getElementById("timerGoalHoursInput").value = Math.floor(minutes / 60);
+      document.getElementById("timerGoalMinutesInput").value = minutes % 60;
+      timerSetupView.style.display = "block";
+      timerRunningView.style.display = "none";
+      timerOverlay.classList.add("open");
+    });
+  }
+
   // ---------- Navigation ----------
   document.querySelectorAll("nav.tabs button").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -1478,8 +1683,18 @@ try {
     save(); renderAll();
   }
   function deleteSubject(subjectId) {
+    const subject = state.subjects.find(s => s.id === subjectId);
+    if (!subject) return;
+    const hasHistory = state.sessions.some(s => s.subjectId === subjectId);
+    if (hasHistory) {
+      alert("Esta matéria possui histórico de estudos. Para preservar seu histórico, ela não pode ser excluída agora.");
+      return;
+    }
+    if (!confirm('Excluir a matéria "' + subject.name + '"?')) return;
     state.subjects = state.subjects.filter(s => s.id !== subjectId);
-    state.sessions = state.sessions.filter(s => s.subjectId !== subjectId);
+    state.revisions = state.revisions.filter(r => r.subjectId !== subjectId);
+    state.schedule = state.schedule.filter(x => x.subjectId !== subjectId);
+    state.cycle = state.cycle.filter(x => x.subjectId !== subjectId);
     save(); renderAll();
   }
   function addTopic(subjectId, name) {
@@ -1494,8 +1709,17 @@ try {
   }
   function deleteTopic(subjectId, topicId) {
     const subj = state.subjects.find(s => s.id === subjectId);
-    if (subj) subj.topics = subj.topics.filter(t => t.id !== topicId);
-    state.sessions = state.sessions.filter(s => s.topicId !== topicId);
+    if (!subj) return;
+    const topic = subj.topics.find(t => t.id === topicId);
+    if (!topic) return;
+    const hasHistory = state.sessions.some(s => s.topicId === topicId);
+    if (hasHistory) {
+      alert("Este tópico possui histórico de estudos. Para preservar seu histórico, ele não pode ser excluído agora.");
+      return;
+    }
+    if (!confirm('Excluir o tópico "' + topic.name + '"?')) return;
+    subj.topics = subj.topics.filter(t => t.id !== topicId);
+    state.revisions = state.revisions.filter(r => r.topicId !== topicId);
     save(); renderAll();
   }
   function toggleTopicDone(subjectId, topicId) {
@@ -1890,6 +2114,7 @@ try {
     renderSemanal();
     renderSimulados();
     renderRevisoes();
+    renderPriorities();
   }
 
   // ---------- PLANEJAMENTO: sub-abas ----------
@@ -2798,7 +3023,11 @@ try {
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      if (!parsed || !Array.isArray(parsed.subjects)) throw new Error("arquivo não parece ser um backup válido");
+      if (!parsed || !Array.isArray(parsed.subjects) || !Array.isArray(parsed.sessions) ||
+          !Array.isArray(parsed.cycle) || !Array.isArray(parsed.simulados) ||
+          !Array.isArray(parsed.revisions) || !Array.isArray(parsed.schedule)) {
+        throw new Error("arquivo não parece ser um backup válido");
+      }
       const ok = confirm("Isso vai substituir todos os dados atuais pelos dados desse arquivo de backup. Deseja continuar?");
       if (!ok) { e.target.value = ""; return; }
       state = {
@@ -2849,7 +3078,9 @@ try {
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      if (!parsed || !Array.isArray(parsed.profiles) || typeof parsed.data !== "object") {
+      if (!parsed || parsed.type !== "meus-estudos-backup-completo" ||
+          !Array.isArray(parsed.profiles) || !parsed.profiles.every(p => p && typeof p.id === "string" && typeof p.name === "string") ||
+          !parsed.data || typeof parsed.data !== "object" || Array.isArray(parsed.data)) {
         throw new Error("arquivo não parece ser um backup completo válido");
       }
       const ok = confirm("Isso vai substituir TODOS os seus editais (matérias, histórico, cronogramas etc. de todos eles) pelos dados desse arquivo. Deseja continuar?");
