@@ -253,7 +253,10 @@
   .fab-timer:hover { background: #BC981F; }
   .fab-timer:active { transform: scale(0.96); }
   .fab-timer.active { box-shadow: 0 0 0 3px rgba(201,162,39,0.3), 0 2px 10px rgba(30,26,10,0.3); }
-  .timer-card { background: #FFFFFF; border: 1px solid #E5E3DC; border-radius: 16px; padding: 2rem 2.2rem; width: 100%; max-width: 440px; text-align: center; color: #2A2926; box-shadow: 0 20px 45px -15px rgba(30,26,10,0.3); }
+  .timer-card { position: relative; background: #FFFFFF; border: 1px solid #E5E3DC; border-radius: 16px; padding: 2rem 2.2rem; width: 100%; max-width: 440px; text-align: center; color: #2A2926; box-shadow: 0 20px 45px -15px rgba(30,26,10,0.3), 0 0 0 1px rgba(201,162,39,0.12); }
+  #timerOverlay { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(10,12,16,0.62); }
+  #timerOverlay.open .timer-card { animation: timerCardFocus .35s ease-out both; }
+  @keyframes timerCardFocus { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: scale(1); } }
   .timer-logo { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px; color: #2A2926; margin-bottom: 4px; }
   .timer-mode-toggle { display: flex; gap: 4px; background: #F1EFE8; border-radius: 10px; padding: 4px; margin: 4px 0 6px; }
   .timer-mode-btn { flex: 1; border: none; background: transparent; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; color: #6E6B63; cursor: pointer; }
@@ -281,7 +284,6 @@
   /* ---- MODAL ---- */
   .modal-overlay { position: fixed; inset: 0; background: rgba(20,18,10,0.5); display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
   .modal-overlay.open { display: flex; }
-  #timerOverlay { background: rgba(20,18,10,0.58); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   .modal-box { background: #FFFFFF; border-radius: 14px; padding: 1.5rem; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; box-shadow: 0 16px 40px -12px rgba(20,15,5,0.25); }
   .modal-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 17px; margin: 0 0 16px; }
   .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
@@ -306,32 +308,6 @@
   .result-name { font-size: 14px; font-weight: 500; }
   .result-topics { font-size: 12px; color: #6E6B63; margin-top: 2px; }
 
-  /* ---- CENTRAL DE PRIORIDADES ---- */
-  .priority-card { margin-bottom: 18px; padding: 16px; }
-  .priority-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
-  .priority-title { font-family:'Poppins',sans-serif; font-weight:600; font-size:15px; }
-  .priority-main { padding:14px; border:1px solid #E5E3DC; border-radius:10px; background:#FBFAF6; margin-bottom:10px; }
-  .priority-name { font-size:16px; font-weight:700; }
-  .priority-topic { font-size:12px; color:#6E6B63; margin-top:3px; }
-  .priority-score { font-size:13px; font-weight:700; color:#8A6A14; margin-top:8px; }
-  .priority-level { display:inline-block; margin-left:6px; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; text-transform:uppercase; }
-  .priority-level.high { background:#F7E4E2; color:#A34A43; }
-  .priority-level.medium { background:#FBF3DC; color:#8A6A14; }
-  .priority-level.low { background:#E8EAF0; color:#24365C; }
-  .priority-breakdown { margin:12px 0 10px; border-top:1px solid #E5E3DC; padding-top:8px; }
-  .priority-breakdown-row { display:flex; justify-content:space-between; gap:10px; font-size:11px; color:#6E6B63; padding:3px 0; }
-  .priority-breakdown-row strong { color:#2A2926; }
-  .priority-reasons { margin:8px 0 12px; padding-left:18px; font-size:12px; color:#6E6B63; line-height:1.6; }
-  .priority-list { display:flex; flex-direction:column; gap:6px; }
-  .priority-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid #E5E3DC; border-radius:8px; font-size:12px; }
-  .priority-item-score { margin-left:auto; font-weight:700; color:#8A6A14; }
-  [data-theme="dark"] .priority-breakdown { border-color:#2B303B; }
-  [data-theme="dark"] .priority-breakdown-row strong { color:#E3E0D8; }
-  [data-theme="dark"] .priority-level.high { background:#3A2524; color:#E39B95; }
-  [data-theme="dark"] .priority-level.medium { background:#2A2416; color:#D9C67E; }
-  [data-theme="dark"] .priority-level.low { background:#24365C; color:#C7CCDB; }
-  [data-theme="dark"] .priority-main { background:#232833; border-color:#2B303B; }
-  [data-theme="dark"] .priority-item { border-color:#2B303B; }
   @media (max-width: 1024px) {
     .cycle-layout { grid-template-columns: 1fr; }
     .sim-stats { grid-template-columns: 1fr 1fr; }
@@ -414,11 +390,11 @@
   }
   [data-theme="dark"] .edital-progress-bar, [data-theme="dark"] .cycle-bar-track { background: #2B303B; }
   [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.6); }
-  [data-theme="dark"] #timerOverlay { background: rgba(0,0,0,0.68); }
   [data-theme="dark"] .save-warning { background: #2A1A1D; border-color: #5A2A30; color: #F2A6A6; }
   [data-theme="dark"] .fab-timer { box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
   [data-theme="dark"] .fab-timer.active { box-shadow: 0 0 0 3px rgba(201,162,39,0.35), 0 2px 10px rgba(0,0,0,0.5); }
-  [data-theme="dark"] .timer-card { background: #1B1E24; border-color: rgba(255,255,255,0.08); color: #E3E0D8; box-shadow: 0 20px 45px -15px rgba(0,0,0,0.45); }
+  [data-theme="dark"] .timer-card { background: #1B1E24; border-color: rgba(255,255,255,0.08); color: #E3E0D8; box-shadow: 0 20px 45px -15px rgba(0,0,0,0.45), 0 0 0 1px rgba(201,162,39,0.14); }
+  [data-theme="dark"] #timerOverlay { background: rgba(4,6,10,0.72); }
   [data-theme="dark"] .timer-mode-toggle { background: #232833; }
   [data-theme="dark"] .timer-mode-btn { color: #9C978D; }
   [data-theme="dark"] .timer-mode-btn.active { background: #1B1E24; color: #F2F4F8; }
@@ -606,13 +582,6 @@
       <span class="edital-progress-label" id="editalProgressLabel">0 de 0 tópicos concluídos</span>
       <div class="edital-progress-bar"><div class="edital-progress-fill" id="editalProgressFill" style="width:0%;"></div></div>
       <span class="edital-progress-pct" id="editalProgressPct">0%</span>
-    </div>
-    <div class="card priority-card" id="priorityCard">
-      <div class="priority-head">
-        <div class="priority-title">🎯 Central de Prioridades</div>
-        <span class="empty-hint" id="priorityUpdatedLabel"></span>
-      </div>
-      <div id="priorityContent"></div>
     </div>
     <div id="subjectsContainer"></div>
     <div class="card" style="padding:14px 16px;">
@@ -889,11 +858,14 @@
 <!-- Modal: Adicionar/editar sessão -->
 <div class="modal-overlay" id="sessionModalOverlay">
   <div class="modal-box">
-    <h2 class="modal-title" id="sessionModalTitle">Adicionar estudo</h2>
+    <h2 class="modal-title" id="sessionModalTitle">Adicionar material</h2>
     <form id="sessionForm">
       <div class="field-row">
         <label class="field-label">Matéria</label>
-        <select id="formSubjectSelect"></select>
+        <div class="row-with-btn" style="align-items:center;">
+          <select id="formSubjectSelect"></select>
+          <button type="button" class="btn btn-outline btn-small" id="newSubjectFromSessionBtn">+ Nova</button>
+        </div>
       </div>
       <div class="field-row">
         <label class="field-label">Tópico</label>
@@ -917,16 +889,16 @@
           <input type="date" id="formDateInput" />
         </div>
       </div>
-      <div class="field-grid-3 field-row">
+      <div class="field-grid-3 field-row" id="sessionMetricsFields">
         <div>
           <label class="field-label">Duração (min)</label>
           <input type="number" id="formMinutesInput" min="0" value="0" />
         </div>
-        <div>
+        <div class="question-only-field" id="formCorretasField">
           <label class="field-label">Acertos</label>
           <input type="number" id="formCorretasInput" min="0" value="0" />
         </div>
-        <div>
+        <div class="question-only-field" id="formErradasField">
           <label class="field-label">Erros</label>
           <input type="number" id="formErradasInput" min="0" value="0" />
         </div>
@@ -938,6 +910,23 @@
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" id="cancelSessionBtn">Cancelar</button>
         <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Nova matéria -->
+<div class="modal-overlay" id="newSubjectFromSessionOverlay">
+  <div class="modal-box" style="max-width:360px;">
+    <h2 class="modal-title">Nova matéria</h2>
+    <form id="newSubjectFromSessionForm">
+      <div class="field-row">
+        <label class="field-label" for="newSubjectFromSessionInput">Nome da matéria</label>
+        <input type="text" id="newSubjectFromSessionInput" placeholder="Ex.: Direito Constitucional" autocomplete="off" required />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancelNewSubjectFromSessionBtn">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Criar matéria</button>
       </div>
     </form>
   </div>
@@ -1122,7 +1111,7 @@ import {
   sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, runTransaction
+  getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 // ============ CONFIGURAÇÃO DO FIREBASE ============
@@ -1153,29 +1142,7 @@ try {
 (function () {
   const LEGACY_STORAGE_KEY = "meus-estudos:dados-v2";
   const PROFILES_KEY = "meus-estudos:perfis-v1";
-  const PROFILE_SYNC_META_PREFIX = "meus-estudos:sync-meta:";
-  const PROFILES_SYNC_META_KEY = "meus-estudos:sync-meta:profiles";
-  const TIMER_STATE_KEY_PREFIX = "meus-estudos:timer:";
-  const BACKUP_VERSION = 1;
   function profileDataKey(id) { return "meus-estudos:dados:" + id; }
-  function profileSyncMetaKey(id) { return PROFILE_SYNC_META_PREFIX + id; }
-  function readSyncMeta(key) {
-    try { return JSON.parse(localStorage.getItem(key) || "null") || {}; } catch (e) { return {}; }
-  }
-  function writeSyncMeta(key, meta) {
-    try { localStorage.setItem(key, JSON.stringify(meta)); } catch (e) {}
-  }
-  function markProfileChanged(profileId) {
-    if (!profileId) return 0;
-    const updatedAt = Date.now();
-    writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: updatedAt });
-    return updatedAt;
-  }
-  function markProfilesChanged() {
-    const updatedAt = Date.now();
-    writeSyncMeta(PROFILES_SYNC_META_KEY, { updatedAt: updatedAt });
-    return updatedAt;
-  }
   const COLORS = ["#2C3E63", "#C9A227", "#EA7C2C", "#24365C", "#E1527A", "#1B2A4A", "#C9A227", "#1B2A4A"];
   const PROMPT_TEMPLATE =
     "Analise o edital de concurso abaixo.\n" +
@@ -1210,11 +1177,8 @@ try {
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
   }
 
-  function uid() { return crypto.randomUUID(); }
-  function todayKey(d) {
-    d = d || new Date();
-    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-  }
+  function uid() { return Math.random().toString(36).slice(2, 10); }
+  function todayKey(d) { d = d || new Date(); return d.toISOString().slice(0, 10); }
   function escapeHtml(str) { const div = document.createElement("div"); div.textContent = str == null ? "" : String(str); return div.innerHTML; }
   function fmtHMS(totalSeconds) {
     const s = Math.max(0, Math.floor(totalSeconds));
@@ -1276,8 +1240,7 @@ try {
   }
   function saveProfilesList() {
     try { localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: profiles, activeId: activeProfileId })); } catch (e) {}
-    const updatedAt = markProfilesChanged();
-    pushProfilesToCloud(updatedAt);
+    pushProfilesToCloud();
   }
 
   // ---------- Sincronização com a nuvem (Firebase) ----------
@@ -1290,56 +1253,32 @@ try {
   }
   let pushDataTimer = null;
   function schedulePushProfileData() {
-    if (!firebaseReady || !currentUser || !activeProfileId) return;
+    if (!firebaseReady || !currentUser) return;
     if (pushDataTimer) clearTimeout(pushDataTimer);
-    const profileId = activeProfileId;
-    const snapshot = JSON.parse(JSON.stringify(state));
-    const updatedAt = Number(readSyncMeta(profileSyncMetaKey(profileId)).updatedAt || 0) || markProfileChanged(profileId);
-    pushDataTimer = setTimeout(() => pushProfileDataToCloud(profileId, snapshot, updatedAt), 800);
+    const profileId = activeProfileId, snapshot = JSON.parse(JSON.stringify(state));
+    pushDataTimer = setTimeout(() => pushProfileDataToCloud(profileId, snapshot), 800);
   }
-  async function pushProfileDataToCloud(profileId, data, updatedAt) {
+  async function pushProfileDataToCloud(profileId, data) {
     if (!firebaseReady || !currentUser || !profileId) return;
     setSyncStatus("syncing");
     try {
-      const ref = doc(db, "users", currentUser.uid, "profileData", profileId);
-      const result = await runTransaction(db, async (tx) => {
-        const snap = await tx.get(ref);
-        const remote = snap.exists() ? (snap.data()._sync && Number(snap.data()._sync.updatedAt) || 0) : 0;
-        if (remote > updatedAt) return false;
-        tx.set(ref, Object.assign({}, data, { _sync: { updatedAt: updatedAt } }));
-        return true;
-      });
-      if (result === false) {
-        const latest = await getDoc(ref);
-        if (latest.exists()) {
-          const cloudData = Object.assign({}, latest.data());
-          delete cloudData._sync;
-          try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
-          writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: Number(latest.data()._sync && latest.data()._sync.updatedAt) || Date.now() });
-          if (profileId === activeProfileId) loadActiveProfileData();
-        }
-      }
+      await setDoc(doc(db, "users", currentUser.uid, "profileData", profileId), data);
       setSyncStatus("ok");
     } catch (e) { setSyncStatus("error"); }
   }
-  async function pushProfilesToCloud(updatedAt) {
+  async function pushProfilesToCloud() {
     if (!firebaseReady || !currentUser) return;
-    updatedAt = updatedAt || readSyncMeta(PROFILES_SYNC_META_KEY).updatedAt || Date.now();
     setSyncStatus("syncing");
     try {
-      const ref = doc(db, "users", currentUser.uid);
-      await runTransaction(db, async (tx) => {
-        const snap = await tx.get(ref);
-        const remote = snap.exists() ? (snap.data()._sync && Number(snap.data()._sync.profilesUpdatedAt) || 0) : 0;
-        if (remote > updatedAt) return;
-        tx.set(ref, { profiles: profiles, activeId: activeProfileId, _sync: Object.assign({}, snap.exists() ? (snap.data()._sync || {}) : {}, { profilesUpdatedAt: updatedAt }) }, { merge: true });
-      });
+      await setDoc(doc(db, "users", currentUser.uid), { profiles: profiles, activeId: activeProfileId }, { merge: true });
       setSyncStatus("ok");
     } catch (e) { setSyncStatus("error"); }
   }
   async function pushThemeToCloud(theme) {
     if (!firebaseReady || !currentUser) return;
-    try { await setDoc(doc(db, "users", currentUser.uid), { theme: theme }, { merge: true }); } catch (e) {}
+    try {
+      await setDoc(doc(db, "users", currentUser.uid), { theme: theme }, { merge: true });
+    } catch (e) { /* preferência de tema não é crítica, falha silenciosa */ }
   }
   async function deleteProfileDataFromCloud(profileId) {
     if (!firebaseReady || !currentUser) return;
@@ -1356,67 +1295,16 @@ try {
           localStorage.setItem(THEME_KEY, meta.theme);
           applyTheme(meta.theme);
         }
-
-        const cloudProfiles = Array.isArray(meta.profiles) ? meta.profiles : [];
-        const localProfilesMeta = readSyncMeta(PROFILES_SYNC_META_KEY);
-        const cloudProfilesUpdatedAt = Number(meta._sync && meta._sync.profilesUpdatedAt) || 0;
-        if (cloudProfiles.length && cloudProfilesUpdatedAt >= Number(localProfilesMeta.updatedAt || 0)) {
+        const cloudProfiles = meta.profiles || [];
+        if (cloudProfiles.length) {
+          const dataSnaps = await getDocs(collection(db, "users", currentUser.uid, "profileData"));
+          const dataMap = {};
+          dataSnaps.forEach(d => { dataMap[d.id] = d.data(); });
           const nextActiveId = (meta.activeId && cloudProfiles.some(p => p.id === meta.activeId)) ? meta.activeId : cloudProfiles[0].id;
-          profiles = cloudProfiles;
-          activeProfileId = nextActiveId;
-          try { localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: profiles, activeId: activeProfileId })); } catch (e) {}
-          writeSyncMeta(PROFILES_SYNC_META_KEY, { updatedAt: cloudProfilesUpdatedAt || Date.now() });
-        } else if (profiles.length) {
-          pushProfilesToCloud(Number(localProfilesMeta.updatedAt || Date.now()));
-        }
-
-        const dataSnaps = await getDocs(collection(db, "users", currentUser.uid, "profileData"));
-        const cloudDataMap = {};
-        dataSnaps.forEach(d => { cloudDataMap[d.id] = d.data(); });
-        const profileIds = Array.from(new Set([...(profiles || []).map(p => p.id), ...Object.keys(cloudDataMap)]));
-        for (const profileId of profileIds) {
-          const cloudRaw = cloudDataMap[profileId] || null;
-          const cloudSyncAt = cloudRaw ? (Number(cloudRaw._sync && cloudRaw._sync.updatedAt) || 0) : 0;
-          const localMeta = readSyncMeta(profileSyncMetaKey(profileId));
-          let localState = null;
-          try {
-            const raw = localStorage.getItem(profileDataKey(profileId));
-            localState = raw ? JSON.parse(raw) : null;
-          } catch (e) {}
-          const localHasData = !!(localState && ((Array.isArray(localState.subjects) && localState.subjects.length) || (Array.isArray(localState.sessions) && localState.sessions.length)));
-          const localUpdatedAt = Number(localMeta.updatedAt || 0);
-
-          if (cloudRaw && cloudSyncAt > localUpdatedAt) {
-            const cloudData = Object.assign({}, cloudRaw);
-            delete cloudData._sync;
-            try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
-            writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: cloudSyncAt });
-            continue;
-          }
-
-          if (localState && (!cloudRaw || localUpdatedAt >= cloudSyncAt || !cloudSyncAt)) {
-            const localAt = localUpdatedAt || markProfileChanged(profileId);
-            pushProfileDataToCloud(profileId, localState, localAt);
-            continue;
-          }
-
-          if (cloudRaw && !localHasData && cloudSyncAt > 0) {
-            const cloudData = Object.assign({}, cloudRaw);
-            delete cloudData._sync;
-            try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
-            writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: cloudSyncAt });
-          }
-        }
-      } else {
-        // Conta sem dados na nuvem: preserva os dados locais e envia-os.
-        if (profiles.length) pushProfilesToCloud(Number(readSyncMeta(PROFILES_SYNC_META_KEY).updatedAt || Date.now()));
-        for (const p of profiles) {
-          let localState = null;
-          try { const raw = localStorage.getItem(profileDataKey(p.id)); localState = raw ? JSON.parse(raw) : null; } catch (e) {}
-          if (localState) {
-            const localAt = Number(readSyncMeta(profileSyncMetaKey(p.id)).updatedAt || 0) || markProfileChanged(p.id);
-            pushProfileDataToCloud(p.id, localState, localAt);
-          }
+          localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: cloudProfiles, activeId: nextActiveId }));
+          cloudProfiles.forEach(p => {
+            localStorage.setItem(profileDataKey(p.id), JSON.stringify(dataMap[p.id] || {}));
+          });
         }
       }
       setSyncStatus("ok");
@@ -1431,12 +1319,7 @@ try {
         const parsed = JSON.parse(raw);
         state.subjects = parsed.subjects || [];
         state.sessions = parsed.sessions || [];
-        state.cycle = (parsed.cycle || []).map(item => {
-          if (item.createdAt) return item;
-          // Ciclos antigos não tinham data de início; consideramos o momento da migração
-          // para impedir que o histórico anterior seja contado no novo ciclo.
-          return Object.assign({}, item, { createdAt: Date.now() });
-        });
+        state.cycle = parsed.cycle || [];
         state.simulados = parsed.simulados || [];
         state.revisions = parsed.revisions || [];
         state.schedule = parsed.schedule || [];
@@ -1454,7 +1337,6 @@ try {
   function save() {
     try {
       localStorage.setItem(profileDataKey(activeProfileId), JSON.stringify(state));
-      markProfileChanged(activeProfileId);
       document.getElementById("saveWarning").style.display = "none";
     } catch (e) {
       document.getElementById("saveWarning").style.display = "block";
@@ -1468,7 +1350,6 @@ try {
       const ok = confirm("Você tem um cronômetro em andamento. Trocar de edital vai descartar esse tempo não salvo. Continuar?");
       if (!ok) return;
       running = null;
-      clearPersistedTimerState();
       if (tickInterval) { clearInterval(tickInterval); tickInterval = null; }
     }
     activeProfileId = id;
@@ -1600,173 +1481,6 @@ try {
     return { corretas, erradas, seconds, pct, done, total };
   }
 
-  // ---------- Central de Prioridades ----------
-  function daysSince(dateStr) {
-    if (!dateStr) return null;
-    const a = new Date(dateStr + "T00:00:00");
-    const b = new Date(todayKey() + "T00:00:00");
-    return Math.max(0, Math.round((b - a) / 86400000));
-  }
-
-  function priorityLevel(score) {
-    if (score >= 70) return { label: "Alta", className: "high" };
-    if (score >= 40) return { label: "Média", className: "medium" };
-    return { label: "Baixa", className: "low" };
-  }
-
-  function calculatePriorityForTopic(subject, topic) {
-    const agg = topicAgg(topic.id);
-    const reasons = [];
-    const breakdown = {
-      revision: 0,
-      performance: 0,
-      importance: 0,
-      recency: 0,
-      pending: 0
-    };
-
-    const pendingRevision = state.revisions.find(r =>
-      r.topicId === topic.id && !r.done && !r.ignored
-    );
-
-    if (pendingRevision) {
-      if (pendingRevision.date < todayKey()) {
-        const days = Math.max(1, daysSince(pendingRevision.date));
-        breakdown.revision = Math.min(30, 15 + days * 3);
-        reasons.push("Revisão atrasada há " + days + " dia" + (days === 1 ? "" : "s"));
-      } else if (pendingRevision.date === todayKey()) {
-        breakdown.revision = 20;
-        reasons.push("Revisão programada para hoje");
-      } else {
-        breakdown.revision = 5;
-        reasons.push("Revisão programada");
-      }
-    }
-
-    if (agg.pct != null) {
-      if (agg.pct < 50) {
-        breakdown.performance = 25;
-        reasons.push("Desempenho baixo (" + agg.pct + "%)");
-      } else if (agg.pct < 70) {
-        breakdown.performance = 15;
-        reasons.push("Desempenho abaixo de 70% (" + agg.pct + "%)");
-      } else if (agg.pct < 80) {
-        breakdown.performance = 5;
-      }
-    }
-
-    const weight = getSubjectWeight(subject);
-    breakdown.importance = Math.min(20, weight * 4);
-    if (weight >= 4) reasons.push("Matéria de alta importância");
-
-    const days = agg.lastStudy ? daysSince(agg.lastStudy) : 30;
-    if (!agg.lastStudy) {
-      breakdown.recency = 15;
-      reasons.push("Ainda não estudado");
-    } else if (days >= 14) {
-      breakdown.recency = 15;
-      reasons.push(days + " dias sem estudar");
-    } else if (days >= 7) {
-      breakdown.recency = 10;
-      reasons.push(days + " dias sem estudar");
-    } else if (days >= 3) {
-      breakdown.recency = 5;
-    }
-
-    if (!topic.done) {
-      breakdown.pending = 10;
-      if (reasons.length < 3) reasons.push("Conteúdo ainda não concluído");
-    }
-
-    const score = Math.min(100, Math.round(
-      breakdown.revision + breakdown.performance + breakdown.importance + breakdown.recency + breakdown.pending
-    ));
-    const level = priorityLevel(score);
-
-    return {
-      subjectId: subject.id,
-      topicId: topic.id,
-      subjectName: subject.name,
-      topicName: topic.name,
-      score,
-      level: level.label,
-      levelClass: level.className,
-      breakdown,
-      reasons: reasons.slice(0, 3),
-      recommendedMinutes: score >= 80 ? 45 : score >= 60 ? 35 : 25
-    };
-  }
-
-  function getPriorityRecommendations() {
-    const items = [];
-    state.subjects.forEach(subject => {
-      subject.topics.forEach(topic => {
-        items.push(calculatePriorityForTopic(subject, topic));
-      });
-    });
-    return items.sort((a, b) =>
-      b.score - a.score ||
-      b.reasons.length - a.reasons.length ||
-      a.topicName.localeCompare(b.topicName)
-    ).slice(0, 3);
-  }
-
-  function renderPriorityBreakdown(b) {
-    const rows = [
-      ["Revisão", b.revision, 30],
-      ["Desempenho", b.performance, 25],
-      ["Importância", b.importance, 20],
-      ["Tempo sem estudar", b.recency, 15],
-      ["Conteúdo pendente", b.pending, 10]
-    ];
-    return '<div class="priority-breakdown">' + rows.map(r =>
-      '<div class="priority-breakdown-row"><span>' + r[0] + '</span><strong>' + r[1] + '/' + r[2] + '</strong></div>'
-    ).join('') + '</div>';
-  }
-
-  function renderPriorities() {
-    const content = document.getElementById("priorityContent");
-    if (!content) return;
-
-    const items = getPriorityRecommendations();
-    if (!items.length) {
-      content.innerHTML = '<p class="empty-hint">Cadastre matérias e tópicos para receber recomendações.</p>';
-      return;
-    }
-
-    const main = items[0];
-    content.innerHTML =
-      '<div class="priority-main">' +
-        '<div class="priority-name">' + escapeHtml(main.subjectName) + '</div>' +
-        '<div class="priority-topic">' + escapeHtml(main.topicName) + '</div>' +
-        '<div class="priority-score">Prioridade: ' + main.score + '/100 <span class="priority-level ' + main.levelClass + '">' + main.level + '</span> · ' + main.recommendedMinutes + ' min recomendados</div>' +
-        renderPriorityBreakdown(main.breakdown) +
-        (main.reasons.length ? '<ul class="priority-reasons">' + main.reasons.map(r => '<li>' + escapeHtml(r) + '</li>').join("") + '</ul>' : '') +
-        '<button class="btn btn-primary btn-small" id="priorityStudyNowBtn">Estudar agora</button>' +
-      '</div>' +
-      (items.length > 1 ?
-        '<div class="priority-list">' +
-          items.slice(1).map((x, i) =>
-            '<div class="priority-item"><span>' + (i + 2) + 'º</span><span>' +
-            escapeHtml(x.subjectName) + ' — ' + escapeHtml(x.topicName) +
-            '</span><span class="priority-item-score">' + x.score + '</span></div>'
-          ).join("") +
-        '</div>' : '');
-
-    const btn = document.getElementById("priorityStudyNowBtn");
-    if (btn) btn.addEventListener("click", () => {
-      setTimerMode("free");
-      populateSubjectSelect(timerSubjectSelect, main.subjectId, true);
-      populateTopicSelect(timerTopicSelect, main.subjectId, main.topicId, true);
-      const minutes = main.recommendedMinutes || 25;
-      document.getElementById("timerGoalHoursInput").value = Math.floor(minutes / 60);
-      document.getElementById("timerGoalMinutesInput").value = minutes % 60;
-      timerSetupView.style.display = "block";
-      timerRunningView.style.display = "none";
-      timerOverlay.classList.add("open");
-    });
-  }
-
   // ---------- Navigation ----------
   document.querySelectorAll("nav.tabs button").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -1783,23 +1497,15 @@ try {
 
   function addSubject(name) {
     name = name.trim();
-    if (!name) return;
-    state.subjects.push({ id: uid(), name: name, weight: null, topics: [] });
+    if (!name) return null;
+    const subject = { id: uid(), name: name, weight: null, topics: [] };
+    state.subjects.push(subject);
     save(); renderAll();
+    return subject;
   }
   function deleteSubject(subjectId) {
-    const subject = state.subjects.find(s => s.id === subjectId);
-    if (!subject) return;
-    const hasHistory = state.sessions.some(s => s.subjectId === subjectId);
-    if (hasHistory) {
-      alert("Esta matéria possui histórico de estudos. Para preservar seu histórico, ela não pode ser excluída agora.");
-      return;
-    }
-    if (!confirm('Excluir a matéria "' + subject.name + '"?')) return;
     state.subjects = state.subjects.filter(s => s.id !== subjectId);
-    state.revisions = state.revisions.filter(r => r.subjectId !== subjectId);
-    state.schedule = state.schedule.filter(x => x.subjectId !== subjectId);
-    state.cycle = state.cycle.filter(x => x.subjectId !== subjectId);
+    state.sessions = state.sessions.filter(s => s.subjectId !== subjectId);
     save(); renderAll();
   }
   function addTopic(subjectId, name) {
@@ -1814,17 +1520,8 @@ try {
   }
   function deleteTopic(subjectId, topicId) {
     const subj = state.subjects.find(s => s.id === subjectId);
-    if (!subj) return;
-    const topic = subj.topics.find(t => t.id === topicId);
-    if (!topic) return;
-    const hasHistory = state.sessions.some(s => s.topicId === topicId);
-    if (hasHistory) {
-      alert("Este tópico possui histórico de estudos. Para preservar seu histórico, ele não pode ser excluído agora.");
-      return;
-    }
-    if (!confirm('Excluir o tópico "' + topic.name + '"?')) return;
-    subj.topics = subj.topics.filter(t => t.id !== topicId);
-    state.revisions = state.revisions.filter(r => r.topicId !== topicId);
+    if (subj) subj.topics = subj.topics.filter(t => t.id !== topicId);
+    state.sessions = state.sessions.filter(s => s.topicId !== topicId);
     save(); renderAll();
   }
   function toggleTopicDone(subjectId, topicId) {
@@ -2219,7 +1916,6 @@ try {
     renderSemanal();
     renderSimulados();
     renderRevisoes();
-    renderPriorities();
   }
 
   // ---------- PLANEJAMENTO: sub-abas ----------
@@ -2490,9 +2186,7 @@ try {
         const subject = state.subjects.find(s => s.id === item.subjectId);
         if (!subject) return "";
         const color = subjectColor(subject);
-        const cycleStart = Number(item.createdAt || Date.now());
-        const studiedSec = state.sessions.filter(s => s.subjectId === subject.id && Number(s.createdAt || 0) >= cycleStart)
-          .reduce((sum, s) => sum + (s.seconds || 0), 0);
+        const studiedSec = subjectAgg(subject).seconds;
         const targetSec = item.minutes * 60;
         const pct = targetSec > 0 ? Math.min(100, Math.round((studiedSec / targetSec) * 100)) : 0;
         return '<div class="cycle-item">' +
@@ -2516,8 +2210,7 @@ try {
     const totalTargetSec = state.cycle.reduce((a, c) => a + c.minutes * 60, 0);
     const totalStudiedSec = state.cycle.reduce((a, c) => {
       const subj = state.subjects.find(s => s.id === c.subjectId);
-      const start = Number(c.createdAt || Date.now());
-      return a + (subj ? state.sessions.filter(s => s.subjectId === subj.id && Number(s.createdAt || 0) >= start).reduce((sum, s) => sum + (s.seconds || 0), 0) : 0);
+      return a + (subj ? subjectAgg(subj).seconds : 0);
     }, 0);
     const ringPct = totalTargetSec > 0 ? Math.round((totalStudiedSec / totalTargetSec) * 100) : 0;
     const size = 220, stroke = 16, r = (size - stroke) / 2, c = 2 * Math.PI * r;
@@ -2534,7 +2227,7 @@ try {
     const subjectId = document.getElementById("cycleSubjectSelect").value;
     const minutes = Number(document.getElementById("cycleMinutesInput").value) || 60;
     if (!subjectId) return;
-    state.cycle.push({ id: uid(), subjectId: subjectId, minutes: minutes, createdAt: Date.now() });
+    state.cycle.push({ id: uid(), subjectId: subjectId, minutes: minutes });
     save(); renderCiclo();
   });
 
@@ -2767,6 +2460,13 @@ try {
     if (selectedId != null) selectEl.value = selectedId;
   }
 
+  function updateSessionQuestionFields() {
+    const isQuestions = document.getElementById("formTipoSelect").value === "questoes";
+    document.getElementById("formCorretasField").style.display = isQuestions ? "block" : "none";
+    document.getElementById("formErradasField").style.display = isQuestions ? "block" : "none";
+    document.getElementById("sessionMetricsFields").style.gridTemplateColumns = isQuestions ? "1fr 1fr 1fr" : "1fr";
+  }
+
   function openSessionModal(opts) {
     opts = opts || {};
     editingSessionId = null;
@@ -2777,7 +2477,8 @@ try {
     document.getElementById("formNotesInput").value = "";
     document.getElementById("formDateInput").value = todayKey();
     document.getElementById("formTipoSelect").value = "teoria";
-    document.getElementById("sessionModalTitle").textContent = "Adicionar estudo";
+    document.getElementById("sessionModalTitle").textContent = "Adicionar material";
+    updateSessionQuestionFields();
 
     if (opts.editId) {
       const s = state.sessions.find(x => x.id === opts.editId);
@@ -2787,6 +2488,7 @@ try {
         populateSubjectSelect(formSubjectSelect, s.subjectId || "", true);
         populateTopicSelect(formTopicSelect, s.subjectId, s.topicId || "", true);
         document.getElementById("formTipoSelect").value = s.tipo;
+        updateSessionQuestionFields();
         document.getElementById("formDateInput").value = s.date;
         document.getElementById("formMinutesInput").value = Math.round(s.seconds / 60);
         document.getElementById("formCorretasInput").value = s.corretas;
@@ -2809,6 +2511,27 @@ try {
 
   formSubjectSelect.addEventListener("change", () => {
     populateTopicSelect(formTopicSelect, formSubjectSelect.value, "", true);
+  });
+  document.getElementById("formTipoSelect").addEventListener("change", updateSessionQuestionFields);
+
+  const newSubjectFromSessionOverlay = document.getElementById("newSubjectFromSessionOverlay");
+  const newSubjectFromSessionInput = document.getElementById("newSubjectFromSessionInput");
+  document.getElementById("newSubjectFromSessionBtn").addEventListener("click", () => {
+    newSubjectFromSessionInput.value = "";
+    newSubjectFromSessionOverlay.classList.add("open");
+    setTimeout(() => newSubjectFromSessionInput.focus(), 50);
+  });
+  document.getElementById("cancelNewSubjectFromSessionBtn").addEventListener("click", () => newSubjectFromSessionOverlay.classList.remove("open"));
+  newSubjectFromSessionOverlay.addEventListener("click", (e) => {
+    if (e.target === newSubjectFromSessionOverlay) newSubjectFromSessionOverlay.classList.remove("open");
+  });
+  document.getElementById("newSubjectFromSessionForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const subject = addSubject(newSubjectFromSessionInput.value);
+    if (!subject) return;
+    newSubjectFromSessionOverlay.classList.remove("open");
+    populateSubjectSelect(formSubjectSelect, subject.id, true);
+    populateTopicSelect(formTopicSelect, subject.id, "", true);
   });
 
   document.getElementById("cancelSessionBtn").addEventListener("click", closeSessionModal);
@@ -2866,52 +2589,6 @@ try {
   let pomoPhaseElapsed = 0;
   let pomoPhaseTarget = 25 * 60;
   let pomoFocusAccumulated = 0;
-  let timerStateDirty = false;
-  function timerStateKey() { return TIMER_STATE_KEY_PREFIX + (activeProfileId || "sem-perfil"); }
-  function persistTimerState() {
-    if (!activeProfileId) return;
-    const snapshot = {
-      timerMode, timerSeconds, timerTargetSeconds, pomoConfig, pomoPhase, pomoCycleCount,
-      pomoPhaseElapsed, pomoPhaseTarget, pomoFocusAccumulated, running: running ? { startedAt: running.startedAt } : null,
-      subjectId: timerSubjectSelect.value || "", topicId: timerTopicSelect.value || "", savedAt: Date.now()
-    };
-    try { localStorage.setItem(timerStateKey(), JSON.stringify(snapshot)); timerStateDirty = false; } catch (e) {}
-  }
-  function clearPersistedTimerState() {
-    try { localStorage.removeItem(timerStateKey()); } catch (e) {}
-    timerStateDirty = false;
-  }
-  function restoreTimerState() {
-    if (!activeProfileId) return false;
-    try {
-      const raw = localStorage.getItem(timerStateKey());
-      if (!raw) return false;
-      const s = JSON.parse(raw);
-      if (!s || !s.timerMode) return false;
-      timerMode = s.timerMode === "pomodoro" ? "pomodoro" : "free";
-      timerSeconds = Number(s.timerSeconds) || 0;
-      timerTargetSeconds = Number(s.timerTargetSeconds) || 3600;
-      pomoConfig = Object.assign({ focus: 25, short: 5, long: 15, cycles: 4 }, s.pomoConfig || {});
-      pomoPhase = s.pomoPhase || "work";
-      pomoCycleCount = Number(s.pomoCycleCount) || 0;
-      pomoPhaseElapsed = Number(s.pomoPhaseElapsed) || 0;
-      pomoPhaseTarget = Number(s.pomoPhaseTarget) || pomoConfig.focus * 60;
-      pomoFocusAccumulated = Number(s.pomoFocusAccumulated) || 0;
-      if (s.subjectId) timerSubjectSelect.value = s.subjectId;
-      populateSubjectSelect(timerSubjectSelect, s.subjectId || "", true);
-      populateTopicSelect(timerTopicSelect, s.subjectId || timerSubjectSelect.value, s.topicId || "", true);
-      if (s.running && Number(s.running.startedAt) > 0) running = { startedAt: Number(s.running.startedAt) };
-      else running = null;
-      setTimerMode(timerMode);
-      if (running) {
-        if (tickInterval) clearInterval(tickInterval);
-        tickInterval = setInterval(tickTimer, 1000);
-        requestWakeLock();
-      }
-      timerStateDirty = false;
-      return true;
-    } catch (e) { return false; }
-  }
 
   // ---- Wake Lock: impede a tela de apagar enquanto o cronômetro está rodando ----
   let wakeLock = null;
@@ -2999,7 +2676,6 @@ try {
     }
     pomoPhaseElapsed = 0;
     running = { startedAt: Date.now() };
-    persistTimerState();
     updatePomoBadge();
     updatePomoCycleInfo();
     updatePomodoroDisplay();
@@ -3042,7 +2718,6 @@ try {
   }
 
   fabTimerBtn.addEventListener("click", () => {
-    if (!running && timerSeconds === 0 && pomoFocusAccumulated === 0 && pomoPhaseElapsed === 0) restoreTimerState();
     const hasActiveSession = running || timerSeconds > 0 || pomoFocusAccumulated > 0 || pomoPhaseElapsed > 0;
     if (hasActiveSession) {
       showTimerRunningView();
@@ -3081,7 +2756,6 @@ try {
       } catch (e) {}
     }
     running = { startedAt: Date.now() };
-    persistTimerState();
     document.getElementById("timerPauseBtn").innerHTML = "&#10074;&#10074;";
     requestWakeLock();
     showTimerRunningView();
@@ -3094,13 +2768,11 @@ try {
       if (timerMode === "free") timerSeconds += (Date.now() - running.startedAt) / 1000;
       else pomoPhaseElapsed += (Date.now() - running.startedAt) / 1000;
       running = null;
-      persistTimerState();
       e.currentTarget.innerHTML = "&#9654;";
       if (tickInterval) { clearInterval(tickInterval); tickInterval = null; }
       releaseWakeLock();
     } else {
       running = { startedAt: Date.now() };
-      persistTimerState();
       e.currentTarget.innerHTML = "&#10074;&#10074;";
       tickInterval = setInterval(tickTimer, 1000);
       requestWakeLock();
@@ -3112,7 +2784,6 @@ try {
     btn.addEventListener("click", () => {
       if (timerMode !== "free") return;
       timerTargetSeconds += Number(btn.getAttribute("data-add-min")) * 60;
-      persistTimerState();
       updateTimerRunningDisplay();
     });
   });
@@ -3130,7 +2801,6 @@ try {
     releaseWakeLock();
     timerSeconds = 0;
     pomoPhaseElapsed = 0; pomoFocusAccumulated = 0; pomoCycleCount = 0; pomoPhase = "work";
-    clearPersistedTimerState();
     document.getElementById("timerPauseBtn").innerHTML = "&#10074;&#10074;";
     fabTimerBtn.classList.remove("active");
     timerOverlay.classList.remove("open");
@@ -3163,8 +2833,7 @@ try {
   // ---------- Backup (exportar / importar tudo) ----------
   document.getElementById("exportBackupBtn").addEventListener("click", () => {
     document.getElementById("moreMenuDropdown").classList.remove("open");
-    const payload = Object.assign({ type: "meus-estudos-backup", schemaVersion: BACKUP_VERSION, createdAt: Date.now() }, state);
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -3185,24 +2854,23 @@ try {
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      if (!parsed || !Array.isArray(parsed.subjects) || !Array.isArray(parsed.sessions) ||
-          !Array.isArray(parsed.cycle) || !Array.isArray(parsed.simulados) ||
-          !Array.isArray(parsed.revisions) || !Array.isArray(parsed.schedule)) {
-        throw new Error("arquivo não parece ser um backup válido");
-      }
-      const ok = confirm("Isso vai substituir todos os dados atuais pelos dados desse arquivo de backup. Antes disso, farei um backup automático dos dados atuais. Deseja continuar?");
+      if (!parsed || !Array.isArray(parsed.subjects)) throw new Error("arquivo não parece ser um backup válido");
+      const ok = confirm("Isso vai substituir todos os dados atuais pelos dados desse arquivo de backup. Deseja continuar?");
       if (!ok) { e.target.value = ""; return; }
-      const safetyKey = "meus-estudos:backup-seguranca:" + activeProfileId;
-      try { localStorage.setItem(safetyKey, JSON.stringify({ schemaVersion: BACKUP_VERSION, createdAt: Date.now(), data: state })); } catch (e) {}
-      const importedState = {
-        subjects: parsed.subjects || [], sessions: parsed.sessions || [], cycle: parsed.cycle || [],
-        simulados: parsed.simulados || [], revisions: parsed.revisions || [], schedule: parsed.schedule || [],
-        examDate: parsed.examDate || null, examQuestions: parsed.examQuestions || null, examInfo: parsed.examInfo || []
+      state = {
+        subjects: parsed.subjects || [],
+        sessions: parsed.sessions || [],
+        cycle: parsed.cycle || [],
+        simulados: parsed.simulados || [],
+        revisions: parsed.revisions || [],
+        schedule: parsed.schedule || [],
+        examDate: parsed.examDate || null,
+        examQuestions: parsed.examQuestions || null,
+        examInfo: parsed.examInfo || []
       };
-      state = importedState;
       save();
       renderAll();
-      alert("Backup importado com sucesso. Um backup de segurança do estado anterior também foi criado localmente.");
+      alert("Backup importado com sucesso.");
     } catch (err) {
       alert("Não consegui importar esse arquivo: " + err.message);
     }
@@ -3218,7 +2886,7 @@ try {
         allData[p.id] = raw ? JSON.parse(raw) : {};
       } catch (e) { allData[p.id] = {}; }
     });
-    const payload = { type: "meus-estudos-backup-completo", schemaVersion: BACKUP_VERSION, createdAt: Date.now(), profiles: profiles, activeId: activeProfileId, data: allData };
+    const payload = { type: "meus-estudos-backup-completo", profiles: profiles, activeId: activeProfileId, data: allData };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -3237,21 +2905,11 @@ try {
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      if (!parsed || parsed.type !== "meus-estudos-backup-completo" ||
-          !Array.isArray(parsed.profiles) || !parsed.profiles.every(p => p && typeof p.id === "string" && typeof p.name === "string") ||
-          !parsed.data || typeof parsed.data !== "object" || Array.isArray(parsed.data)) {
+      if (!parsed || !Array.isArray(parsed.profiles) || typeof parsed.data !== "object") {
         throw new Error("arquivo não parece ser um backup completo válido");
       }
-      const ok = confirm("Isso vai substituir TODOS os seus editais (matérias, histórico, cronogramas etc. de todos eles). Antes disso, farei um backup automático dos dados atuais. Deseja continuar?");
+      const ok = confirm("Isso vai substituir TODOS os seus editais (matérias, histórico, cronogramas etc. de todos eles) pelos dados desse arquivo. Deseja continuar?");
       if (!ok) { e.target.value = ""; return; }
-
-      try {
-        const currentAllData = {};
-        profiles.forEach(p => {
-          try { const raw = localStorage.getItem(profileDataKey(p.id)); currentAllData[p.id] = raw ? JSON.parse(raw) : {}; } catch (err) { currentAllData[p.id] = {}; }
-        });
-        localStorage.setItem("meus-estudos:backup-seguranca-completo", JSON.stringify({ schemaVersion: BACKUP_VERSION, createdAt: Date.now(), profiles: profiles, activeId: activeProfileId, data: currentAllData }));
-      } catch (err) {}
 
       // remove editais atuais do armazenamento
       profiles.forEach(p => { try { localStorage.removeItem(profileDataKey(p.id)); } catch (err) {} });
@@ -3268,11 +2926,6 @@ try {
         activeProfileId = id;
       }
       saveProfilesList();
-      profiles.forEach(p => {
-        const profileData = parsed.data[p.id] || {};
-        const updatedAt = markProfileChanged(p.id);
-        if (firebaseReady && currentUser) pushProfileDataToCloud(p.id, profileData, updatedAt);
-      });
       loadActiveProfileData();
       renderAll();
       renderProfileSwitcher();
@@ -3561,7 +3214,6 @@ try {
     load();
     renderProfileSwitcher();
     renderAll();
-    restoreTimerState();
   }
 
   if (firebaseReady) {
@@ -3650,7 +3302,6 @@ try {
           accountRow.style.display = "flex";
           document.getElementById("accountEmailLabel").textContent = user.email || "";
           setSyncStatus("syncing");
-          load();
           await pullFromCloud();
           startApp();
         } else {
