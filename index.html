@@ -41,6 +41,7 @@
   .sync-dot.ok { background: #3E8A4F; }
   .sync-dot.syncing { background: #C9A227; }
   .sync-dot.error { background: #D1526E; }
+  .sync-dot.conflict { background: #EA7C2C; }
   .account-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; padding-top: 10px; border-top: 1px solid #F1EFE8; }
   .account-email { font-size: 11.5px; color: #6E6B63; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .profile-add-row input { font-size: 13px; padding: 8px 10px; min-height: 36px; }
@@ -184,10 +185,12 @@
   .plan-layout { display: grid; grid-template-columns: 1fr 260px; gap: 14px; }
   .plan-sidebar { display: flex; flex-direction: column; gap: 12px; }
   .layer-check { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 0; cursor: pointer; }
-  .mini-cal-header { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; font-weight: 700; margin-bottom: 8px; }
-  .mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-  .mini-cal-dow { font-size: 9px; color: #9B9890; text-align: center; font-weight: 700; padding-bottom: 2px; }
-  .mini-cal-day { font-size: 11px; text-align: center; padding: 5px 0; border-radius: 6px; cursor: pointer; color: #2A2926; border: 1.5px solid transparent; }
+  .mini-cal-header { display: grid; grid-template-columns: 28px minmax(0, 1fr) 28px; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 700; margin-bottom: 8px; }
+  .mini-cal-header > span { text-align: center; min-width: 0; }
+  .mini-cal-header .icon-btn { width: 28px; height: 28px; padding: 0; justify-self: center; }
+  .mini-cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; width: 100%; align-items: center; }
+  .mini-cal-dow { font-size: 9px; color: #9B9890; text-align: center; font-weight: 700; padding: 2px 0 4px; min-width: 0; }
+  .mini-cal-day { width: 100%; aspect-ratio: 1 / 1; min-height: 26px; font-size: 11px; text-align: center; padding: 0; border-radius: 6px; cursor: pointer; color: #2A2926; border: 1.5px solid transparent; display: flex; align-items: center; justify-content: center; }
   .mini-cal-day:hover { background: #F1EFE8; }
   .mini-cal-day.other-month { color: #C9C5BA; }
   .mini-cal-day.today { border-color: #C9A227; font-weight: 700; }
@@ -342,6 +345,21 @@
   .priority-list { display:flex; flex-direction:column; gap:6px; }
   .priority-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid #E5E3DC; border-radius:8px; font-size:12px; }
   .priority-item-score { margin-left:auto; font-weight:700; color:#8A6A14; }
+  .priority-meta-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-top:12px; }
+  .priority-meta { padding:8px 9px; border-radius:8px; background:#F5F3EE; }
+  .priority-meta-label { font-size:9px; color:#9B9890; text-transform:uppercase; letter-spacing:.04em; font-weight:700; }
+  .priority-meta-value { font-size:12px; font-weight:700; margin-top:2px; }
+  .priority-domain { display:inline-block; margin-top:5px; padding:3px 8px; border-radius:10px; font-size:10px; font-weight:700; }
+  .priority-domain.low { background:#FDEEEE; color:#A34A43; }
+  .priority-domain.mid { background:#FFF4E0; color:#C77700; }
+  .priority-domain.consolidation { background:#FBF3DC; color:#8A6A14; }
+  .priority-domain.high { background:#E8EAF0; color:#24365C; }
+  .priority-recommendation { margin:10px 0 12px; padding:9px 10px; border-radius:8px; background:#F1EFE8; font-size:12px; }
+  .priority-recommendation strong { display:block; margin-bottom:2px; }
+  .priority-config { font-size:11px; color:#6E6B63; margin-top:8px; }
+  [data-theme="dark"] .priority-meta { background:#1C2028; }
+  [data-theme="dark"] .priority-recommendation { background:#2B303B; }
+  @media (max-width:780px) { .priority-meta-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
   [data-theme="dark"] .priority-breakdown { border-color:#2B303B; }
   [data-theme="dark"] .priority-breakdown-row strong { color:#E3E0D8; }
   [data-theme="dark"] .priority-level.high { background:#3A2524; color:#E39B95; }
@@ -628,14 +646,14 @@
       </div>
     </div>
     <div class="edital-progress-wrap">
-      <span class="edital-progress-label" id="editalProgressLabel">0 de 0 tópicos concluídos</span>
+      <span class="edital-progress-label" id="editalProgressLabel">Cobertura do edital: 0% · 0/0 matérias trabalhadas</span>
       <div class="edital-progress-bar"><div class="edital-progress-fill" id="editalProgressFill" style="width:0%;"></div></div>
       <span class="edital-progress-pct" id="editalProgressPct">0%</span>
     </div>
     <div class="card priority-card" id="priorityCard">
       <div class="priority-head">
         <div class="priority-title">🎯 Central de Prioridades</div>
-        <span class="empty-hint" id="priorityUpdatedLabel"></span>
+        <span class="empty-hint" id="priorityUpdatedLabel">Peso + desempenho + recência</span>
       </div>
       <div id="priorityContent"></div>
     </div>
@@ -673,7 +691,7 @@
       <div class="card stat-card">
         <div class="stat-label">Progresso no edital</div>
         <div class="stat-value" id="statProgressoEdital">0%</div>
-        <div class="stat-sub" id="statProgressoSub">0 tópicos concluídos</div>
+        <div class="stat-sub" id="statProgressoSub">0 matérias trabalhadas</div>
       </div>
     </div>
     <div class="card chart-card">
@@ -845,7 +863,7 @@
         <select id="timerSubjectSelect"></select>
       </div>
       <div class="field-row">
-        <label class="field-label">Tópico</label>
+        <label class="field-label">Tópico <span style="font-weight:400;color:#9B9890;">(opcional)</span></label>
         <select id="timerTopicSelect"></select>
       </div>
       <div class="field-row" id="freeGoalFields">
@@ -921,7 +939,7 @@
         <select id="formSubjectSelect"></select>
       </div>
       <div class="field-row">
-        <label class="field-label">Tópico</label>
+        <label class="field-label">Tópico <span style="font-weight:400;color:#9B9890;">(opcional)</span></label>
         <select id="formTopicSelect"></select>
       </div>
       <div class="field-row">
@@ -998,7 +1016,7 @@
 <div class="modal-overlay" id="autoScheduleModalOverlay">
   <div class="modal-box">
     <h2 class="modal-title">Gerar cronograma automaticamente</h2>
-    <p class="field-hint" style="margin-bottom:12px;">Distribui o tempo entre as matérias de acordo com o peso de cada uma (definido no Edital, manualmente ou pela quantidade de tópicos) — matérias com mais peso aparecem em mais dias e recebem mais tempo. Os dias variam entre si, sem repetir sempre a mesma coisa. Isso substitui o cronograma semanal atual.</p>
+    <p class="field-hint" style="margin-bottom:12px;">Distribui o tempo usando a mesma inteligência da Central de Prioridades: peso do edital, desempenho, quantidade de questões, tendência e tempo sem estudar. Matérias importantes e ainda não consolidadas recebem mais espaço; matérias já dominadas entram em manutenção. Isso substitui o cronograma semanal atual.</p>
     <p class="field-hint" id="examSuggestionHint" style="display:none; margin-bottom:12px; color:#8A6A14; background:#FBF3DC; padding:8px 10px; border-radius:8px;"></p>
     <form id="autoScheduleForm">
       <div class="field-row">
@@ -1023,6 +1041,17 @@
           <input type="number" id="autoScheduleBlocksInput" min="1" max="5" value="2" />
         </div>
       </div>
+      <div class="field-grid-2 field-row">
+        <div>
+          <label class="field-label">Meta de acertos (%)</label>
+          <input type="number" id="autoScheduleTargetPctInput" min="50" max="100" value="80" />
+        </div>
+        <div>
+          <label class="field-label">Questões mínimas para consolidar</label>
+          <input type="number" id="autoScheduleMinQuestionsInput" min="10" max="1000" value="50" />
+        </div>
+      </div>
+      <p class="field-hint">A meta e o volume mínimo servem para evitar que uma matéria pare de receber atenção com uma amostra pequena de questões.</p>
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" id="cancelAutoScheduleBtn">Cancelar</button>
         <button type="submit" class="btn btn-primary">Gerar</button>
@@ -1180,26 +1209,50 @@ try {
   const PROFILES_KEY = "meus-estudos:perfis-v1";
   const PROFILE_SYNC_META_PREFIX = "meus-estudos:sync-meta:";
   const PROFILES_SYNC_META_KEY = "meus-estudos:sync-meta:profiles";
+  const SYNC_CLIENT_ID_KEY = "meus-estudos:sync-client-id";
+  const SYNC_CONFLICT_PREFIX = "meus-estudos:sync-conflict:";
   const TIMER_STATE_KEY_PREFIX = "meus-estudos:timer:";
   const BACKUP_VERSION = 1;
+  let SYNC_CLIENT_ID = null;
+  let suppressSyncWrites = false;
   function profileDataKey(id) { return "meus-estudos:dados:" + id; }
   function profileSyncMetaKey(id) { return PROFILE_SYNC_META_PREFIX + id; }
+  function conflictKey(id) { return SYNC_CONFLICT_PREFIX + id; }
   function readSyncMeta(key) {
     try { return JSON.parse(localStorage.getItem(key) || "null") || {}; } catch (e) { return {}; }
   }
   function writeSyncMeta(key, meta) {
     try { localStorage.setItem(key, JSON.stringify(meta)); } catch (e) {}
   }
+  function nextSyncVersion(key) {
+    const meta = readSyncMeta(key);
+    const now = Date.now();
+    const version = Math.max(Number(meta.version || meta.updatedAt || 0) + 1, now);
+    writeSyncMeta(key, { version: version, updatedAt: version, clientId: SYNC_CLIENT_ID, dirty: true });
+    return version;
+  }
   function markProfileChanged(profileId) {
     if (!profileId) return 0;
-    const updatedAt = Date.now();
-    writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: updatedAt });
-    return updatedAt;
+    return nextSyncVersion(profileSyncMetaKey(profileId));
   }
   function markProfilesChanged() {
-    const updatedAt = Date.now();
-    writeSyncMeta(PROFILES_SYNC_META_KEY, { updatedAt: updatedAt });
-    return updatedAt;
+    return nextSyncVersion(PROFILES_SYNC_META_KEY);
+  }
+  function markProfileClean(profileId, version) {
+    const key = profileSyncMetaKey(profileId);
+    const meta = readSyncMeta(key);
+    if (Number(meta.version || 0) !== Number(version || 0)) return false;
+    writeSyncMeta(key, { version: Number(version), updatedAt: Number(version), clientId: SYNC_CLIENT_ID, dirty: false });
+    return true;
+  }
+  function markProfilesClean(version) {
+    const meta = readSyncMeta(PROFILES_SYNC_META_KEY);
+    if (Number(meta.version || 0) !== Number(version || 0)) return false;
+    writeSyncMeta(PROFILES_SYNC_META_KEY, { version: Number(version), updatedAt: Number(version), clientId: SYNC_CLIENT_ID, dirty: false });
+    return true;
+  }
+  function backupLocalConflict(key, payload) {
+    try { localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data: payload })); } catch (e) {}
   }
   const COLORS = ["#2C3E63", "#C9A227", "#EA7C2C", "#24365C", "#E1527A", "#1B2A4A", "#C9A227", "#1B2A4A"];
   const PROMPT_TEMPLATE =
@@ -1236,6 +1289,7 @@ try {
   }
 
   function uid() { return crypto.randomUUID(); }
+  SYNC_CLIENT_ID = (() => { try { let id = localStorage.getItem(SYNC_CLIENT_ID_KEY); if (!id) { id = uid(); localStorage.setItem(SYNC_CLIENT_ID_KEY, id); } return id; } catch (e) { return uid(); } })();
   function todayKey(d) {
     d = d || new Date();
     return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
@@ -1265,28 +1319,26 @@ try {
     return "pct-bad";
   }
 
-  let state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [] };
+  let state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], planningConfig: { targetPct: 80, minQuestions: 50 } };
   let running = null; // { startedAt }
   let tickInterval = null;
   let editingSessionId = null;
   let pendingTimerSave = null; // { subjectId, topicId, seconds }
   let profiles = []; // [{ id, name }]
   let activeProfileId = null;
-  let syncReady = false; // evita qualquer escrita na nuvem antes da recuperação inicial terminar
 
   function loadProfilesList() {
     try {
       const raw = localStorage.getItem(PROFILES_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        profiles = Array.isArray(parsed.profiles) ? parsed.profiles.filter(p => p && p.id && p.name) : [];
+        profiles = parsed.profiles || [];
         activeProfileId = parsed.activeId || (profiles[0] ? profiles[0].id : null);
         if (profiles.length) return;
       }
-    } catch (e) { /* continua para a recuperação */ }
+    } catch (e) { /* nada salvo ainda */ }
 
-    // Primeira abertura: cria apenas uma estrutura local temporária.
-    // NÃO grava na nuvem aqui; o Firebase será consultado primeiro.
+    // primeira vez: migra dados antigos (chave única) para o novo formato de perfis
     let legacyState = null;
     try {
       const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
@@ -1299,14 +1351,12 @@ try {
     if (legacyState) {
       try { localStorage.setItem(profileDataKey(id), JSON.stringify(legacyState)); } catch (e) {}
     }
-    try { localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: profiles, activeId: activeProfileId })); } catch (e) {}
+    saveProfilesList();
   }
-  function saveProfilesList(options = {}) {
-    const markChanged = options.markChanged !== false;
+  function saveProfilesList() {
     try { localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: profiles, activeId: activeProfileId })); } catch (e) {}
-    if (!syncReady || !currentUser || !firebaseReady) return;
-    const updatedAt = markChanged ? markProfilesChanged() : Number(readSyncMeta(PROFILES_SYNC_META_KEY).updatedAt || Date.now());
-    pushProfilesToCloud(updatedAt);
+    const version = markProfilesChanged();
+    if (!suppressSyncWrites) pushProfilesToCloud(version);
   }
 
   // ---------- Sincronização com a nuvem (Firebase) ----------
@@ -1315,18 +1365,20 @@ try {
     const text = document.getElementById("syncStatusText");
     if (!dot || !text) return;
     dot.className = "sync-dot" + (status ? " " + status : "");
-    text.textContent = status === "syncing" ? "Sincronizando..." : status === "ok" ? "Sincronizado" : status === "offline" ? "Offline — salvo neste dispositivo" : status === "error" ? "Falha ao sincronizar" : "—";
+    text.textContent = status === "syncing" ? "Sincronizando..." : status === "ok" ? "Sincronizado" : status === "offline" ? "Offline — salvo neste dispositivo" : status === "conflict" ? "Conflito — dados locais preservados" : status === "error" ? "Falha ao sincronizar" : "—";
   }
   let pushDataTimer = null;
   function schedulePushProfileData() {
-    if (!firebaseReady || !currentUser || !activeProfileId) return;
+    if (!firebaseReady || !currentUser || !activeProfileId || suppressSyncWrites) return;
     if (pushDataTimer) clearTimeout(pushDataTimer);
     const profileId = activeProfileId;
     const snapshot = JSON.parse(JSON.stringify(state));
-    const updatedAt = Number(readSyncMeta(profileSyncMetaKey(profileId)).updatedAt || 0) || markProfileChanged(profileId);
-    pushDataTimer = setTimeout(() => pushProfileDataToCloud(profileId, snapshot, updatedAt), 800);
+    const meta = readSyncMeta(profileSyncMetaKey(profileId));
+    const version = Number(meta.version || meta.updatedAt || 0) || markProfileChanged(profileId);
+    const clientId = meta.clientId || SYNC_CLIENT_ID;
+    pushDataTimer = setTimeout(() => pushProfileDataToCloud(profileId, snapshot, version, clientId), 800);
   }
-  async function pushProfileDataToCloud(profileId, data, updatedAt) {
+  async function pushProfileDataToCloud(profileId, data, version, clientId) {
     if (!firebaseReady || !currentUser || !profileId) return;
     if (!navigator.onLine) { setSyncStatus("offline"); return; }
     setSyncStatus("syncing");
@@ -1334,39 +1386,223 @@ try {
       const ref = doc(db, "users", currentUser.uid, "profileData", profileId);
       const result = await runTransaction(db, async (tx) => {
         const snap = await tx.get(ref);
-        const remote = snap.exists() ? (snap.data()._sync && Number(snap.data()._sync.updatedAt) || 0) : 0;
-        if (remote > updatedAt) return false;
-        tx.set(ref, Object.assign({}, data, { _sync: { updatedAt: updatedAt } }));
-        return true;
+        const remoteSync = snap.exists() ? (snap.data()._sync || {}) : {};
+        const remoteVersion = Number(remoteSync.version || remoteSync.updatedAt || 0);
+        const remoteClientId = String(remoteSync.clientId || "");
+        if (remoteVersion > Number(version) || (remoteVersion === Number(version) && remoteClientId && remoteClientId > String(clientId || ""))) {
+          return { winner: "remote", version: remoteVersion };
+        }
+        tx.set(ref, Object.assign({}, data, { _sync: { version: Number(version), updatedAt: Number(version), clientId: String(clientId || SYNC_CLIENT_ID) } }));
+        return { winner: "local", version: Number(version) };
       });
-      if (result === false) {
+
+      const currentMeta = readSyncMeta(profileSyncMetaKey(profileId));
+      const currentVersion = Number(currentMeta.version || currentMeta.updatedAt || 0);
+
+      if (result && result.winner === "remote") {
         const latest = await getDoc(ref);
         if (latest.exists()) {
-          const cloudData = Object.assign({}, latest.data());
-          delete cloudData._sync;
-          try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
-          writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: Number(latest.data()._sync && latest.data()._sync.updatedAt) || Date.now() });
-          if (profileId === activeProfileId) loadActiveProfileData();
+          const latestSync = latest.data()._sync || {};
+          const remoteVersion = Number(latestSync.version || latestSync.updatedAt || result.version || 0);
+          if (currentVersion <= Number(version)) {
+            if (currentMeta.dirty) {
+              backupLocalConflict(conflictKey(profileId), data);
+            }
+            const cloudData = Object.assign({}, latest.data());
+            delete cloudData._sync;
+            try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
+            writeSyncMeta(profileSyncMetaKey(profileId), { version: remoteVersion, updatedAt: remoteVersion, clientId: String(latestSync.clientId || ""), dirty: false });
+            if (profileId === activeProfileId) loadActiveProfileData();
+            setSyncStatus(currentMeta.dirty ? "conflict" : "ok");
+          } else {
+            schedulePushProfileData();
+          }
         }
+        return;
+      }
+
+      // Só marca como sincronizado se nenhuma alteração mais nova aconteceu enquanto o upload estava em andamento.
+      if (currentVersion === Number(version)) markProfileClean(profileId, version);
+      if (currentVersion > Number(version)) {
+        schedulePushProfileData();
+        return;
       }
       setSyncStatus("ok");
-    } catch (e) { setSyncStatus("error"); }
+    } catch (e) { console.error("Falha ao sincronizar perfil:", e); setSyncStatus("error"); }
   }
-  async function pushProfilesToCloud(updatedAt) {
+  async function pushProfilesToCloud(version) {
     if (!firebaseReady || !currentUser) return;
     if (!navigator.onLine) { setSyncStatus("offline"); return; }
-    updatedAt = updatedAt || readSyncMeta(PROFILES_SYNC_META_KEY).updatedAt || Date.now();
+    const metaLocal = readSyncMeta(PROFILES_SYNC_META_KEY);
+    version = Number(version || metaLocal.version || metaLocal.updatedAt || Date.now());
     setSyncStatus("syncing");
     try {
       const ref = doc(db, "users", currentUser.uid);
-      await runTransaction(db, async (tx) => {
+      const result = await runTransaction(db, async (tx) => {
         const snap = await tx.get(ref);
-        const remote = snap.exists() ? (snap.data()._sync && Number(snap.data()._sync.profilesUpdatedAt) || 0) : 0;
-        if (remote > updatedAt) return;
-        tx.set(ref, { profiles: profiles, activeId: activeProfileId, _sync: Object.assign({}, snap.exists() ? (snap.data()._sync || {}) : {}, { profilesUpdatedAt: updatedAt }) }, { merge: true });
+        const remoteSync = snap.exists() ? (snap.data()._sync || {}) : {};
+        const remoteVersion = Number(remoteSync.profilesVersion || remoteSync.profilesUpdatedAt || 0);
+        const remoteClientId = String(remoteSync.profilesClientId || "");
+        if (remoteVersion > version || (remoteVersion === version && remoteClientId && remoteClientId > SYNC_CLIENT_ID)) return { winner: "remote", version: remoteVersion };
+        tx.set(ref, { profiles: profiles, activeId: activeProfileId, _sync: Object.assign({}, snap.exists() ? (snap.data()._sync || {}) : {}, { profilesVersion: version, profilesUpdatedAt: version, profilesClientId: SYNC_CLIENT_ID }) }, { merge: true });
+        return { winner: "local", version: version };
       });
+      const currentMeta = readSyncMeta(PROFILES_SYNC_META_KEY);
+      const currentVersion = Number(currentMeta.version || currentMeta.updatedAt || 0);
+      if (result && result.winner === "remote") {
+        const latest = await getDoc(ref);
+        if (latest.exists()) {
+          const latestData = latest.data();
+          const latestSync = latestData._sync || {};
+          const remoteVersion = Number(latestSync.profilesVersion || latestSync.profilesUpdatedAt || result.version || 0);
+          if (currentVersion <= version) {
+            if (currentMeta.dirty) backupLocalConflict(PROFILES_SYNC_META_KEY + ":conflict", { profiles: profiles, activeId: activeProfileId });
+            const cloudProfiles = Array.isArray(latestData.profiles) ? latestData.profiles : profiles;
+            profiles = cloudProfiles;
+            activeProfileId = (latestData.activeId && cloudProfiles.some(p => p.id === latestData.activeId)) ? latestData.activeId : (cloudProfiles[0] ? cloudProfiles[0].id : null);
+            try { localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: profiles, activeId: activeProfileId })); } catch (e) {}
+            writeSyncMeta(PROFILES_SYNC_META_KEY, { version: remoteVersion, updatedAt: remoteVersion, clientId: String(latestSync.profilesClientId || ""), dirty: false });
+            setSyncStatus(currentMeta.dirty ? "conflict" : "ok");
+          } else {
+            pushProfilesToCloud(currentVersion);
+          }
+        }
+        return;
+      }
+      if (currentVersion === version) markProfilesClean(version);
+      if (currentVersion > version) { pushProfilesToCloud(currentVersion); return; }
       setSyncStatus("ok");
-    } catch (e) { setSyncStatus("error"); }
+    } catch (e) { console.error("Falha ao sincronizar perfis:", e); setSyncStatus("error"); }
+  }
+  async function pullFromCloud() {
+    if (!firebaseReady || !currentUser) return;
+    if (!navigator.onLine) { setSyncStatus("offline"); return; }
+    setSyncStatus("syncing");
+    try {
+      const metaSnap = await getDoc(doc(db, "users", currentUser.uid));
+      if (!metaSnap.exists()) {
+        // Conta sem dados na nuvem: preserva o que já existe localmente e envia.
+        const localProfilesMeta = readSyncMeta(PROFILES_SYNC_META_KEY);
+        if (profiles.length) {
+          const v = Number(localProfilesMeta.version || localProfilesMeta.updatedAt || 0) || markProfilesChanged();
+          await pushProfilesToCloud(v);
+        }
+        const localIds = (profiles || []).map(p => p.id);
+        for (const profileId of localIds) {
+          let localState = null;
+          try { const raw = localStorage.getItem(profileDataKey(profileId)); localState = raw ? JSON.parse(raw) : null; } catch (e) {}
+          if (!localState) continue;
+          const meta = readSyncMeta(profileSyncMetaKey(profileId));
+          const v = Number(meta.version || meta.updatedAt || 0) || markProfileChanged(profileId);
+          await pushProfileDataToCloud(profileId, localState, v, SYNC_CLIENT_ID);
+        }
+        setSyncStatus("ok");
+        return;
+      }
+
+      const meta = metaSnap.data();
+      if (meta.theme === "dark" || meta.theme === "light") {
+        localStorage.setItem(THEME_KEY, meta.theme);
+        applyTheme(meta.theme);
+      }
+
+      // ---------- Perfis ----------
+      const cloudProfiles = Array.isArray(meta.profiles) ? meta.profiles.filter(p => p && typeof p.id === "string") : [];
+      const localProfilesMeta = readSyncMeta(PROFILES_SYNC_META_KEY);
+      const localProfilesVersion = Number(localProfilesMeta.version || localProfilesMeta.updatedAt || 0);
+      const cloudProfilesVersion = Number(meta._sync && (meta._sync.profilesVersion || meta._sync.profilesUpdatedAt) || 0);
+
+      // Compatibilidade com versões anteriores: perfis antigos podem existir no
+      // documento do Firebase sem metadados _sync de perfis. Nesse caso, a
+      // existência de uma lista remota válida é evidência suficiente para
+      // recuperá-la. Nunca deixe o perfil provisório "Meu Edital" esconder
+      // editais reais já salvos na nuvem.
+      const localOnlyLooksLikeFreshDefault = profiles.length === 1 &&
+        profiles[0] && profiles[0].name === "Meu Edital" &&
+        !localStorage.getItem(profileDataKey(profiles[0].id));
+      const cloudHasKnownLocalProfile = cloudProfiles.some(cp => profiles.some(lp => lp.id === cp.id));
+
+      if (cloudProfiles.length && (
+          cloudProfilesVersion > localProfilesVersion ||
+          (!localProfilesVersion && (localOnlyLooksLikeFreshDefault || !profiles.length)) ||
+          (!cloudProfilesVersion && !cloudHasKnownLocalProfile)
+        )) {
+        if (localProfilesMeta.dirty && !localOnlyLooksLikeFreshDefault) {
+          backupLocalConflict(PROFILES_SYNC_META_KEY + ":conflict", { profiles: profiles, activeId: activeProfileId });
+        }
+
+        // Mantém perfis locais que realmente existem e incorpora todos os
+        // perfis remotos. Em caso de mesmo ID, a versão remota prevalece.
+        const merged = [];
+        const byId = new Map();
+        profiles.forEach(p => { if (p && p.id) byId.set(p.id, p); });
+        cloudProfiles.forEach(p => byId.set(p.id, Object.assign({}, byId.get(p.id) || {}, p)));
+        if (!localOnlyLooksLikeFreshDefault) profiles.forEach(p => { if (p && p.id && !byId.has(p.id)) byId.set(p.id, p); });
+        byId.forEach(p => merged.push(p));
+        profiles = merged;
+
+        activeProfileId = (meta.activeId && profiles.some(p => p.id === meta.activeId))
+          ? meta.activeId
+          : (activeProfileId && profiles.some(p => p.id === activeProfileId) && !localOnlyLooksLikeFreshDefault
+              ? activeProfileId
+              : (profiles[0] ? profiles[0].id : null));
+
+        try { localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles: profiles, activeId: activeProfileId })); } catch (e) {}
+        writeSyncMeta(PROFILES_SYNC_META_KEY, { version: cloudProfilesVersion, updatedAt: cloudProfilesVersion, clientId: String(meta._sync && meta._sync.profilesClientId || ""), dirty: false });
+        loadActiveProfileData();
+      } else if (profiles.length && (localProfilesVersion > cloudProfilesVersion || localProfilesMeta.dirty)) {
+        await pushProfilesToCloud(localProfilesVersion || markProfilesChanged());
+      }
+
+      // ---------- Dados de cada edital/perfil ----------
+      const dataSnaps = await getDocs(collection(db, "users", currentUser.uid, "profileData"));
+      const cloudDataMap = {};
+      dataSnaps.forEach(d => { cloudDataMap[d.id] = d.data(); });
+      const profileIds = Array.from(new Set([...(profiles || []).map(p => p.id), ...Object.keys(cloudDataMap)]));
+
+      for (const profileId of profileIds) {
+        const cloudRaw = cloudDataMap[profileId] || null;
+        const cloudSync = cloudRaw ? (cloudRaw._sync || {}) : {};
+        const cloudVersion = Number(cloudSync.version || cloudSync.updatedAt || 0);
+        const localMeta = readSyncMeta(profileSyncMetaKey(profileId));
+        const localVersion = Number(localMeta.version || localMeta.updatedAt || 0);
+        let localState = null;
+        try {
+          const raw = localStorage.getItem(profileDataKey(profileId));
+          localState = raw ? JSON.parse(raw) : null;
+        } catch (e) {}
+
+        if (cloudRaw && cloudVersion > localVersion) {
+          // Se havia alteração local ainda não confirmada, preserve uma cópia antes de aceitar a nuvem.
+          if (localMeta.dirty && localState) backupLocalConflict(conflictKey(profileId), localState);
+          const cloudData = Object.assign({}, cloudRaw);
+          delete cloudData._sync;
+          try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
+          writeSyncMeta(profileSyncMetaKey(profileId), { version: cloudVersion, updatedAt: cloudVersion, clientId: String(cloudSync.clientId || ""), dirty: false });
+          if (profileId === activeProfileId) loadActiveProfileData();
+          continue;
+        }
+
+        if (localState && (localVersion > cloudVersion || localMeta.dirty || !cloudRaw)) {
+          const v = localVersion || markProfileChanged(profileId);
+          await pushProfileDataToCloud(profileId, localState, v, SYNC_CLIENT_ID);
+          continue;
+        }
+
+        if (cloudRaw && !localState) {
+          const cloudData = Object.assign({}, cloudRaw);
+          delete cloudData._sync;
+          try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
+          writeSyncMeta(profileSyncMetaKey(profileId), { version: cloudVersion, updatedAt: cloudVersion, clientId: String(cloudSync.clientId || ""), dirty: false });
+          if (profileId === activeProfileId) loadActiveProfileData();
+        }
+      }
+
+      setSyncStatus("ok");
+    } catch (e) {
+      console.error("Falha ao carregar dados da nuvem:", e);
+      setSyncStatus("error");
+    }
   }
   async function pushThemeToCloud(theme) {
     if (!firebaseReady || !currentUser) return;
@@ -1376,138 +1612,8 @@ try {
     if (!firebaseReady || !currentUser) return;
     try { await deleteDoc(doc(db, "users", currentUser.uid, "profileData", profileId)); } catch (e) {}
   }
-  async function pullFromCloud() {
-    if (!firebaseReady || !currentUser) return;
-    if (!navigator.onLine) { setSyncStatus("offline"); return; }
-    setSyncStatus("syncing");
-    syncReady = false;
-    try {
-      const userRef = doc(db, "users", currentUser.uid);
-      const metaSnap = await getDoc(userRef);
-      const meta = metaSnap.exists() ? metaSnap.data() : {};
-
-      if (meta.theme === "dark" || meta.theme === "light") {
-        localStorage.setItem(THEME_KEY, meta.theme);
-        applyTheme(meta.theme);
-      }
-
-      // Sempre lê todos os profileData antes de decidir qual lista de editais usar.
-      // Isso permite recuperar documentos órfãos que ainda existem no Firebase.
-      const dataSnaps = await getDocs(collection(db, "users", currentUser.uid, "profileData"));
-      const cloudDataMap = {};
-      dataSnaps.forEach(d => { cloudDataMap[d.id] = d.data(); });
-
-      const cloudProfiles = Array.isArray(meta.profiles) ? meta.profiles.filter(p => p && p.id && p.name) : [];
-      const localProfiles = Array.isArray(profiles) ? profiles.slice() : [];
-      const cloudProfileIds = new Set(cloudProfiles.map(p => p.id));
-
-      // Recupera automaticamente profileData que existe na nuvem, mas sumiu da lista _sync.profiles.
-      // Nunca exclui um documento remoto por causa dessa inconsistência.
-      const recoveredProfiles = [];
-      Object.keys(cloudDataMap).forEach(profileId => {
-        if (cloudProfileIds.has(profileId)) return;
-        const data = cloudDataMap[profileId] || {};
-        const recoveredName = String(
-          data.profileName || data.editalName || data.examName || data.title ||
-          (data.examInfo && data.examInfo.find(x => x && /nome.*edital|edital|concurso/i.test(String(x.label || "")))?.value) ||
-          "Edital recuperado"
-        ).trim() || "Edital recuperado";
-        recoveredProfiles.push({ id: profileId, name: recoveredName });
-      });
-
-      let nextProfiles;
-      if (cloudProfiles.length) {
-        // A lista remota é a fonte principal, mas documentos órfãos são anexados.
-        nextProfiles = cloudProfiles.slice();
-        recoveredProfiles.forEach(p => {
-          if (!nextProfiles.some(x => x.id === p.id)) nextProfiles.push(p);
-        });
-      } else if (recoveredProfiles.length) {
-        // Mesmo sem _sync.profiles, os documentos reais de profileData permitem recuperar os editais.
-        nextProfiles = recoveredProfiles.slice();
-      } else if (localProfiles.length) {
-        nextProfiles = localProfiles;
-      } else {
-        const id = uid();
-        nextProfiles = [{ id, name: "Meu Edital" }];
-      }
-
-      const cloudActiveId = meta.activeId;
-      const localActiveId = activeProfileId;
-      const nextActiveId =
-        (cloudActiveId && nextProfiles.some(p => p.id === cloudActiveId)) ? cloudActiveId :
-        (localActiveId && nextProfiles.some(p => p.id === localActiveId)) ? localActiveId :
-        nextProfiles[0].id;
-
-      profiles = nextProfiles;
-      activeProfileId = nextActiveId;
-      try { localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles, activeId: activeProfileId })); } catch (e) {}
-
-      const cloudProfilesUpdatedAt = Number(meta._sync && meta._sync.profilesUpdatedAt) || 0;
-      if (cloudProfilesUpdatedAt) {
-        writeSyncMeta(PROFILES_SYNC_META_KEY, { updatedAt: cloudProfilesUpdatedAt });
-      }
-
-      // Sincroniza cada perfil sem permitir que um estado local vazio sobrescreva dados remotos.
-      for (const profileId of Array.from(new Set([...(profiles || []).map(p => p.id), ...Object.keys(cloudDataMap)]))) {
-        const cloudRaw = cloudDataMap[profileId] || null;
-        const cloudSyncAt = cloudRaw ? (Number(cloudRaw._sync && cloudRaw._sync.updatedAt) || 0) : 0;
-        const localMeta = readSyncMeta(profileSyncMetaKey(profileId));
-        const localUpdatedAt = Number(localMeta.updatedAt || 0);
-        let localState = null;
-        try {
-          const raw = localStorage.getItem(profileDataKey(profileId));
-          localState = raw ? JSON.parse(raw) : null;
-        } catch (e) {}
-
-        // Se há dados na nuvem e o local está ausente/vazio, recupera a nuvem sem hesitar.
-        if (cloudRaw && cloudSyncAt > 0 && !localState) {
-          const cloudData = Object.assign({}, cloudRaw);
-          delete cloudData._sync;
-          try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
-          writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: cloudSyncAt });
-          continue;
-        }
-
-        if (cloudRaw && cloudSyncAt > localUpdatedAt) {
-          const cloudData = Object.assign({}, cloudRaw);
-          delete cloudData._sync;
-          try { localStorage.setItem(profileDataKey(profileId), JSON.stringify(cloudData)); } catch (e) {}
-          writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: cloudSyncAt });
-          continue;
-        }
-
-        // Só envia local para a nuvem se houver estado local real e ele não estiver mais antigo.
-        if (localState && (localUpdatedAt >= cloudSyncAt || !cloudSyncAt)) {
-          const localAt = localUpdatedAt || Date.now();
-          if (!localUpdatedAt) writeSyncMeta(profileSyncMetaKey(profileId), { updatedAt: localAt });
-          pushProfileDataToCloud(profileId, localState, localAt);
-        }
-      }
-
-      // A partir daqui, gravações normais podem sincronizar.
-      syncReady = true;
-      const needsProfileListWrite = recoveredProfiles.length > 0 || !cloudProfiles.length;
-      if (needsProfileListWrite) {
-        const updatedAt = Math.max(cloudProfilesUpdatedAt, Date.now());
-        writeSyncMeta(PROFILES_SYNC_META_KEY, { updatedAt });
-        try { localStorage.setItem(PROFILES_KEY, JSON.stringify({ profiles, activeId: activeProfileId })); } catch (e) {}
-        await pushProfilesToCloud(updatedAt);
-      }
-
-      // Recarrega o perfil ativo somente depois que a recuperação terminou.
-      loadActiveProfileData();
-      renderProfileSwitcher();
-      setSyncStatus("ok");
-    } catch (e) {
-      syncReady = true;
-      setSyncStatus("error");
-      console.error("Falha na recuperação/sincronização inicial:", e);
-    }
-  }
-
   function loadActiveProfileData() {
-    state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null, examInfo: [] };
+    state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null, examInfo: [], planningConfig: { targetPct: 80, minQuestions: 50 } };
     try {
       const raw = localStorage.getItem(profileDataKey(activeProfileId));
       if (raw) {
@@ -1526,6 +1632,7 @@ try {
         state.examDate = parsed.examDate || null;
         state.examQuestions = parsed.examQuestions || null;
         state.examInfo = parsed.examInfo || [];
+        state.planningConfig = Object.assign({ targetPct: 80, minQuestions: 50 }, parsed.planningConfig || {});
       }
     } catch (e) { /* perfil novo, sem dados ainda */ }
   }
@@ -1565,7 +1672,7 @@ try {
     const id = uid();
     profiles.push({ id: id, name: name });
     activeProfileId = id;
-    state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null, examInfo: [] };
+    state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null, examInfo: [], planningConfig: { targetPct: 80, minQuestions: 50 } };
     saveProfilesList();
     save();
     return id;
@@ -1683,12 +1790,20 @@ try {
     return { corretas, erradas, seconds, pct, done, total };
   }
 
-  // ---------- Central de Prioridades ----------
+  // ---------- Central de Prioridades / inteligência adaptativa ----------
   function daysSince(dateStr) {
     if (!dateStr) return null;
     const a = new Date(dateStr + "T00:00:00");
     const b = new Date(todayKey() + "T00:00:00");
     return Math.max(0, Math.round((b - a) / 86400000));
+  }
+
+  function getPlanningConfig() {
+    const defaults = { targetPct: 80, minQuestions: 50 };
+    const raw = state.planningConfig || {};
+    const targetPct = Math.min(100, Math.max(50, Number(raw.targetPct) || defaults.targetPct));
+    const minQuestions = Math.min(1000, Math.max(10, Number(raw.minQuestions) || defaults.minQuestions));
+    return { targetPct, minQuestions };
   }
 
   function priorityLevel(score) {
@@ -1697,57 +1812,110 @@ try {
     return { label: "Baixa", className: "low" };
   }
 
-  function calculatePriorityForTopic(subject, topic) {
-    const agg = topicAgg(topic.id);
-    const reasons = [];
-    const breakdown = {
-      revision: 0,
-      performance: 0,
-      importance: 0,
-      recency: 0,
-      pending: 0
+  function subjectStudySessions(subject) {
+    return state.sessions.filter(s => s.subjectId === subject.id);
+  }
+
+  function subjectStudyMetrics(subject) {
+    const sessions = subjectStudySessions(subject);
+    const corretas = sessions.reduce((a, s) => a + (Number(s.corretas) || 0), 0);
+    const erradas = sessions.reduce((a, s) => a + (Number(s.erradas) || 0), 0);
+    const questions = corretas + erradas;
+    const seconds = sessions.reduce((a, s) => a + (Number(s.seconds) || 0), 0);
+    const lastStudy = sessions.reduce((max, s) => (!max || s.date > max ? s.date : max), null);
+    const pct = questions > 0 ? Math.round((corretas / questions) * 100) : null;
+
+    const questionSessions = sessions.filter(s => ((Number(s.corretas) || 0) + (Number(s.erradas) || 0)) > 0)
+      .sort((a, b) => (a.date || "").localeCompare(b.date || "") || (Number(a.createdAt) || 0) - (Number(b.createdAt) || 0));
+    const recentLimit = getPlanningConfig().minQuestions;
+    let remaining = recentLimit, recentCorrect = 0, recentTotal = 0;
+    for (let i = questionSessions.length - 1; i >= 0 && remaining > 0; i--) {
+      const q = (Number(questionSessions[i].corretas) || 0) + (Number(questionSessions[i].erradas) || 0);
+      const take = Math.min(remaining, q);
+      if (q > 0) recentCorrect += Math.round(((Number(questionSessions[i].corretas) || 0) / q) * take);
+      recentTotal += take;
+      remaining -= take;
+    }
+    const recentPct = recentTotal > 0 ? Math.round((recentCorrect / recentTotal) * 100) : null;
+    const trend = pct != null && recentPct != null && recentTotal >= Math.min(20, recentLimit) ? recentPct - pct : null;
+
+    const topicIdsStudied = new Set(sessions.filter(s => s.topicId).map(s => s.topicId));
+    const totalTopics = subject.topics.length;
+    const doneTopics = subject.topics.filter(t => t.done).length;
+    const explicitCoverage = totalTopics ? Math.round((topicIdsStudied.size / totalTopics) * 100) : 0;
+    const manualCoverage = totalTopics ? Math.round((doneTopics / totalTopics) * 100) : 0;
+    const generalSessions = sessions.filter(s => !s.topicId);
+    const generalQuestions = generalSessions.reduce((a, s) => a + (Number(s.corretas) || 0) + (Number(s.erradas) || 0), 0);
+    const generalHours = generalSessions.reduce((a, s) => a + (Number(s.seconds) || 0), 0) / 3600;
+    let generalEstimate = 0;
+    if (generalSessions.length) {
+      generalEstimate = Math.min(80, Math.round(10 + Math.log10(generalQuestions + 1) * 18 + Math.min(25, generalHours * 5)));
+    }
+    const coverage = Math.min(100, Math.max(manualCoverage, explicitCoverage, generalEstimate));
+
+    return {
+      sessions, corretas, erradas, questions, seconds, lastStudy, pct,
+      recentPct, recentTotal, trend, topicIdsStudied, totalTopics, doneTopics,
+      coverage, generalQuestions, generalHours,
+      daysWithoutStudy: lastStudy ? daysSince(lastStudy) : null
     };
+  }
 
-    const pendingRevision = state.revisions.find(r =>
-      r.topicId === topic.id && !r.done && !r.ignored
-    );
+  function getDomainInfo(metrics) {
+    const cfg = getPlanningConfig();
+    if (metrics.pct == null) return { label: "Domínio baixo", className: "low", phase: "Desenvolvimento" };
+    const enough = metrics.questions >= cfg.minQuestions;
+    const recentGood = metrics.recentPct == null || metrics.recentPct >= cfg.targetPct - 5;
+    if (metrics.pct >= cfg.targetPct && enough && recentGood) return { label: "Domínio alto", className: "high", phase: "Manutenção" };
+    if (metrics.pct >= cfg.targetPct && !enough) return { label: "Em consolidação", className: "consolidation", phase: "Consolidação" };
+    if (metrics.pct >= Math.max(60, cfg.targetPct - 10)) return { label: "Domínio intermediário", className: "mid", phase: "Consolidação" };
+    return { label: "Domínio baixo", className: "low", phase: "Desenvolvimento" };
+  }
 
-    if (pendingRevision) {
-      if (pendingRevision.date < todayKey()) {
-        const days = Math.max(1, daysSince(pendingRevision.date));
-        breakdown.revision = Math.min(30, 15 + days * 3);
-        reasons.push("Revisão atrasada há " + days + " dia" + (days === 1 ? "" : "s"));
-      } else if (pendingRevision.date === todayKey()) {
-        breakdown.revision = 20;
-        reasons.push("Revisão programada para hoje");
-      } else {
-        breakdown.revision = 5;
-        reasons.push("Revisão programada");
-      }
+  function getRecommendedStudy(metrics, domain) {
+    const cfg = getPlanningConfig();
+    if (metrics.pct == null || metrics.pct < 60 || metrics.questions < Math.max(10, Math.floor(cfg.minQuestions / 4))) {
+      return { mode: "questoes", label: "📝 Fazer questões", minutes: domain.phase === "Manutenção" ? 30 : 60 };
     }
-
-    if (agg.pct != null) {
-      if (agg.pct < 50) {
-        breakdown.performance = 25;
-        reasons.push("Desempenho baixo (" + agg.pct + "%)");
-      } else if (agg.pct < 70) {
-        breakdown.performance = 15;
-        reasons.push("Desempenho abaixo de 70% (" + agg.pct + "%)");
-      } else if (agg.pct < 80) {
-        breakdown.performance = 5;
-      }
+    if (metrics.pct < cfg.targetPct || (metrics.trend != null && metrics.trend <= -5)) {
+      return { mode: "teoria", label: "📖 Teoria + questões", minutes: 60 };
     }
+    return { mode: "questoes", label: "📝 Questões de manutenção", minutes: domain.phase === "Manutenção" ? 30 : 45 };
+  }
 
+  function calculatePriorityForSubject(subject) {
+    const metrics = subjectStudyMetrics(subject);
+    const cfg = getPlanningConfig();
+    const domain = getDomainInfo(metrics);
     const weight = getSubjectWeight(subject);
-    breakdown.importance = Math.min(20, weight * 4);
-    if (weight >= 4) reasons.push("Matéria de alta importância");
+    const breakdown = { importance: 0, performance: 0, sample: 0, recency: 0, trend: 0, revision: 0 };
+    const reasons = [];
 
-    const days = agg.lastStudy ? daysSince(agg.lastStudy) : 30;
-    if (!agg.lastStudy) {
-      breakdown.recency = 15;
+    // Peso é a gravidade base: 1..5 -> 6..30 pontos, com reforço extra quando o domínio ainda é baixo.
+    breakdown.importance = Math.min(30, 6 + weight * 4.8);
+    if (weight >= 4) reasons.push("Matéria de alta importância no edital");
+
+    if (metrics.pct == null) {
+      breakdown.performance = 26;
+      reasons.push("Ainda não há desempenho suficiente");
+    } else {
+      const deficit = Math.max(0, cfg.targetPct - metrics.pct);
+      breakdown.performance = Math.min(34, Math.round((deficit / Math.max(1, cfg.targetPct)) * 34));
+      if (metrics.pct < cfg.targetPct) reasons.push("Desempenho abaixo da meta (" + metrics.pct + "%)");
+    }
+
+    if (metrics.questions < cfg.minQuestions) {
+      breakdown.sample = Math.min(12, Math.round((1 - metrics.questions / cfg.minQuestions) * 12));
+      if (metrics.questions === 0) reasons.push("Precisa formar uma amostra de questões");
+      else if (metrics.questions < Math.floor(cfg.minQuestions * 0.5)) reasons.push("Poucas questões para consolidar o desempenho");
+    }
+
+    const days = metrics.lastStudy ? metrics.daysWithoutStudy : 30;
+    if (!metrics.lastStudy) {
+      breakdown.recency = 14;
       reasons.push("Ainda não estudado");
     } else if (days >= 14) {
-      breakdown.recency = 15;
+      breakdown.recency = 14;
       reasons.push(days + " dias sem estudar");
     } else if (days >= 7) {
       breakdown.recency = 10;
@@ -1756,51 +1924,53 @@ try {
       breakdown.recency = 5;
     }
 
-    if (!topic.done) {
-      breakdown.pending = 10;
-      if (reasons.length < 3) reasons.push("Conteúdo ainda não concluído");
+    if (metrics.trend != null) {
+      if (metrics.trend <= -8) { breakdown.trend = 10; reasons.push("Tendência recente negativa"); }
+      else if (metrics.trend <= -4) { breakdown.trend = 6; reasons.push("Desempenho recente caiu"); }
+      else if (metrics.trend >= 8) breakdown.trend = -4;
     }
 
-    const score = Math.min(100, Math.round(
-      breakdown.revision + breakdown.performance + breakdown.importance + breakdown.recency + breakdown.pending
-    ));
+    const pendingRevisions = state.revisions.filter(r => r.subjectId === subject.id && !r.done && !r.ignored).length;
+    breakdown.revision = Math.min(6, pendingRevisions * 2);
+    if (pendingRevisions > 0 && reasons.length < 3) reasons.push(pendingRevisions + " revisão(ões) pendente(s)");
+
+    // Matérias dominadas continuam com um piso de manutenção, mas deixam espaço para as mais fracas.
+    if (domain.phase === "Manutenção") {
+      breakdown.performance = 0;
+      breakdown.sample = 0;
+      breakdown.trend = Math.min(2, Math.max(0, breakdown.trend));
+    }
+
+    let score = Math.round(breakdown.importance + breakdown.performance + breakdown.sample + breakdown.recency + breakdown.trend + breakdown.revision);
+    score = Math.max(10, Math.min(100, score));
     const level = priorityLevel(score);
+    const recommendation = getRecommendedStudy(metrics, domain);
+
+    if (domain.phase === "Manutenção") reasons.push("Desempenho consistente — manter contato sem consumir o planejamento");
 
     return {
-      subjectId: subject.id,
-      topicId: topic.id,
-      subjectName: subject.name,
-      topicName: topic.name,
-      score,
-      level: level.label,
-      levelClass: level.className,
-      breakdown,
-      reasons: reasons.slice(0, 3),
-      recommendedMinutes: score >= 80 ? 45 : score >= 60 ? 35 : 25
+      subjectId: subject.id, subjectName: subject.name, score,
+      level: level.label, levelClass: level.className, domain, metrics,
+      weight, breakdown, reasons: reasons.slice(0, 4),
+      recommendation, recommendedMinutes: recommendation.minutes,
+      pendingRevisions
     };
   }
 
   function getPriorityRecommendations() {
-    const items = [];
-    state.subjects.forEach(subject => {
-      subject.topics.forEach(topic => {
-        items.push(calculatePriorityForTopic(subject, topic));
-      });
-    });
-    return items.sort((a, b) =>
-      b.score - a.score ||
-      b.reasons.length - a.reasons.length ||
-      a.topicName.localeCompare(b.topicName)
-    ).slice(0, 3);
+    return state.subjects.map(calculatePriorityForSubject).sort((a, b) =>
+      b.score - a.score || b.weight - a.weight || (a.subjectName || "").localeCompare(b.subjectName || "")
+    ).slice(0, Math.min(5, state.subjects.length));
   }
 
   function renderPriorityBreakdown(b) {
     const rows = [
-      ["Revisão", b.revision, 30],
-      ["Desempenho", b.performance, 25],
-      ["Importância", b.importance, 20],
-      ["Tempo sem estudar", b.recency, 15],
-      ["Conteúdo pendente", b.pending, 10]
+      ["Importância", b.importance, 30],
+      ["Desempenho", b.performance, 34],
+      ["Amostra", b.sample, 12],
+      ["Tempo sem estudar", b.recency, 14],
+      ["Tendência", b.trend, 10],
+      ["Revisões", b.revision, 6]
     ];
     return '<div class="priority-breakdown">' + rows.map(r =>
       '<div class="priority-breakdown-row"><span>' + r[0] + '</span><strong>' + r[1] + '/' + r[2] + '</strong></div>'
@@ -1810,37 +1980,43 @@ try {
   function renderPriorities() {
     const content = document.getElementById("priorityContent");
     if (!content) return;
-
     const items = getPriorityRecommendations();
+    const cfg = getPlanningConfig();
     if (!items.length) {
-      content.innerHTML = '<p class="empty-hint">Cadastre matérias e tópicos para receber recomendações.</p>';
+      content.innerHTML = '<p class="empty-hint">Cadastre matérias no Edital para receber recomendações adaptativas.</p>';
       return;
     }
-
     const main = items[0];
+    const m = main.metrics;
+    const daysLabel = m.lastStudy ? (m.daysWithoutStudy === 0 ? "Hoje" : m.daysWithoutStudy + " dia" + (m.daysWithoutStudy === 1 ? "" : "s")) : "Nunca";
     content.innerHTML =
       '<div class="priority-main">' +
         '<div class="priority-name">' + escapeHtml(main.subjectName) + '</div>' +
-        '<div class="priority-topic">' + escapeHtml(main.topicName) + '</div>' +
-        '<div class="priority-score">Prioridade: ' + main.score + '/100 <span class="priority-level ' + main.levelClass + '">' + main.level + '</span> · ' + main.recommendedMinutes + ' min recomendados</div>' +
+        '<div class="priority-domain ' + main.domain.className + '">' + main.domain.label + ' · ' + main.domain.phase + '</div>' +
+        '<div class="priority-score">Prioridade: ' + main.score + '/100 <span class="priority-level ' + main.levelClass + '">' + main.level + '</span></div>' +
+        '<div class="priority-meta-grid">' +
+          '<div class="priority-meta"><div class="priority-meta-label">Acertos</div><div class="priority-meta-value">' + (m.pct == null ? "—" : m.pct + "%") + '</div></div>' +
+          '<div class="priority-meta"><div class="priority-meta-label">Questões</div><div class="priority-meta-value">' + m.questions + '</div></div>' +
+          '<div class="priority-meta"><div class="priority-meta-label">Peso</div><div class="priority-meta-value">' + main.weight + '/5</div></div>' +
+          '<div class="priority-meta"><div class="priority-meta-label">Último estudo</div><div class="priority-meta-value">' + daysLabel + '</div></div>' +
+        '</div>' +
+        '<div class="priority-recommendation"><strong>Recomendação</strong>' + main.recommendation.label + ' — ' + main.recommendedMinutes + ' min</div>' +
+        (m.recentPct != null ? '<div class="priority-config">Últimas ' + m.recentTotal + ' questões: ' + m.recentPct + '% · tendência ' + (m.trend > 0 ? '+' : '') + m.trend + ' p.p.</div>' : '') +
+        '<div class="priority-config">Cobertura estimada da matéria: ' + m.coverage + '% · Meta: ' + cfg.targetPct + '% / ' + cfg.minQuestions + ' questões</div>' +
         renderPriorityBreakdown(main.breakdown) +
         (main.reasons.length ? '<ul class="priority-reasons">' + main.reasons.map(r => '<li>' + escapeHtml(r) + '</li>').join("") + '</ul>' : '') +
         '<button class="btn btn-primary btn-small" id="priorityStudyNowBtn">Estudar agora</button>' +
       '</div>' +
       (items.length > 1 ?
-        '<div class="priority-list">' +
-          items.slice(1).map((x, i) =>
-            '<div class="priority-item"><span>' + (i + 2) + 'º</span><span>' +
-            escapeHtml(x.subjectName) + ' — ' + escapeHtml(x.topicName) +
-            '</span><span class="priority-item-score">' + x.score + '</span></div>'
-          ).join("") +
-        '</div>' : '');
+        '<div class="priority-list">' + items.slice(1).map((x, i) =>
+          '<div class="priority-item"><span>' + (i + 2) + 'º</span><span style="min-width:0;">' + escapeHtml(x.subjectName) + ' · ' + escapeHtml(x.domain.label) + '</span><span class="priority-item-score">' + x.score + '</span></div>'
+        ).join("") + '</div>' : '');
 
     const btn = document.getElementById("priorityStudyNowBtn");
     if (btn) btn.addEventListener("click", () => {
       setTimerMode("free");
       populateSubjectSelect(timerSubjectSelect, main.subjectId, true);
-      populateTopicSelect(timerTopicSelect, main.subjectId, main.topicId, true);
+      populateTopicSelect(timerTopicSelect, main.subjectId, "", true);
       const minutes = main.recommendedMinutes || 25;
       document.getElementById("timerGoalHoursInput").value = Math.floor(minutes / 60);
       document.getElementById("timerGoalMinutesInput").value = minutes % 60;
@@ -1997,8 +2173,10 @@ try {
     renderExamInfo();
     const totalTopics = state.subjects.reduce((a, s) => a + s.topics.length, 0);
     const doneTopics = state.subjects.reduce((a, s) => a + s.topics.filter(t => t.done).length, 0);
-    const overallPct = totalTopics ? Math.round((doneTopics / totalTopics) * 100) : 0;
-    document.getElementById("editalProgressLabel").textContent = doneTopics + " de " + totalTopics + " tópicos concluídos";
+    const subjectMetrics = state.subjects.map(subjectStudyMetrics);
+    const workedSubjects = subjectMetrics.filter(m => m.sessions.length > 0 || m.doneTopics > 0).length;
+    const overallPct = subjectMetrics.length ? Math.round(subjectMetrics.reduce((a, m) => a + m.coverage, 0) / subjectMetrics.length) : 0;
+    document.getElementById("editalProgressLabel").textContent = "Cobertura estimada: " + overallPct + "% · " + workedSubjects + "/" + state.subjects.length + " matérias trabalhadas · " + doneTopics + "/" + totalTopics + " tópicos confirmados";
     document.getElementById("editalProgressFill").style.width = overallPct + "%";
     document.getElementById("editalProgressPct").textContent = overallPct + "%";
 
@@ -2020,6 +2198,7 @@ try {
     container.innerHTML = state.subjects.map(subject => {
       const color = subjectColor(subject);
       const agg = subjectAgg(subject);
+      const studyMetrics = subjectStudyMetrics(subject);
       const collapsed = !!collapsedState[subject.id];
       const rows = subject.topics.map((t, i) => {
         const a = topicAgg(t.id);
@@ -2040,7 +2219,7 @@ try {
         '<div class="subject-header" data-toggle-collapse="' + subject.id + '">' +
           '<div class="subject-color-bar" style="background:' + color + ';"></div>' +
           '<div class="subject-header-name">' + escapeHtml(subject.name) + '</div>' +
-          '<div class="subject-header-meta">' + agg.done + '/' + agg.total + ' tópicos &middot; ' + fmtHoursLong(agg.seconds) + '</div>' +
+          '<div class="subject-header-meta">' + studyMetrics.coverage + '% cobertura estimada &middot; ' + agg.done + '/' + agg.total + ' tópicos confirmados &middot; ' + fmtHoursLong(agg.seconds) + '</div>' +
           '<span class="weight-badge" data-edit-weight="' + subject.id + '" title="Peso desta matéria no edital — clique para ajustar. Usado para focar o cronograma e as revisões.">Peso ' + getSubjectWeight(subject) + (subject.weight != null ? '' : ' &middot; auto') + '</span>' +
           '<svg class="chevron' + (collapsed ? " collapsed" : "") + '" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
         '</div>' +
@@ -2074,7 +2253,7 @@ try {
         const subject = state.subjects.find(s => s.id === el.getAttribute("data-edit-weight"));
         if (!subject) return;
         const atual = subject.weight != null ? String(subject.weight) : "";
-        const novo = prompt("Peso desta matéria no edital (1 a 5 — quanto maior, mais foco ela recebe no cronograma e nas revisões).\nDeixe em branco para calcular automaticamente pelo número de tópicos:", atual);
+        const novo = prompt("Peso desta matéria no edital (1 a 5 — quanto maior, maior a importância no planejamento, especialmente enquanto o domínio estiver abaixo da meta).\nDeixe em branco para usar um peso automático baseado na estrutura do edital:", atual);
         if (novo === null) return;
         if (novo.trim() === "") { subject.weight = null; }
         else {
@@ -2169,11 +2348,13 @@ try {
     document.getElementById("statConstancia").textContent = constancia + "%";
     document.getElementById("statConstanciaSub").textContent = studyDates.length + " dias estudados / " + diasTotais + " dias totais";
 
+    const metrics = state.subjects.map(subjectStudyMetrics);
+    const progresso = metrics.length ? Math.round(metrics.reduce((a, m) => a + m.coverage, 0) / metrics.length) : 0;
+    const worked = metrics.filter(m => m.sessions.length > 0 || m.doneTopics > 0).length;
     const totalTopics = state.subjects.reduce((a, s) => a + s.topics.length, 0);
     const doneTopics = state.subjects.reduce((a, s) => a + s.topics.filter(t => t.done).length, 0);
-    const progresso = totalTopics ? Math.round((doneTopics / totalTopics) * 100) : 0;
     document.getElementById("statProgressoEdital").textContent = progresso + "%";
-    document.getElementById("statProgressoSub").textContent = doneTopics + " de " + totalTopics + " tópicos";
+    document.getElementById("statProgressoSub").textContent = worked + " matérias trabalhadas · " + doneTopics + "/" + totalTopics + " tópicos confirmados";
 
     renderEvolutionChart();
   }
@@ -2483,6 +2664,9 @@ try {
   document.getElementById("openAutoScheduleBtn").addEventListener("click", () => {
     if (state.subjects.length === 0) { alert("Cadastre matérias no Edital antes de gerar o cronograma."); return; }
     applyExamBasedSuggestion();
+    const cfg = getPlanningConfig();
+    document.getElementById("autoScheduleTargetPctInput").value = cfg.targetPct;
+    document.getElementById("autoScheduleMinQuestionsInput").value = cfg.minQuestions;
     autoScheduleOverlay.classList.add("open");
   });
   document.getElementById("cancelAutoScheduleBtn").addEventListener("click", () => autoScheduleOverlay.classList.remove("open"));
@@ -2496,7 +2680,7 @@ try {
     if (diasRestantes <= 0) { hint.style.display = "none"; return; }
 
     // ~12 min de estudo por questão da prova é uma estimativa simples para cobrir o conteúdo com folga
-    const questoes = state.examQuestions || (state.subjects.reduce((a, s) => a + s.topics.length, 0) * 3);
+    const questoes = state.examQuestions || Math.max(30, state.subjects.length * 20);
     const minutosTotaisEstimados = questoes * 12;
     const minutosPorDiaSugerido = Math.min(240, Math.max(30, Math.round((minutosTotaisEstimados / diasRestantes) / 5) * 5));
 
@@ -2535,7 +2719,11 @@ try {
     const blocksPerDay = Math.max(1, Math.min(5, Number(document.getElementById("autoScheduleBlocksInput").value) || 2));
     if (state.schedule.length > 0 && !confirm("Isso vai substituir o cronograma semanal atual pelo gerado automaticamente. Continuar?")) return;
 
-    const items = state.subjects.map(s => ({ id: s.id, weight: getSubjectWeight(s) }));
+    const targetPct = Math.min(100, Math.max(50, Number(document.getElementById("autoScheduleTargetPctInput").value) || 80));
+    const minQuestions = Math.min(1000, Math.max(10, Number(document.getElementById("autoScheduleMinQuestionsInput").value) || 50));
+    state.planningConfig = { targetPct, minQuestions };
+    const priorityItems = state.subjects.map(calculatePriorityForSubject);
+    const items = priorityItems.map(x => ({ id: x.subjectId, weight: Math.max(1, x.score) }));
     const totalSlots = days.length * blocksPerDay;
     const sequence = weightedRoundRobinSequence(items, totalSlots);
     const minutesPerBlock = Math.max(5, Math.round((minutesPerDay / blocksPerDay) / 5) * 5);
@@ -2859,7 +3047,7 @@ try {
     document.getElementById("formErradasInput").value = 0;
     document.getElementById("formNotesInput").value = "";
     document.getElementById("formDateInput").value = todayKey();
-    document.getElementById("formTipoSelect").value = "teoria";
+    document.getElementById("formTipoSelect").value = "questoes";
     document.getElementById("sessionModalTitle").textContent = "Adicionar estudo";
 
     if (opts.editId) {
@@ -3280,7 +3468,8 @@ try {
       const importedState = {
         subjects: parsed.subjects || [], sessions: parsed.sessions || [], cycle: parsed.cycle || [],
         simulados: parsed.simulados || [], revisions: parsed.revisions || [], schedule: parsed.schedule || [],
-        examDate: parsed.examDate || null, examQuestions: parsed.examQuestions || null, examInfo: parsed.examInfo || []
+        examDate: parsed.examDate || null, examQuestions: parsed.examQuestions || null, examInfo: parsed.examInfo || [],
+        planningConfig: Object.assign({ targetPct: 80, minQuestions: 50 }, parsed.planningConfig || {})
       };
       state = importedState;
       save();
@@ -3973,8 +4162,14 @@ try {
           accountRow.style.display = "flex";
           document.getElementById("accountEmailLabel").textContent = user.email || "";
           setSyncStatus("syncing");
-          load();
-          await pullFromCloud();
+          // Durante a carga inicial, nunca envie o estado local antes de comparar com a nuvem.
+          suppressSyncWrites = true;
+          try {
+            load();
+            await pullFromCloud();
+          } finally {
+            suppressSyncWrites = false;
+          }
           startApp();
         } else {
           accountRow.style.display = "none";
