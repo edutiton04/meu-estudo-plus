@@ -196,8 +196,8 @@
   .mini-cal-day.today { border-color: #C9A227; font-weight: 700; }
   .mini-cal-day.in-week { background: #E8EAF0; }
 
-  .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-  .week-day { background: #fff; border: 1px solid #E3E0D8; border-radius: 12px; padding: 10px; min-height: 260px; display: flex; flex-direction: column; }
+  .week-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  .week-day { background: #fff; border: 1px solid #E3E0D8; border-radius: 12px; padding: 10px; min-height: 260px; display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
   .week-day.is-today { border-color: #C9A227; border-width: 1.5px; box-shadow: 0 0 0 1px #C9A227 inset; }
   .week-day-header { text-align: center; margin-bottom: 8px; }
   .week-day-dow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #9B9890; }
@@ -210,9 +210,10 @@
   .rev-block .rb-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .hist-block { background: #FBF3DC; border: 1px solid #F1E6B8; border-radius: 8px; padding: 5px 8px; margin-bottom: 5px; font-size: 10.5px; display: flex; align-items: center; gap: 5px; color: #6B5A10; }
   .hist-block .hb-check { color: #8A6A14; flex-shrink: 0; }
-  .hist-block .hb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hist-block .hb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1 1 auto; }
   .week-block { border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; font-size: 11.5px; color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 4px; }
-  .week-block .wb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .week-block .wb-main { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+  .week-block .wb-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .week-block .wb-del { cursor: pointer; opacity: 0.85; flex-shrink: 0; }
   .week-block .wb-time { font-size: 10px; opacity: 0.9; display: block; }
   .cycle-layout { display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
@@ -371,7 +372,7 @@
     .cycle-layout { grid-template-columns: 1fr; }
     .sim-stats { grid-template-columns: 1fr 1fr; }
     .stats-grid { grid-template-columns: 1fr 1fr; }
-    .week-grid { grid-template-columns: repeat(4, 1fr); }
+    .week-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .plan-layout { grid-template-columns: 1fr; }
     .plan-sidebar { flex-direction: row; flex-wrap: wrap; }
     .plan-sidebar .card { flex: 1; min-width: 220px; }
@@ -1327,6 +1328,34 @@ try {
   let profiles = []; // [{ id, name }]
   let activeProfileId = null;
 
+  const SAFETY_BACKUP_PREFIX = "meus-estudos:backup-seguranca:";
+  function purgeProfileLocalKeys(id) {
+    if (!id) return;
+    try { localStorage.removeItem(profileSyncMetaKey(id)); } catch (e) {}
+    try { localStorage.removeItem(conflictKey(id)); } catch (e) {}
+    try { localStorage.removeItem(SAFETY_BACKUP_PREFIX + id); } catch (e) {}
+    try { localStorage.removeItem(TIMER_STATE_KEY_PREFIX + id); } catch (e) {}
+  }
+  // Backups de conflito e de segurança já são 1 chave por edital (cada evento novo
+  // sobrescreve o anterior), então "manter só os mais atuais" na prática significa
+  // remover as chaves que sobraram de editais que não existem mais (excluídos,
+  // ou os "fantasmas" duplicados que o bug de sincronização criava).
+  function cleanupOrphanedBackups() {
+    const validIds = new Set((profiles || []).map(p => p.id));
+    const perProfilePrefixes = [PROFILE_SYNC_META_PREFIX, SYNC_CONFLICT_PREFIX, SAFETY_BACKUP_PREFIX, TIMER_STATE_KEY_PREFIX];
+    let keys;
+    try { keys = Object.keys(localStorage); } catch (e) { return; }
+    keys.forEach(key => {
+      if (key === PROFILES_SYNC_META_KEY || key === PROFILES_SYNC_META_KEY + ":conflict") return; // chaves globais, não por-edital
+      for (const prefix of perProfilePrefixes) {
+        if (key.indexOf(prefix) === 0) {
+          const id = key.slice(prefix.length);
+          if (id && !validIds.has(id)) { try { localStorage.removeItem(key); } catch (e) {} }
+          break;
+        }
+      }
+    });
+  }
   function loadProfilesList() {
     try {
       const raw = localStorage.getItem(PROFILES_KEY);
@@ -1367,16 +1396,21 @@ try {
     dot.className = "sync-dot" + (status ? " " + status : "");
     text.textContent = status === "syncing" ? "Sincronizando..." : status === "ok" ? "Sincronizado" : status === "offline" ? "Offline — salvo neste dispositivo" : status === "conflict" ? "Conflito — dados locais preservados" : status === "error" ? "Falha ao sincronizar" : "—";
   }
-  let pushDataTimer = null;
+  const pushDataTimers = {};
   function schedulePushProfileData() {
     if (!firebaseReady || !currentUser || !activeProfileId || suppressSyncWrites) return;
-    if (pushDataTimer) clearTimeout(pushDataTimer);
     const profileId = activeProfileId;
+    // Um timer por perfil: trocar de edital e editar outro dentro da mesma janela
+    // de debounce não pode cancelar o envio pendente do perfil anterior.
+    if (pushDataTimers[profileId]) clearTimeout(pushDataTimers[profileId]);
     const snapshot = JSON.parse(JSON.stringify(state));
     const meta = readSyncMeta(profileSyncMetaKey(profileId));
     const version = Number(meta.version || meta.updatedAt || 0) || markProfileChanged(profileId);
     const clientId = meta.clientId || SYNC_CLIENT_ID;
-    pushDataTimer = setTimeout(() => pushProfileDataToCloud(profileId, snapshot, version, clientId), 800);
+    pushDataTimers[profileId] = setTimeout(() => {
+      delete pushDataTimers[profileId];
+      pushProfileDataToCloud(profileId, snapshot, version, clientId);
+    }, 800);
   }
   async function pushProfileDataToCloud(profileId, data, version, clientId) {
     if (!firebaseReady || !currentUser || !profileId) return;
@@ -1478,6 +1512,7 @@ try {
     if (!firebaseReady || !currentUser) return;
     if (!navigator.onLine) { setSyncStatus("offline"); return; }
     setSyncStatus("syncing");
+    await flushPendingDeletes();
     try {
       const metaSnap = await getDoc(doc(db, "users", currentUser.uid));
       if (!metaSnap.exists()) {
@@ -1533,11 +1568,14 @@ try {
 
         // Mantém perfis locais que realmente existem e incorpora todos os
         // perfis remotos. Em caso de mesmo ID, a versão remota prevalece.
+        // Importante: se o perfil local era só um placeholder recém-criado
+        // (localOnlyLooksLikeFreshDefault), ele NÃO entra no merge — do
+        // contrário, vira um edital "fantasma" duplicado toda vez que o app
+        // é aberto num dispositivo/navegador sem dados locais ainda.
         const merged = [];
         const byId = new Map();
-        profiles.forEach(p => { if (p && p.id) byId.set(p.id, p); });
+        if (!localOnlyLooksLikeFreshDefault) profiles.forEach(p => { if (p && p.id) byId.set(p.id, p); });
         cloudProfiles.forEach(p => byId.set(p.id, Object.assign({}, byId.get(p.id) || {}, p)));
-        if (!localOnlyLooksLikeFreshDefault) profiles.forEach(p => { if (p && p.id && !byId.has(p.id)) byId.set(p.id, p); });
         byId.forEach(p => merged.push(p));
         profiles = merged;
 
@@ -1557,7 +1595,8 @@ try {
       // ---------- Dados de cada edital/perfil ----------
       const dataSnaps = await getDocs(collection(db, "users", currentUser.uid, "profileData"));
       const cloudDataMap = {};
-      dataSnaps.forEach(d => { cloudDataMap[d.id] = d.data(); });
+      const pendingDeletes = readPendingDeletes();
+      dataSnaps.forEach(d => { if (!pendingDeletes.includes(d.id)) cloudDataMap[d.id] = d.data(); });
       const profileIds = Array.from(new Set([...(profiles || []).map(p => p.id), ...Object.keys(cloudDataMap)]));
 
       for (const profileId of profileIds) {
@@ -1608,9 +1647,36 @@ try {
     if (!firebaseReady || !currentUser) return;
     try { await setDoc(doc(db, "users", currentUser.uid), { theme: theme }, { merge: true }); } catch (e) {}
   }
+  const PENDING_DELETES_KEY = "meus-estudos:sync-pending-deletes";
+  function readPendingDeletes() {
+    try { const arr = JSON.parse(localStorage.getItem(PENDING_DELETES_KEY) || "[]"); return Array.isArray(arr) ? arr : []; } catch (e) { return []; }
+  }
+  function writePendingDeletes(list) {
+    try { localStorage.setItem(PENDING_DELETES_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+  function queuePendingDelete(profileId) {
+    const list = readPendingDeletes();
+    if (!list.includes(profileId)) { list.push(profileId); writePendingDeletes(list); }
+  }
   async function deleteProfileDataFromCloud(profileId) {
-    if (!firebaseReady || !currentUser) return;
-    try { await deleteDoc(doc(db, "users", currentUser.uid, "profileData", profileId)); } catch (e) {}
+    queuePendingDelete(profileId);
+    if (!firebaseReady || !currentUser || !navigator.onLine) return;
+    try {
+      await deleteDoc(doc(db, "users", currentUser.uid, "profileData", profileId));
+      writePendingDeletes(readPendingDeletes().filter(id => id !== profileId));
+    } catch (e) { /* fica na fila e será retentado depois */ }
+  }
+  // Reenvia exclusões de editais que não puderam ser confirmadas na nuvem
+  // (ex.: usuário estava offline no momento em que apagou o edital).
+  async function flushPendingDeletes() {
+    if (!firebaseReady || !currentUser || !navigator.onLine) return;
+    const list = readPendingDeletes();
+    for (const profileId of list) {
+      try {
+        await deleteDoc(doc(db, "users", currentUser.uid, "profileData", profileId));
+        writePendingDeletes(readPendingDeletes().filter(id => id !== profileId));
+      } catch (e) { /* tenta de novo na próxima oportunidade */ }
+    }
   }
   function loadActiveProfileData() {
     state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null, examInfo: [], planningConfig: { targetPct: 80, minQuestions: 50 } };
@@ -1688,6 +1754,7 @@ try {
     if (!confirm('Excluir o edital "' + p.name + '" e todos os dados dele (matérias, histórico, cronograma etc.)? Essa ação não pode ser desfeita.')) return;
     profiles = profiles.filter(x => x.id !== id);
     try { localStorage.removeItem(profileDataKey(id)); } catch (e) {}
+    purgeProfileLocalKeys(id);
     deleteProfileDataFromCloud(id);
     if (activeProfileId === id) {
       activeProfileId = profiles[0].id;
@@ -2558,7 +2625,7 @@ try {
               if (!subject) return "";
               const color = subjectColor(subject);
               return '<div class="week-block" style="background:' + color + ';">' +
-                '<div><span class="wb-name">' + escapeHtml(subject.name) + '</span><span class="wb-time">' + b.minutes + 'min</span></div>' +
+                '<div class="wb-main"><span class="wb-name">' + escapeHtml(subject.name) + '</span><span class="wb-time">' + b.minutes + 'min</span></div>' +
                 '<span class="wb-del" data-del-schedule="' + b.id + '">&times;</span>' +
               '</div>';
             }).join("");
@@ -3463,7 +3530,7 @@ try {
       }
       const ok = confirm("Isso vai substituir todos os dados atuais pelos dados desse arquivo de backup. Antes disso, farei um backup automático dos dados atuais. Deseja continuar?");
       if (!ok) { e.target.value = ""; return; }
-      const safetyKey = "meus-estudos:backup-seguranca:" + activeProfileId;
+      const safetyKey = SAFETY_BACKUP_PREFIX + activeProfileId;
       try { localStorage.setItem(safetyKey, JSON.stringify({ schemaVersion: BACKUP_VERSION, createdAt: Date.now(), data: state })); } catch (e) {}
       const importedState = {
         subjects: parsed.subjects || [], sessions: parsed.sessions || [], cycle: parsed.cycle || [],
@@ -4064,6 +4131,7 @@ try {
 
   function startApp() {
     load();
+    cleanupOrphanedBackups();
     renderProfileSwitcher();
     renderAll();
     restoreTimerState();
@@ -4073,7 +4141,7 @@ try {
   window.addEventListener("online", () => {
     if (!firebaseReady || !currentUser) return;
     setSyncStatus("syncing");
-    pullFromCloud();
+    pullFromCloud(); // já inclui flushPendingDeletes()
   });
 
   if (firebaseReady) {
