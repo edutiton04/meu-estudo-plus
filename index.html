@@ -652,9 +652,12 @@
       <span class="edital-progress-pct" id="editalProgressPct">0%</span>
     </div>
     <div class="card priority-card" id="priorityCard">
-      <div class="priority-head">
+      <div class="priority-head" id="priorityHead" style="cursor:pointer;">
         <div class="priority-title">🎯 Central de Prioridades</div>
-        <span class="empty-hint" id="priorityUpdatedLabel">Peso + desempenho + recência</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="empty-hint" id="priorityUpdatedLabel">Peso + desempenho + recência</span>
+          <svg class="chevron" id="priorityChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
       </div>
       <div id="priorityContent"></div>
     </div>
@@ -2044,9 +2047,16 @@ try {
     ).join('') + '</div>';
   }
 
+  let priorityCollapsed = (function () {
+    try { return localStorage.getItem("meus-estudos:priority-collapsed") === "1"; } catch (e) { return false; }
+  })();
   function renderPriorities() {
     const content = document.getElementById("priorityContent");
+    const chevron = document.getElementById("priorityChevron");
+    if (chevron) chevron.classList.toggle("collapsed", priorityCollapsed);
     if (!content) return;
+    content.style.display = priorityCollapsed ? "none" : "";
+    if (priorityCollapsed) return;
     const items = getPriorityRecommendations();
     const cfg = getPlanningConfig();
     if (!items.length) {
@@ -2161,6 +2171,12 @@ try {
     }
     save(); renderAll();
   }
+
+  document.getElementById("priorityHead").addEventListener("click", () => {
+    priorityCollapsed = !priorityCollapsed;
+    try { localStorage.setItem("meus-estudos:priority-collapsed", priorityCollapsed ? "1" : "0"); } catch (e) {}
+    renderPriorities();
+  });
 
   document.getElementById("addSubjectBtn").addEventListener("click", () => {
     const input = document.getElementById("subjectInput");
@@ -2445,7 +2461,7 @@ try {
 
     const width = Math.max(500, dates.length * 46);
     const height = 220;
-    const padBottom = 26, padTop = 10;
+    const padBottom = 26, padTop = 24;
     const plotH = height - padBottom - padTop;
     const maxQ = Math.max(1, ...dates.map(d => byDate[d].corretas + byDate[d].erradas));
     const barW = 20;
@@ -2762,10 +2778,17 @@ try {
       ". Sugestão: " + minutosPorDiaSugerido + " min/dia para cobrir o conteúdo com folga — ajuste como preferir.";
   }
 
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
   // Sequência ponderada (smooth weighted round-robin): dá mais slots às matérias de maior peso,
   // mas intercala em vez de agrupar tudo junto — evita repetir a mesma coisa todo dia.
   function weightedRoundRobinSequence(items, totalSlots) {
-    const pool = items.map(it => ({ id: it.id, weight: it.weight, current: 0 }));
+    let pool = items.map(it => ({ id: it.id, weight: it.weight, current: 0 }));
     const totalWeight = pool.reduce((a, p) => a + p.weight, 0) || 1;
     const seq = [];
     for (let i = 0; i < totalSlots; i++) {
@@ -2774,6 +2797,18 @@ try {
       pool.forEach(p => { if (p.current > best.current) best = p; });
       seq.push(best.id);
       best.current -= totalWeight;
+      // Quando os pesos empatam (comum quando várias matérias ainda não têm
+      // histórico de estudo, todas recebendo a mesma pontuação de prioridade),
+      // o round-robin puro sempre escolhe na mesma ordem a cada N slots — e
+      // isso fazia dias diferentes da semana caírem com as matérias idênticas,
+      // sempre no mesmo padrão fixo. Embaralhar a ordem de desempate a cada
+      // volta completa evita esse padrão rígido, sem mudar a frequência
+      // relativa de cada matéria (com poucas matérias e muitos dias, alguma
+      // coincidência ocasional entre dias é matematicamente inevitável, mas
+      // deixa de ser um padrão fixo e óbvio se repetindo todo santo dia).
+      if ((i + 1) % pool.length === 0) {
+        pool = shuffleArray(pool.slice());
+      }
     }
     return seq;
   }
