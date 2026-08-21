@@ -145,14 +145,25 @@
   .add-subject-row { display: flex; gap: 6px; margin-top: 6px; }
 
   /* ---- ESTATISTICAS PAGE ---- */
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 20px; }
   .stat-card { padding: 1rem 1.1rem; }
   .stat-card .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #9B9890; font-weight: 600; margin-bottom: 8px; }
   .stat-card .stat-value { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; }
   .stat-card .stat-sub { font-size: 11px; color: #9B9890; margin-top: 4px; }
   .donut-card { display: flex; align-items: center; gap: 14px; }
-  .chart-card { padding: 1.25rem 1.4rem; }
+  .chart-card { padding: 1.25rem 1.4rem; margin-bottom: 20px; }
   .chart-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #9B9890; font-weight: 600; margin-bottom: 14px; }
+  .streak-flame { font-size: 22px; line-height: 1; }
+  .subject-stats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .subject-stats-table th { text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #9B9890; font-weight: 600; border-bottom: 1px solid #F1EFE8; }
+  .subject-stats-table td { padding: 8px 10px; border-bottom: 1px solid #F5F3EE; vertical-align: middle; }
+  .subject-stats-table .subj-name-cell { display: flex; align-items: center; gap: 8px; }
+  .subject-stats-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .subject-stats-bar-track { background: #EDEBE3; border-radius: 6px; height: 6px; width: 100%; overflow: hidden; }
+  .subject-stats-bar-fill { height: 100%; border-radius: 6px; }
+  [data-theme="dark"] .subject-stats-table th { border-color: #2B303B; }
+  [data-theme="dark"] .subject-stats-table td { border-color: #262B34; }
+  [data-theme="dark"] .subject-stats-bar-track { background: #2B303B; }
 
   /* ---- HISTORICO PAGE ---- */
   .hist-day-header { display: flex; align-items: baseline; gap: 10px; margin: 22px 0 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: #9B9890; text-transform: uppercase; }
@@ -371,7 +382,6 @@
   @media (max-width: 1024px) {
     .cycle-layout { grid-template-columns: 1fr; }
     .sim-stats { grid-template-columns: 1fr 1fr; }
-    .stats-grid { grid-template-columns: 1fr 1fr; }
     .week-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .plan-layout { grid-template-columns: 1fr; }
     .plan-sidebar { flex-direction: row; flex-wrap: wrap; }
@@ -386,6 +396,24 @@
     .timer-card { padding: 1.6rem 1.4rem; }
     .timer-big-display { font-size: 38px; }
     .wrap { padding: 1rem 1rem 5rem; }
+    .week-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .examinfo-row { flex-direction: column; gap: 3px; }
+    .examinfo-label { width: auto; }
+    .subject-stats-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .header-inner { padding: 12px 1rem; gap: 12px; }
+    .plan-sidebar { flex-direction: column; }
+    .plan-sidebar .card { min-width: 0; }
+  }
+  @media (max-width: 480px) {
+    .week-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .week-day { min-height: 190px; padding: 8px; }
+    nav.tabs button { padding: 8px 10px; font-size: 12px; }
+    .logo-text { font-size: 14px; }
+    .modal-box { padding: 1.1rem; }
+    .donut-card { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .priority-meta-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 6px; }
+    .stat-card { padding: 0.85rem 0.9rem; }
+    .stat-card .stat-value { font-size: 19px; }
   }
 
   /* ---- MODO ESCURO ---- */
@@ -697,11 +725,21 @@
         <div class="stat-value" id="statProgressoEdital">0%</div>
         <div class="stat-sub" id="statProgressoSub">0 matérias trabalhadas</div>
       </div>
+      <div class="card stat-card">
+        <div class="stat-label">Sequência de dias</div>
+        <div class="stat-value" id="statStreak"><span class="streak-flame">&#128293;</span> 0</div>
+        <div class="stat-sub" id="statStreakSub">Estude hoje para começar</div>
+      </div>
     </div>
     <div class="card chart-card">
       <div class="chart-title">Evolução no tempo (questões respondidas e desempenho por dia)</div>
       <div id="evolutionChart"></div>
       <p class="empty-hint" id="chartEmptyHint" style="display:none;">Registre sessões do tipo "Questões" com acertos/erros para ver a evolução aqui.</p>
+    </div>
+    <div class="card chart-card">
+      <div class="chart-title">Desempenho por matéria</div>
+      <div style="overflow-x:auto;"><table class="subject-stats-table" id="subjectStatsTable"></table></div>
+      <p class="empty-hint" id="subjectStatsEmptyHint" style="display:none;">Cadastre matérias e registre estudos para ver o desempenho por matéria aqui.</p>
     </div>
   </div>
 
@@ -2439,7 +2477,71 @@ try {
     document.getElementById("statProgressoEdital").textContent = progresso + "%";
     document.getElementById("statProgressoSub").textContent = worked + " matérias trabalhadas · " + doneTopics + "/" + totalTopics + " tópicos confirmados";
 
+    renderStreak();
     renderEvolutionChart();
+    renderSubjectStats();
+  }
+
+  // ---------- Streak (sequência de dias estudados) ----------
+  function computeStreak() {
+    const studyDatesSet = new Set(state.sessions.map(s => s.date));
+    if (studyDatesSet.size === 0) return 0;
+    const cursor = new Date(todayKey() + "T00:00:00");
+    if (!studyDatesSet.has(todayKey(cursor))) {
+      cursor.setDate(cursor.getDate() - 1); // não estudou hoje ainda: a sequência ainda conta até ontem
+    }
+    let streak = 0;
+    while (studyDatesSet.has(todayKey(cursor))) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return streak;
+  }
+  function renderStreak() {
+    const streak = computeStreak();
+    const valueEl = document.getElementById("statStreak");
+    const subEl = document.getElementById("statStreakSub");
+    if (!valueEl || !subEl) return;
+    valueEl.innerHTML = '<span class="streak-flame">&#128293;</span> ' + streak;
+    const studiedToday = state.sessions.some(s => s.date === todayKey());
+    if (streak === 0) subEl.textContent = "Estude hoje para começar";
+    else if (studiedToday) subEl.textContent = streak === 1 ? "1 dia seguido — continue amanhã!" : streak + " dias seguidos — continue assim!";
+    else subEl.textContent = "Estude hoje para manter a sequência";
+  }
+
+  // ---------- Estatísticas por matéria ----------
+  function renderSubjectStats() {
+    const tableEl = document.getElementById("subjectStatsTable");
+    const hint = document.getElementById("subjectStatsEmptyHint");
+    if (!tableEl) return;
+    const rows = state.subjects.map(subject => ({ subject: subject, agg: subjectAgg(subject) }))
+      .filter(r => (r.agg.corretas + r.agg.erradas) > 0 || r.agg.seconds > 0)
+      .sort((a, b) => {
+        const pa = a.agg.pct == null ? -1 : a.agg.pct;
+        const pb = b.agg.pct == null ? -1 : b.agg.pct;
+        return pa - pb; // pior desempenho primeiro, para chamar atenção
+      });
+    if (rows.length === 0) {
+      tableEl.innerHTML = "";
+      hint.style.display = "block";
+      return;
+    }
+    hint.style.display = "none";
+    tableEl.innerHTML =
+      '<thead><tr><th>Matéria</th><th>Acerto</th><th>Questões</th><th>Tempo</th></tr></thead><tbody>' +
+      rows.map(r => {
+        const color = subjectColor(r.subject);
+        const pct = r.agg.pct == null ? null : r.agg.pct;
+        const pctLabel = pct == null ? "—" : pct + "%";
+        const barColor = pct == null ? "#C9C6BC" : (pct >= 70 ? "#3E8A4F" : (pct >= 40 ? "#C9A227" : "#D1526E"));
+        return '<tr>' +
+          '<td><div class="subj-name-cell"><span class="subject-stats-dot" style="background:' + color + ';"></span>' + escapeHtml(r.subject.name) + '</div></td>' +
+          '<td style="min-width:120px;"><div class="subject-stats-bar-track"><div class="subject-stats-bar-fill" style="width:' + (pct == null ? 0 : pct) + '%;background:' + barColor + ';"></div></div><div style="font-size:11px;color:#6E6B63;margin-top:3px;">' + pctLabel + '</div></td>' +
+          '<td>' + (r.agg.corretas + r.agg.erradas) + '</td>' +
+          '<td>' + fmtHoursLong(r.agg.seconds) + '</td>' +
+        '</tr>';
+      }).join("") +
+      '</tbody>';
   }
 
   function renderEvolutionChart() {
