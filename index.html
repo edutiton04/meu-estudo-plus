@@ -97,6 +97,11 @@
   .field-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
   .save-warning { background: #FDEEEE; border: 1px solid #F2A6A6; color: #9B2C2C; padding: 0.6rem 0.9rem; border-radius: 10px; font-size: 13px; margin-bottom: 1.25rem; display: none; }
+  .status-banner { background: #FEF6E4; border: 1px solid #E8CE8C; color: #7A5D0A; padding: 0.65rem 0.9rem; border-radius: 10px; font-size: 13px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; line-height: 1.4; }
+  .status-banner.storage { background: #FDEEEE; border-color: #F2A6A6; color: #9B2C2C; }
+  .status-banner-msg { flex: 1; min-width: 200px; }
+  .status-banner-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .status-banner button { font-size: 12.5px; padding: 5px 10px; }
   .empty-hint { font-size: 13px; color: #6E6B63; line-height: 1.5; }
 
   /* Page switching */
@@ -301,6 +306,16 @@
   .modal-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 17px; margin: 0 0 16px; }
   .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 
+  /* ---- TOAST / UNDO ---- */
+  .toast-container { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 80; display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; padding: 0 16px; pointer-events: none; }
+  .toast { pointer-events: auto; background: #24365C; color: #F5F3EC; border-radius: 10px; padding: 11px 12px 11px 16px; display: flex; align-items: center; gap: 14px; box-shadow: 0 10px 28px rgba(15,20,35,0.3); font-size: 13.5px; max-width: 420px; opacity: 0; transform: translateY(8px); transition: opacity 0.18s ease, transform 0.18s ease; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast-msg { flex: 1; line-height: 1.4; }
+  .toast-undo-btn { background: none; border: none; color: #C9A227; font-weight: 700; font-size: 13px; cursor: pointer; padding: 6px 4px; white-space: nowrap; }
+  .toast-undo-btn:hover { text-decoration: underline; }
+  .toast-close-btn { background: none; border: none; color: #B9C0D4; cursor: pointer; padding: 4px; font-size: 13px; opacity: 0.7; }
+  .toast-close-btn:hover { opacity: 1; }
+
   /* Import panel (reused) */
   .import-panel { padding: 1.25rem 1.4rem; margin-bottom: 20px; display: none; }
   .import-panel.open { display: block; }
@@ -480,6 +495,8 @@
   [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.6); }
   [data-theme="dark"] #timerOverlay { background: rgba(0,0,0,0.68); }
   [data-theme="dark"] .save-warning { background: #2A1A1D; border-color: #5A2A30; color: #F2A6A6; }
+  [data-theme="dark"] .status-banner { background: #2E2712; border-color: #6B551D; color: #E8CE8C; }
+  [data-theme="dark"] .status-banner.storage { background: #2A1A1D; border-color: #5A2A30; color: #F2A6A6; }
   [data-theme="dark"] .fab-timer { box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
   [data-theme="dark"] .fab-timer.active { box-shadow: 0 0 0 3px rgba(201,162,39,0.35), 0 2px 10px rgba(0,0,0,0.5); }
   [data-theme="dark"] .timer-card { background: #1B1E24; border-color: rgba(255,255,255,0.08); color: #E3E0D8; box-shadow: 0 20px 45px -15px rgba(0,0,0,0.45); }
@@ -559,7 +576,7 @@
       <button data-page="revisoes">Revisões</button>
     </nav>
     <div class="header-actions">
-      <button class="btn btn-outline btn-small" id="themeToggleBtn" title="Alternar modo claro/escuro">&#127769;</button>
+      <button class="btn btn-outline btn-small" id="themeToggleBtn" title="Alternar modo claro/escuro" aria-label="Alternar modo claro/escuro">&#127769;</button>
       <div class="more-menu-wrap">
         <button class="btn btn-outline btn-small" id="moreMenuBtn">&#8942; Mais</button>
         <div class="profile-dropdown dropdown-right" id="moreMenuDropdown">
@@ -575,10 +592,13 @@
   </div>
 </header>
 
+<div class="toast-container" id="toastContainer"></div>
+
 <div class="wrap">
   <div class="save-warning" id="saveWarning">
     Não consegui salvar os dados neste navegador (armazenamento local indisponível ou cheio).
   </div>
+  <div class="status-banner" id="statusBanner" style="display:none;"></div>
 
   <!-- Import panel -->
   <div class="card import-panel" id="importPanel">
@@ -732,7 +752,10 @@
       </div>
     </div>
     <div class="card chart-card">
-      <div class="chart-title">Evolução no tempo (questões respondidas e desempenho por dia)</div>
+      <div class="chart-title" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <span>Evolução no tempo (questões respondidas e desempenho por dia)</span>
+        <select id="evolutionSubjectFilter" style="max-width:220px;"></select>
+      </div>
       <div id="evolutionChart"></div>
       <p class="empty-hint" id="chartEmptyHint" style="display:none;">Registre sessões do tipo "Questões" com acertos/erros para ver a evolução aqui.</p>
     </div>
@@ -1210,6 +1233,20 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="dialogOverlay">
+  <div class="modal-box" id="dialogBox">
+    <h2 class="modal-title" id="dialogTitle">Confirmar</h2>
+    <p id="dialogMessage" style="font-size:13.5px;color:#4A4840;line-height:1.5;margin:0 0 4px;white-space:pre-line;"></p>
+    <div class="field-row" id="dialogInputRow" style="display:none;margin-top:12px;">
+      <input type="text" id="dialogInput" />
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" id="dialogCancelBtn">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="dialogConfirmBtn">OK</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
@@ -1255,6 +1292,10 @@ try {
   const SYNC_CONFLICT_PREFIX = "meus-estudos:sync-conflict:";
   const TIMER_STATE_KEY_PREFIX = "meus-estudos:timer:";
   const BACKUP_VERSION = 1;
+  const LAST_BACKUP_KEY = "meus-estudos:last-backup-at";
+  const BACKUP_SNOOZE_KEY = "meus-estudos:backup-snooze-until";
+  const BACKUP_REMINDER_DAYS = 14;
+  const STORAGE_WARN_BYTES = 3.5 * 1024 * 1024; // aviso a partir de ~3.5MB (limite típico de localStorage é ~5MB)
   let SYNC_CLIENT_ID = null;
   let suppressSyncWrites = false;
   function profileDataKey(id) { return "meus-estudos:dados:" + id; }
@@ -1331,12 +1372,143 @@ try {
   }
 
   function uid() { return crypto.randomUUID(); }
+
+  // ---------- Comparação tolerante de nomes (matérias/tópicos) ----------
+  // Ignora acentuação, maiúsculas/minúsculas, pontuação e espaços extras; tolera plural simples
+  // (uma letra "s" a mais no final), para reduzir duplicatas criadas por pequenas variações de digitação
+  // entre editais importados (ex.: "Português" vs "portugues", "Direito Administrativo:" vs "Direito Administrativo").
+  function normalizeForMatch(str) {
+    return String(str || "")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove acentos
+      .toLowerCase()
+      .replace(/[.,:;!?()\[\]"'-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  function namesMatch(a, b) {
+    const na = normalizeForMatch(a), nb = normalizeForMatch(b);
+    if (!na || !nb) return na === nb;
+    if (na === nb) return true;
+    if (na.length >= 3 && nb.length >= 3 && (na === nb + "s" || nb === na + "s")) return true; // plural simples
+    return false;
+  }
+
   SYNC_CLIENT_ID = (() => { try { let id = localStorage.getItem(SYNC_CLIENT_ID_KEY); if (!id) { id = uid(); localStorage.setItem(SYNC_CLIENT_ID_KEY, id); } return id; } catch (e) { return uid(); } })();
   function todayKey(d) {
     d = d || new Date();
     return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   }
   function escapeHtml(str) { const div = document.createElement("div"); div.textContent = str == null ? "" : String(str); return div.innerHTML; }
+
+  // ---------- Modal genérico (substitui confirm()/prompt() nativos) ----------
+  const dialogOverlay = document.getElementById("dialogOverlay");
+  const dialogTitle = document.getElementById("dialogTitle");
+  const dialogMessage = document.getElementById("dialogMessage");
+  const dialogInputRow = document.getElementById("dialogInputRow");
+  const dialogInput = document.getElementById("dialogInput");
+  const dialogCancelBtn = document.getElementById("dialogCancelBtn");
+  const dialogConfirmBtn = document.getElementById("dialogConfirmBtn");
+  let dialogResolve = null;
+  let dialogLastFocused = null;
+
+  function closeDialog(result) {
+    dialogOverlay.classList.remove("open");
+    document.removeEventListener("keydown", onDialogKeydown);
+    if (dialogLastFocused && dialogLastFocused.focus) { try { dialogLastFocused.focus(); } catch (e) {} }
+    const resolve = dialogResolve;
+    dialogResolve = null;
+    if (resolve) resolve(result);
+  }
+  function onDialogKeydown(e) {
+    if (e.key === "Escape") { e.preventDefault(); closeDialog(dialogInputRow.style.display === "none" ? false : null); }
+    else if (e.key === "Enter" && (document.activeElement === dialogInput || document.activeElement === dialogConfirmBtn)) {
+      e.preventDefault();
+      dialogConfirmBtn.click();
+    }
+  }
+  dialogCancelBtn.addEventListener("click", () => closeDialog(dialogInputRow.style.display === "none" ? false : null));
+  dialogConfirmBtn.addEventListener("click", () => {
+    if (dialogInputRow.style.display === "none") closeDialog(true);
+    else closeDialog(dialogInput.value);
+  });
+  dialogOverlay.addEventListener("click", (e) => {
+    if (e.target === dialogOverlay) closeDialog(dialogInputRow.style.display === "none" ? false : null);
+  });
+
+  // Substitui confirm(message). Resolve para true/false.
+  function confirmDialog(message, opts) {
+    opts = opts || {};
+    return new Promise((resolve) => {
+      dialogLastFocused = document.activeElement;
+      dialogResolve = resolve;
+      dialogTitle.textContent = opts.title || "Confirmar";
+      dialogMessage.textContent = message;
+      dialogInputRow.style.display = "none";
+      dialogConfirmBtn.textContent = opts.confirmLabel || "Confirmar";
+      dialogConfirmBtn.className = "btn " + (opts.danger ? "btn-danger" : "btn-primary");
+      dialogCancelBtn.textContent = opts.cancelLabel || "Cancelar";
+      dialogOverlay.classList.add("open");
+      document.addEventListener("keydown", onDialogKeydown);
+      setTimeout(() => dialogCancelBtn.focus(), 0);
+    });
+  }
+  // Substitui prompt(message, defaultValue). Resolve para string ou null (cancelado).
+  function promptDialog(message, defaultValue, opts) {
+    opts = opts || {};
+    return new Promise((resolve) => {
+      dialogLastFocused = document.activeElement;
+      dialogResolve = resolve;
+      dialogTitle.textContent = opts.title || "Editar";
+      dialogMessage.textContent = message;
+      dialogInputRow.style.display = "block";
+      dialogInput.value = defaultValue == null ? "" : String(defaultValue);
+      dialogInput.placeholder = opts.placeholder || "";
+      dialogConfirmBtn.textContent = opts.confirmLabel || "Salvar";
+      dialogConfirmBtn.className = "btn btn-primary";
+      dialogCancelBtn.textContent = opts.cancelLabel || "Cancelar";
+      dialogOverlay.classList.add("open");
+      document.addEventListener("keydown", onDialogKeydown);
+      setTimeout(() => { dialogInput.focus(); dialogInput.select(); }, 0);
+    });
+  }
+
+  // ---------- Toast com Desfazer ----------
+  const toastContainer = document.getElementById("toastContainer");
+  const UNDO_TOAST_MS = 7000;
+  // onFinalize (opcional) roda quando o toast é fechado SEM desfazer (timeout ou fechar manualmente) —
+  // usado para confirmar ações que só devem se tornar permanentes depois da janela de desfazer (ex: excluir perfil).
+  function showUndoToast(message, onUndo, onFinalize) {
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    const msg = document.createElement("span");
+    msg.className = "toast-msg";
+    msg.textContent = message;
+    toast.appendChild(msg);
+    let timer = null;
+    let undone = false;
+    const dismiss = () => {
+      clearTimeout(timer);
+      toast.classList.remove("show");
+      setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 200);
+      if (!undone && onFinalize) onFinalize();
+    };
+    if (onUndo) {
+      const undoBtn = document.createElement("button");
+      undoBtn.className = "toast-undo-btn";
+      undoBtn.textContent = "Desfazer";
+      undoBtn.addEventListener("click", () => { undone = true; onUndo(); dismiss(); });
+      toast.appendChild(undoBtn);
+    }
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "toast-close-btn";
+    closeBtn.setAttribute("aria-label", "Fechar aviso");
+    closeBtn.innerHTML = "&#10005;";
+    closeBtn.addEventListener("click", dismiss);
+    toast.appendChild(closeBtn);
+    toastContainer.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add("show"));
+    timer = setTimeout(dismiss, UNDO_TOAST_MS);
+  }
   function fmtHMS(totalSeconds) {
     const s = Math.max(0, Math.floor(totalSeconds));
     const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
@@ -1757,12 +1929,86 @@ try {
       document.getElementById("saveWarning").style.display = "block";
     }
     schedulePushProfileData();
+    updateStatusBanner();
   }
 
-  function switchProfile(id) {
+  // ---------- Aviso de espaço em localStorage e lembrete de backup ----------
+  function estimateLocalStorageBytes() {
+    let total = 0;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        const v = localStorage.getItem(k) || "";
+        total += (k.length + v.length) * 2; // aproximação UTF-16 (2 bytes/caractere)
+      }
+    } catch (e) { /* localStorage indisponível */ }
+    return total;
+  }
+  function formatBytes(bytes) {
+    if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + "MB";
+    return Math.round(bytes / 1024) + "KB";
+  }
+  function markBackupDone() {
+    try { localStorage.setItem(LAST_BACKUP_KEY, String(Date.now())); } catch (e) {}
+    updateStatusBanner();
+  }
+  function snoozeBackupReminder(days) {
+    try { localStorage.setItem(BACKUP_SNOOZE_KEY, String(Date.now() + days * 24 * 60 * 60 * 1000)); } catch (e) {}
+    updateStatusBanner();
+  }
+  function updateStatusBanner() {
+    const banner = document.getElementById("statusBanner");
+    if (!banner) return;
+    const bytes = estimateLocalStorageBytes();
+
+    if (bytes > STORAGE_WARN_BYTES) {
+      banner.className = "status-banner storage";
+      banner.innerHTML =
+        '<span class="status-banner-msg">&#9888; O armazenamento local deste navegador está quase cheio (~' + formatBytes(bytes) + '). ' +
+        'Se o limite for atingido, novos salvamentos podem falhar. Recomendo baixar um backup completo agora.</span>' +
+        '<div class="status-banner-actions">' +
+          '<button type="button" class="btn btn-outline btn-small" id="statusBannerBackupBtn">Baixar backup</button>' +
+          '<button type="button" class="btn btn-outline btn-small" id="statusBannerDismissBtn">Depois</button>' +
+        '</div>';
+      banner.style.display = "flex";
+      document.getElementById("statusBannerBackupBtn").addEventListener("click", () => {
+        document.getElementById("exportAllBackupBtn").click();
+      });
+      document.getElementById("statusBannerDismissBtn").addEventListener("click", () => snoozeBackupReminder(1));
+      return;
+    }
+
+    const hasData = state.subjects.length > 0 || state.sessions.length > 0;
+    const lastBackupAt = Number(localStorage.getItem(LAST_BACKUP_KEY) || 0);
+    const snoozeUntil = Number(localStorage.getItem(BACKUP_SNOOZE_KEY) || 0);
+    const daysSince = lastBackupAt ? (Date.now() - lastBackupAt) / (24 * 60 * 60 * 1000) : Infinity;
+
+    if (hasData && daysSince > BACKUP_REMINDER_DAYS && Date.now() > snoozeUntil) {
+      banner.className = "status-banner";
+      const msg = lastBackupAt
+        ? "Já faz mais de " + BACKUP_REMINDER_DAYS + " dias desde o último backup. Que tal exportar um backup atualizado dos seus estudos?"
+        : "Você ainda não fez nenhum backup dos seus estudos. Recomendo exportar um agora, para não depender só deste navegador.";
+      banner.innerHTML =
+        '<span class="status-banner-msg">&#128190; ' + msg + '</span>' +
+        '<div class="status-banner-actions">' +
+          '<button type="button" class="btn btn-outline btn-small" id="statusBannerBackupBtn">Baixar backup</button>' +
+          '<button type="button" class="btn btn-outline btn-small" id="statusBannerDismissBtn">Lembrar em 7 dias</button>' +
+        '</div>';
+      banner.style.display = "flex";
+      document.getElementById("statusBannerBackupBtn").addEventListener("click", () => {
+        document.getElementById("exportAllBackupBtn").click();
+      });
+      document.getElementById("statusBannerDismissBtn").addEventListener("click", () => snoozeBackupReminder(7));
+      return;
+    }
+
+    banner.style.display = "none";
+  }
+
+  async function switchProfile(id) {
     if (id === activeProfileId) return;
     if (running) {
-      const ok = confirm("Você tem um cronômetro em andamento. Trocar de edital vai descartar esse tempo não salvo. Continuar?");
+      const ok = await confirmDialog("Você tem um cronômetro em andamento. Trocar de edital vai descartar esse tempo não salvo. Continuar?", { danger: true, confirmLabel: "Trocar mesmo assim" });
       if (!ok) return;
       running = null;
       clearPersistedTimerState();
@@ -1773,6 +2019,7 @@ try {
     loadActiveProfileData();
     renderAll();
     renderProfileSwitcher();
+    updateStatusBanner();
   }
   function createProfile(name) {
     name = (name || "").trim() || "Novo edital";
@@ -1788,22 +2035,42 @@ try {
     const p = profiles.find(x => x.id === id);
     if (p && name && name.trim()) { p.name = name.trim(); saveProfilesList(); renderProfileSwitcher(); }
   }
-  function deleteProfile(id) {
+  async function deleteProfile(id) {
     if (profiles.length <= 1) { alert("Esse é o único edital que você tem — não é possível excluir."); return; }
     const p = profiles.find(x => x.id === id);
     if (!p) return;
-    if (!confirm('Excluir o edital "' + p.name + '" e todos os dados dele (matérias, histórico, cronograma etc.)? Essa ação não pode ser desfeita.')) return;
+    const ok = await confirmDialog('Excluir o edital "' + p.name + '" e todos os dados dele (matérias, histórico, cronograma etc.)?', { danger: true, confirmLabel: "Excluir" });
+    if (!ok) return;
+    const profileIndex = profiles.indexOf(p);
+    const wasActive = activeProfileId === id;
+    // Soft-delete: some da lista e da tela agora, mas os dados locais só são apagados
+    // de verdade (e só então enviamos a exclusão para a nuvem) se a pessoa não desfizer a tempo.
     profiles = profiles.filter(x => x.id !== id);
-    try { localStorage.removeItem(profileDataKey(id)); } catch (e) {}
-    purgeProfileLocalKeys(id);
-    deleteProfileDataFromCloud(id);
-    if (activeProfileId === id) {
+    if (wasActive) {
       activeProfileId = profiles[0].id;
       loadActiveProfileData();
       renderAll();
     }
     saveProfilesList();
     renderProfileSwitcher();
+    showUndoToast(
+      'Edital "' + p.name + '" excluído.',
+      () => {
+        profiles.splice(Math.min(profileIndex, profiles.length), 0, p);
+        if (wasActive) {
+          activeProfileId = id;
+          loadActiveProfileData();
+          renderAll();
+        }
+        saveProfilesList();
+        renderProfileSwitcher();
+      },
+      () => {
+        try { localStorage.removeItem(profileDataKey(id)); } catch (e) {}
+        purgeProfileLocalKeys(id);
+        deleteProfileDataFromCloud(id);
+      }
+    );
   }
 
   function renderProfileSwitcher() {
@@ -1813,10 +2080,10 @@ try {
     if (!listEl) return;
     listEl.innerHTML = profiles.map(p => {
       const isActive = p.id === activeProfileId;
-      return '<div class="profile-row' + (isActive ? " active" : "") + '" data-select-profile="' + p.id + '">' +
+      return '<div class="profile-row' + (isActive ? " active" : "") + '" data-select-profile="' + p.id + '" role="button" tabindex="0" aria-label="Selecionar edital ' + escapeHtml(p.name) + (isActive ? " (ativo)" : "") + '">' +
         '<span class="profile-row-name">' + escapeHtml(p.name) + (isActive ? ' &#10003;' : '') + '</span>' +
-        '<button class="icon-btn" data-rename-profile="' + p.id + '" title="Renomear" onclick="event.stopPropagation()">&#9998;</button>' +
-        '<button class="icon-btn" data-delete-profile="' + p.id + '" title="Excluir" onclick="event.stopPropagation()">&#128465;</button>' +
+        '<button class="icon-btn" data-rename-profile="' + p.id + '" title="Renomear" aria-label="Renomear edital ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#9998;</button>' +
+        '<button class="icon-btn" data-delete-profile="' + p.id + '" title="Excluir" aria-label="Excluir edital ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#128465;</button>' +
       '</div>';
     }).join("");
     listEl.querySelectorAll("[data-select-profile]").forEach(el => {
@@ -1824,13 +2091,20 @@ try {
         switchProfile(el.getAttribute("data-select-profile"));
         document.getElementById("profileDropdown").classList.remove("open");
       });
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          switchProfile(el.getAttribute("data-select-profile"));
+          document.getElementById("profileDropdown").classList.remove("open");
+        }
+      });
     });
     listEl.querySelectorAll("[data-rename-profile]").forEach(el => {
-      el.addEventListener("click", () => {
+      el.addEventListener("click", async () => {
         const id = el.getAttribute("data-rename-profile");
         const p = profiles.find(x => x.id === id);
-        const novo = prompt("Novo nome para este edital:", p ? p.name : "");
-        if (novo != null) renameProfile(id, novo);
+        const novo = await promptDialog("Novo nome para este edital:", p ? p.name : "", { title: "Renomear edital" });
+        if (novo != null && novo.trim()) renameProfile(id, novo);
       });
     });
     listEl.querySelectorAll("[data-delete-profile]").forEach(el => {
@@ -2161,7 +2435,7 @@ try {
     state.subjects.push({ id: uid(), name: name, weight: null, topics: [] });
     save(); renderAll();
   }
-  function deleteSubject(subjectId) {
+  async function deleteSubject(subjectId) {
     const subject = state.subjects.find(s => s.id === subjectId);
     if (!subject) return;
     const hasHistory = state.sessions.some(s => s.subjectId === subjectId);
@@ -2169,12 +2443,26 @@ try {
       alert("Esta matéria possui histórico de estudos. Para preservar seu histórico, ela não pode ser excluída agora.");
       return;
     }
-    if (!confirm('Excluir a matéria "' + subject.name + '"?')) return;
+    const ok = await confirmDialog('Excluir a matéria "' + subject.name + '"?', { danger: true, confirmLabel: "Excluir" });
+    if (!ok) return;
+    const subjectIndex = state.subjects.indexOf(subject);
+    const removedRevisions = state.revisions.filter(r => r.subjectId === subjectId);
+    const removedSchedule = state.schedule.filter(x => x.subjectId === subjectId);
+    const removedCycle = state.cycle.filter(x => x.subjectId === subjectId);
+    const profileAtDelete = activeProfileId;
     state.subjects = state.subjects.filter(s => s.id !== subjectId);
     state.revisions = state.revisions.filter(r => r.subjectId !== subjectId);
     state.schedule = state.schedule.filter(x => x.subjectId !== subjectId);
     state.cycle = state.cycle.filter(x => x.subjectId !== subjectId);
     save(); renderAll();
+    showUndoToast('Matéria "' + subject.name + '" excluída.', () => {
+      if (activeProfileId !== profileAtDelete) return;
+      state.subjects.splice(Math.min(subjectIndex, state.subjects.length), 0, subject);
+      state.revisions = state.revisions.concat(removedRevisions);
+      state.schedule = state.schedule.concat(removedSchedule);
+      state.cycle = state.cycle.concat(removedCycle);
+      save(); renderAll();
+    });
   }
   function addTopic(subjectId, name) {
     name = name.trim();
@@ -2186,7 +2474,7 @@ try {
     save();
     return topic;
   }
-  function deleteTopic(subjectId, topicId) {
+  async function deleteTopic(subjectId, topicId) {
     const subj = state.subjects.find(s => s.id === subjectId);
     if (!subj) return;
     const topic = subj.topics.find(t => t.id === topicId);
@@ -2196,10 +2484,22 @@ try {
       alert("Este tópico possui histórico de estudos. Para preservar seu histórico, ele não pode ser excluído agora.");
       return;
     }
-    if (!confirm('Excluir o tópico "' + topic.name + '"?')) return;
+    const ok = await confirmDialog('Excluir o tópico "' + topic.name + '"?', { danger: true, confirmLabel: "Excluir" });
+    if (!ok) return;
+    const topicIndex = subj.topics.indexOf(topic);
+    const removedRevisions = state.revisions.filter(r => r.topicId === topicId);
+    const profileAtDelete = activeProfileId;
     subj.topics = subj.topics.filter(t => t.id !== topicId);
     state.revisions = state.revisions.filter(r => r.topicId !== topicId);
     save(); renderAll();
+    showUndoToast('Tópico "' + topic.name + '" excluído.', () => {
+      if (activeProfileId !== profileAtDelete) return;
+      const subjAgain = state.subjects.find(s => s.id === subjectId);
+      if (!subjAgain) return;
+      subjAgain.topics.splice(Math.min(topicIndex, subjAgain.topics.length), 0, topic);
+      state.revisions = state.revisions.concat(removedRevisions);
+      save(); renderAll();
+    });
   }
   function toggleTopicDone(subjectId, topicId) {
     const subj = state.subjects.find(s => s.id === subjectId);
@@ -2248,15 +2548,15 @@ try {
         '<div class="examinfo-row">' +
           '<div class="examinfo-label">' + escapeHtml(item.label) + '</div>' +
           '<div class="examinfo-value">' + escapeHtml(item.value) + '</div>' +
-          '<button class="icon-btn" data-edit-examinfo="' + idx + '" title="Editar">&#9998;</button>' +
-          '<button class="icon-btn" data-del-examinfo="' + idx + '" title="Excluir">&#128465;</button>' +
+          '<button class="icon-btn" data-edit-examinfo="' + idx + '" title="Editar" aria-label="Editar ' + escapeHtml(item.label) + '">&#9998;</button>' +
+          '<button class="icon-btn" data-del-examinfo="' + idx + '" title="Excluir" aria-label="Excluir ' + escapeHtml(item.label) + '">&#128465;</button>' +
         '</div>'
       ).join("");
       list.querySelectorAll("[data-edit-examinfo]").forEach(el => {
-        el.addEventListener("click", () => {
+        el.addEventListener("click", async () => {
           const idx = Number(el.getAttribute("data-edit-examinfo"));
           const item = state.examInfo[idx];
-          const novoValor = prompt('Editar valor de "' + item.label + '":', item.value);
+          const novoValor = await promptDialog('Editar valor de "' + item.label + '":', item.value, { title: "Editar informação" });
           if (novoValor != null && novoValor.trim()) {
             item.value = novoValor.trim();
             save(); renderExamInfo();
@@ -2283,7 +2583,7 @@ try {
     const value = valueInput.value.trim();
     if (!label || !value) return;
     state.examInfo = state.examInfo || [];
-    const existing = state.examInfo.find(x => x.label.toLowerCase() === label.toLowerCase());
+    const existing = state.examInfo.find(x => namesMatch(x.label, label));
     if (existing) existing.value = value;
     else state.examInfo.push({ label: label, value: value });
     labelInput.value = ""; valueInput.value = "";
@@ -2369,12 +2669,12 @@ try {
       });
     });
     container.querySelectorAll("[data-edit-weight]").forEach(el => {
-      el.addEventListener("click", (e) => {
+      el.addEventListener("click", async (e) => {
         e.stopPropagation();
         const subject = state.subjects.find(s => s.id === el.getAttribute("data-edit-weight"));
         if (!subject) return;
         const atual = subject.weight != null ? String(subject.weight) : "";
-        const novo = prompt("Peso desta matéria no edital (1 a 5 — quanto maior, maior a importância no planejamento, especialmente enquanto o domínio estiver abaixo da meta).\nDeixe em branco para usar um peso automático baseado na estrutura do edital:", atual);
+        const novo = await promptDialog("Peso desta matéria no edital (1 a 5 — quanto maior, maior a importância no planejamento, especialmente enquanto o domínio estiver abaixo da meta).\nDeixe em branco para usar um peso automático baseado na estrutura do edital:", atual, { title: "Peso da matéria", placeholder: "1 a 5" });
         if (novo === null) return;
         if (novo.trim() === "") { subject.weight = null; }
         else {
@@ -2405,13 +2705,13 @@ try {
       });
     });
     container.querySelectorAll("[data-edit-topic]").forEach(el => {
-      el.addEventListener("click", (e) => {
+      el.addEventListener("click", async (e) => {
         e.stopPropagation();
         const [subjectId, topicId] = el.getAttribute("data-edit-topic").split("|");
         const subj = state.subjects.find(s => s.id === subjectId);
         const topic = subj ? subj.topics.find(t => t.id === topicId) : null;
         if (!topic) return;
-        const novoNome = prompt("Editar nome do tópico:", topic.name);
+        const novoNome = await promptDialog("Editar nome do tópico:", topic.name, { title: "Editar tópico" });
         if (novoNome != null && novoNome.trim()) {
           topic.name = novoNome.trim();
           save(); renderAll();
@@ -2544,9 +2844,24 @@ try {
       '</tbody>';
   }
 
+  let evolutionSubjectFilterId = "all";
   function renderEvolutionChart() {
+    const filterEl = document.getElementById("evolutionSubjectFilter");
+    if (filterEl) {
+      const prevValue = evolutionSubjectFilterId;
+      filterEl.innerHTML = '<option value="all">Todas as matérias</option>' +
+        state.subjects.map(s => '<option value="' + s.id + '">' + escapeHtml(s.name) + '</option>').join("");
+      const stillExists = prevValue === "all" || state.subjects.some(s => s.id === prevValue);
+      evolutionSubjectFilterId = stillExists ? prevValue : "all";
+      filterEl.value = evolutionSubjectFilterId;
+      filterEl.onchange = () => { evolutionSubjectFilterId = filterEl.value; renderEvolutionChart(); };
+    }
+    const sessions = evolutionSubjectFilterId === "all"
+      ? state.sessions
+      : state.sessions.filter(s => s.subjectId === evolutionSubjectFilterId);
+
     const byDate = {};
-    state.sessions.forEach(s => {
+    sessions.forEach(s => {
       if (!byDate[s.date]) byDate[s.date] = { corretas: 0, erradas: 0 };
       byDate[s.date].corretas += (s.corretas || 0);
       byDate[s.date].erradas += (s.erradas || 0);
@@ -2557,6 +2872,9 @@ try {
     if (dates.length === 0) {
       el.innerHTML = "";
       hint.style.display = "block";
+      hint.textContent = evolutionSubjectFilterId === "all"
+        ? 'Registre sessões do tipo "Questões" com acertos/erros para ver a evolução aqui.'
+        : 'Nenhuma sessão de "Questões" com acertos/erros registrada para esta matéria ainda.';
       return;
     }
     hint.style.display = "none";
@@ -2915,13 +3233,16 @@ try {
     return seq;
   }
 
-  document.getElementById("autoScheduleForm").addEventListener("submit", (e) => {
+  document.getElementById("autoScheduleForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const days = Array.from(document.querySelectorAll(".auto-day-check:checked")).map(c => Number(c.value)).sort((a, b) => a - b);
     if (days.length === 0) { alert("Selecione pelo menos um dia da semana."); return; }
     const minutesPerDay = Number(document.getElementById("autoScheduleMinutesInput").value) || 60;
     const blocksPerDay = Math.max(1, Math.min(5, Number(document.getElementById("autoScheduleBlocksInput").value) || 2));
-    if (state.schedule.length > 0 && !confirm("Isso vai substituir o cronograma semanal atual pelo gerado automaticamente. Continuar?")) return;
+    if (state.schedule.length > 0) {
+      const ok = await confirmDialog("Isso vai substituir o cronograma semanal atual pelo gerado automaticamente. Continuar?", { danger: true, confirmLabel: "Substituir" });
+      if (!ok) return;
+    }
 
     const targetPct = Math.min(100, Math.max(50, Number(document.getElementById("autoScheduleTargetPctInput").value) || 80));
     const minQuestions = Math.min(1000, Math.max(10, Number(document.getElementById("autoScheduleMinQuestionsInput").value) || 50));
@@ -2977,7 +3298,7 @@ try {
             '<div class="cycle-bar-track"><div class="cycle-bar-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>' +
           '</div>' +
           '<div class="cycle-item-time">' + fmtHoursLong(studiedSec) + ' / ' + fmtHoursLong(targetSec) + '</div>' +
-          '<button class="icon-btn" data-del-cycle="' + item.id + '">&#128465;</button>' +
+          '<button class="icon-btn" data-del-cycle="' + item.id + '" title="Excluir" aria-label="Excluir ' + escapeHtml(subject.name) + ' do ciclo">&#128465;</button>' +
         '</div>';
       }).join("");
       listEl.querySelectorAll("[data-del-cycle]").forEach(el => {
@@ -3052,7 +3373,7 @@ try {
           '<span class="ok">' + s.corretas + '</span><span class="err">' + s.erradas + '</span>' +
           '<span style="color:#9B9890;font-size:12px;">' + s.brancos + ' em branco</span>' +
           '<span class="pct-badge ' + pctClass(pct) + '">' + pct + '%</span>' +
-          '<button class="icon-btn" data-del-sim="' + s.id + '">&#128465;</button>' +
+          '<button class="icon-btn" data-del-sim="' + s.id + '" title="Excluir" aria-label="Excluir simulado ' + escapeHtml(s.title) + '">&#128465;</button>' +
         '</div></div>';
     }).join("");
     listEl.querySelectorAll("[data-del-sim]").forEach(el => {
@@ -3122,14 +3443,14 @@ try {
       const topic = subject ? subject.topics.find(t => t.id === r.topicId) : null;
       const late = !r.done && !r.ignored && r.date < today;
       return '<div class="rev-row">' +
-        '<button class="rev-check' + (r.done ? " done" : "") + '" data-toggle-rev="' + r.id + '">' + (r.done ? "&check;" : "") + '</button>' +
+        '<button class="rev-check' + (r.done ? " done" : "") + '" data-toggle-rev="' + r.id + '" aria-label="' + (r.done ? "Desmarcar" : "Marcar") + ' revisão de ' + escapeHtml(topic ? topic.name : "tópico removido") + ' como concluída">' + (r.done ? "&check;" : "") + '</button>' +
         '<div class="rev-info">' +
           '<div class="rev-name' + (r.done ? " done" : "") + '">' + escapeHtml(subject ? subject.name : "Matéria removida") + '</div>' +
           '<div style="font-size:12px;color:#6E6B63;">' + escapeHtml(topic ? topic.name : "Tópico removido") + '</div>' +
         '</div>' +
         '<div class="rev-date' + (late ? " late" : "") + '">' + fmtDateLabel(r.date) + '</div>' +
-        (revFilter !== "concluidas" && revFilter !== "ignoradas" ? '<button class="icon-btn" data-ignore-rev="' + r.id + '" title="Ignorar">&#128683;</button>' : '') +
-        '<button class="icon-btn" data-del-rev="' + r.id + '" title="Excluir">&#128465;</button>' +
+        (revFilter !== "concluidas" && revFilter !== "ignoradas" ? '<button class="icon-btn" data-ignore-rev="' + r.id + '" title="Ignorar" aria-label="Ignorar revisão de ' + escapeHtml(topic ? topic.name : "tópico removido") + '">&#128683;</button>' : '') +
+        '<button class="icon-btn" data-del-rev="' + r.id + '" title="Excluir" aria-label="Excluir revisão de ' + escapeHtml(topic ? topic.name : "tópico removido") + '">&#128465;</button>' +
       '</div>';
     }).join("");
     listEl.querySelectorAll("[data-toggle-rev]").forEach(el => {
@@ -3356,6 +3677,7 @@ try {
     try { localStorage.removeItem(timerStateKey()); } catch (e) {}
     timerStateDirty = false;
   }
+  const STALE_TIMER_HOURS = 6; // acima disso, tratamos como sessão esquecida aberta, não como estudo real
   function restoreTimerState() {
     if (!activeProfileId) return false;
     try {
@@ -3375,8 +3697,26 @@ try {
       if (s.subjectId) timerSubjectSelect.value = s.subjectId;
       populateSubjectSelect(timerSubjectSelect, s.subjectId || "", true);
       populateTopicSelect(timerTopicSelect, s.subjectId || timerSubjectSelect.value, s.topicId || "", true);
-      if (s.running && Number(s.running.startedAt) > 0) running = { startedAt: Number(s.running.startedAt) };
-      else running = null;
+      let staleHours = 0;
+      if (s.running && Number(s.running.startedAt) > 0) {
+        staleHours = (Date.now() - Number(s.running.startedAt)) / 3600000;
+        running = { startedAt: Number(s.running.startedAt) };
+      } else {
+        running = null;
+      }
+      if (running && staleHours > STALE_TIMER_HOURS) {
+        // Timer ficou "rodando" por tempo implausível (app fechado por horas/dias) — pausa em vez de
+        // somar isso como tempo de estudo real, e avisa a pessoa para ela decidir o que fazer.
+        if (timerMode === "free") timerSeconds += (Number(s.running.startedAt) ? Math.min(staleHours, STALE_TIMER_HOURS) * 3600 : 0);
+        else pomoPhaseElapsed += Math.min(staleHours, STALE_TIMER_HOURS) * 3600;
+        running = null;
+        persistTimerState();
+        showUndoToast(
+          "Encontrei um cronômetro que ficou aberto por " + staleHours.toFixed(1) + "h. Pausei em " +
+          STALE_TIMER_HOURS + "h de estudo (em vez do tempo todo) para evitar um registro irreal — ajuste manualmente se precisar.",
+          null
+        );
+      }
       setTimerMode(timerMode);
       if (running) {
         if (tickInterval) clearInterval(tickInterval);
@@ -3648,6 +3988,7 @@ try {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+    markBackupDone();
   });
   const importBackupInput = document.getElementById("importBackupInput");
   document.getElementById("importBackupBtn").addEventListener("click", () => {
@@ -3665,7 +4006,7 @@ try {
           !Array.isArray(parsed.revisions) || !Array.isArray(parsed.schedule)) {
         throw new Error("arquivo não parece ser um backup válido");
       }
-      const ok = confirm("Isso vai substituir todos os dados atuais pelos dados desse arquivo de backup. Antes disso, farei um backup automático dos dados atuais. Deseja continuar?");
+      const ok = await confirmDialog("Isso vai substituir todos os dados atuais pelos dados desse arquivo de backup. Antes disso, farei um backup automático dos dados atuais. Deseja continuar?", { danger: true, confirmLabel: "Restaurar backup" });
       if (!ok) { e.target.value = ""; return; }
       const safetyKey = SAFETY_BACKUP_PREFIX + activeProfileId;
       try { localStorage.setItem(safetyKey, JSON.stringify({ schemaVersion: BACKUP_VERSION, createdAt: Date.now(), data: state })); } catch (e) {}
@@ -3704,6 +4045,7 @@ try {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+    markBackupDone();
   });
   const importAllBackupInput = document.getElementById("importAllBackupInput");
   document.getElementById("importAllBackupBtn").addEventListener("click", () => importAllBackupInput.click());
@@ -3718,7 +4060,7 @@ try {
           !parsed.data || typeof parsed.data !== "object" || Array.isArray(parsed.data)) {
         throw new Error("arquivo não parece ser um backup completo válido");
       }
-      const ok = confirm("Isso vai substituir TODOS os seus editais (matérias, histórico, cronogramas etc. de todos eles). Antes disso, farei um backup automático dos dados atuais. Deseja continuar?");
+      const ok = await confirmDialog("Isso vai substituir TODOS os seus editais (matérias, histórico, cronogramas etc. de todos eles). Antes disso, farei um backup automático dos dados atuais. Deseja continuar?", { danger: true, confirmLabel: "Restaurar tudo" });
       if (!ok) { e.target.value = ""; return; }
 
       try {
@@ -3955,7 +4297,7 @@ try {
           errors.push("Linha " + (lineIndex + 1) + ": matéria sem nome.");
           return;
         }
-        const existing = materias.find(m => m.nome.toLowerCase() === nome.toLowerCase());
+        const existing = materias.find(m => namesMatch(m.nome, nome));
         if (existing) {
           if (peso != null && (existing.peso == null || peso > existing.peso)) existing.peso = peso;
           current = existing;
@@ -4010,11 +4352,11 @@ try {
   function getImportDuplicates(materias) {
     let existingSubjects = 0, existingTopics = 0;
     materias.forEach(m => {
-      const subject = state.subjects.find(s => s.name.toLowerCase() === m.nome.toLowerCase());
+      const subject = state.subjects.find(s => namesMatch(s.name, m.nome));
       if (!subject) return;
       existingSubjects++;
       (m.topicos || []).forEach(t => {
-        if (subject.topics.some(x => x.name.toLowerCase() === t.toLowerCase())) existingTopics++;
+        if (subject.topics.some(x => namesMatch(x.name, t))) existingTopics++;
       });
     });
     return { existingSubjects, existingTopics };
@@ -4070,7 +4412,7 @@ try {
                 (m.peso != null ? ' <span class="weight-badge" style="cursor:default;">Peso ' + m.peso + '</span>' : '') +
               '</div>' +
               '<div class="result-topics">' + m.topicos.length + ' tópicos' +
-                (state.subjects.some(s => s.name.toLowerCase() === m.nome.toLowerCase()) ? ' · matéria já existe' : ' · nova matéria') +
+                (state.subjects.some(s => namesMatch(s.name, m.nome)) ? ' · matéria já existe' : ' · nova matéria') +
               '</div>' +
             '</div>' +
           '</label>' +
@@ -4149,7 +4491,7 @@ try {
 
         const selectedTopicIndexes = new Set(selectedTopicChecks.map(el => Number(el.getAttribute("data-import-topic"))));
         const nome = (m.nome || "Sem nome").trim();
-        let subject = state.subjects.find(s => s.name.toLowerCase() === nome.toLowerCase());
+        let subject = state.subjects.find(s => namesMatch(s.name, nome));
         if (!subject) {
           subject = { id: uid(), name: nome, weight: null, topics: [] };
           state.subjects.push(subject);
@@ -4160,7 +4502,7 @@ try {
           if (!selectedTopicIndexes.has(ti)) return;
           const nomeTopico = String(topicName).trim();
           if (!nomeTopico) return;
-          const jaExiste = subject.topics.some(t => t.name.toLowerCase() === nomeTopico.toLowerCase());
+          const jaExiste = subject.topics.some(t => namesMatch(t.name, nomeTopico));
           if (!jaExiste) {
             subject.topics.push({ id: uid(), name: nomeTopico, done: false });
             createdTopics++;
@@ -4175,7 +4517,7 @@ try {
       if (pendingImportExam.info && pendingImportExam.info.length) {
         state.examInfo = state.examInfo || [];
         pendingImportExam.info.forEach(item => {
-          const existing = state.examInfo.find(x => x.label.toLowerCase() === item.label.toLowerCase());
+          const existing = state.examInfo.find(x => namesMatch(x.label, item.label));
           if (existing) existing.value = item.value;
           else state.examInfo.push({ label: item.label, value: item.value });
         });
@@ -4272,6 +4614,7 @@ try {
     renderProfileSwitcher();
     renderAll();
     restoreTimerState();
+    updateStatusBanner();
   }
 
   window.addEventListener("offline", () => setSyncStatus("offline"));
