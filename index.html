@@ -103,6 +103,12 @@
   .status-banner-actions { display: flex; gap: 8px; flex-shrink: 0; }
   .status-banner button { font-size: 12.5px; padding: 5px 10px; }
   .empty-hint { font-size: 13px; color: #6E6B63; line-height: 1.5; }
+  .forgotten-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #ECE9E1; flex-wrap: wrap; }
+  .forgotten-row:last-child { border-bottom: none; }
+  .forgotten-name { font-weight: 600; font-size: 13.5px; flex: 1; min-width: 140px; }
+  .forgotten-days { font-size: 12.5px; color: #B23B3B; white-space: nowrap; }
+  [data-theme="dark"] .forgotten-row { border-bottom-color: #333029; }
+  [data-theme="dark"] .forgotten-days { color: #E08A8A; }
 
   /* Page switching */
   .page { display: none; }
@@ -288,7 +294,14 @@
   .timer-progress-label { font-size: 11px; color: #6E6B63; text-align: right; margin-bottom: 4px; }
   .timer-progress-track { height: 6px; background: #E3E0D8; border-radius: 3px; overflow: hidden; margin-bottom: 26px; }
   .timer-progress-fill { height: 100%; background: #C9A227; }
-  .timer-big-display { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 48px; letter-spacing: 1px; color: #1B2A4A; margin-bottom: 20px; }
+  .timer-big-display { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 48px; letter-spacing: 1px; color: #1B2A4A; margin-bottom: 20px; transition: font-size 0.2s ease; }
+  .timer-card.focus-mode .timer-tagline,
+  .timer-card.focus-mode .timer-progress-label,
+  .timer-card.focus-mode #freeAddLabel,
+  .timer-card.focus-mode #pomoCycleInfo { display: none !important; }
+  .timer-card.focus-mode .timer-big-display { font-size: 76px; margin: 28px 0 32px; }
+  .timer-card.focus-mode .timer-progress-track { margin-bottom: 34px; }
+  #focusModeToggleBtn.active { color: #C9A227; }
   .timer-round-btn-lg { width: 52px; height: 52px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
   .timer-round-btn-lg.white { background: #F1EFE8; color: #2A2926; border: 1px solid #E3E0D8; }
   .timer-round-btn-lg.teal { background: #C9A227; color: #fff; }
@@ -410,6 +423,7 @@
     .fab-timer { bottom: 16px; right: 16px; width: 56px; height: 56px; }
     .timer-card { padding: 1.6rem 1.4rem; }
     .timer-big-display { font-size: 38px; }
+    .timer-card.focus-mode .timer-big-display { font-size: 56px; }
     .wrap { padding: 1rem 1rem 5rem; }
     .week-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .examinfo-row { flex-direction: column; gap: 3px; }
@@ -674,6 +688,10 @@
       <h1 class="edital-title">Edital Verticalizado</h1>
       <button class="btn btn-outline btn-small" id="toggleCollapseAllBtn">Recolher todas</button>
     </div>
+    <div class="search-row" style="margin-bottom:14px;position:relative;">
+      <input type="text" id="globalSearchInput" placeholder="Buscar matéria ou tópico..." aria-label="Buscar matéria ou tópico" style="width:100%;padding-right:34px;" />
+      <button type="button" id="globalSearchClearBtn" aria-label="Limpar busca" style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9B9890;font-size:15px;padding:4px;">&#10005;</button>
+    </div>
     <div class="card examinfo-card" id="examInfoCard" style="display:none;">
       <div class="examinfo-header" id="examInfoHeader">
         <span class="examinfo-title">Sobre o concurso</span>
@@ -722,6 +740,10 @@
   <!-- PAGE: ESTATISTICAS -->
   <div class="page" id="page-estatisticas">
     <h1 class="edital-title" style="margin-bottom:16px;">Estatísticas</h1>
+    <div class="card" id="forgottenCard" style="display:none;">
+      <div class="chart-title">&#8987; Matérias esquecidas</div>
+      <div id="forgottenList"></div>
+    </div>
     <div class="stats-grid">
       <div class="card stat-card donut-card">
         <div id="desempenhoDonut"></div>
@@ -973,7 +995,10 @@
 
     <!-- Em execução -->
     <div id="timerRunningView" style="display:none;">
-      <div class="timer-logo" id="timerRunningTitle">Cronômetro de estudo</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;position:relative;">
+        <div class="timer-logo" id="timerRunningTitle">Cronômetro de estudo</div>
+        <button type="button" class="icon-btn" id="focusModeToggleBtn" title="Modo foco" aria-label="Ativar modo foco" style="position:absolute;right:0;">&#10021;</button>
+      </div>
       <div id="pomoPhaseBadge" class="timer-phase-badge work" style="display:none;">Foco</div>
       <p class="timer-tagline" id="timerRunningTagline">Em andamento — pause ou finalize quando quiser.</p>
       <div class="timer-progress-label" id="timerProgressLabel">00h00 / 01h00</div>
@@ -2422,12 +2447,32 @@ try {
       btn.classList.add("active");
       document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
       document.getElementById("page-" + btn.getAttribute("data-page")).classList.add("active");
-      renderAll();
+      renderActivePage();
     });
   });
 
   // ---------- Subjects / topics ----------
   const collapsedState = {};
+  let editalSearchQuery = "";
+  function textContains(haystack, needle) {
+    return normalizeForMatch(haystack).includes(normalizeForMatch(needle));
+  }
+  const globalSearchInput = document.getElementById("globalSearchInput");
+  const globalSearchClearBtn = document.getElementById("globalSearchClearBtn");
+  if (globalSearchInput) {
+    globalSearchInput.addEventListener("input", () => {
+      editalSearchQuery = globalSearchInput.value;
+      globalSearchClearBtn.style.display = editalSearchQuery ? "block" : "none";
+      renderEdital();
+    });
+    globalSearchClearBtn.addEventListener("click", () => {
+      globalSearchInput.value = "";
+      editalSearchQuery = "";
+      globalSearchClearBtn.style.display = "none";
+      globalSearchInput.focus();
+      renderEdital();
+    });
+  }
 
   function addSubject(name) {
     name = name.trim();
@@ -2616,12 +2661,34 @@ try {
       return;
     }
 
-    container.innerHTML = state.subjects.map(subject => {
+    const query = editalSearchQuery.trim();
+    const searching = query.length > 0;
+    let visibleSubjects = state.subjects;
+    if (searching) {
+      visibleSubjects = state.subjects
+        .map(subject => {
+          const subjectMatches = textContains(subject.name, query);
+          const matchingTopics = subject.topics.filter(t => textContains(t.name, query));
+          if (!subjectMatches && matchingTopics.length === 0) return null;
+          return { subject, forceExpand: true, onlyTopics: subjectMatches ? null : matchingTopics };
+        })
+        .filter(Boolean);
+      if (visibleSubjects.length === 0) {
+        container.innerHTML = '<p class="empty-hint">Nenhuma matéria ou tópico encontrado para "' + escapeHtml(query) + '".</p>';
+        return;
+      }
+    } else {
+      visibleSubjects = state.subjects.map(subject => ({ subject, forceExpand: false, onlyTopics: null }));
+    }
+
+    container.innerHTML = visibleSubjects.map(({ subject, forceExpand, onlyTopics }) => {
       const color = subjectColor(subject);
       const agg = subjectAgg(subject);
       const studyMetrics = subjectStudyMetrics(subject);
-      const collapsed = !!collapsedState[subject.id];
-      const rows = subject.topics.map((t, i) => {
+      const collapsed = forceExpand ? false : !!collapsedState[subject.id];
+      const topicsToShow = onlyTopics || subject.topics;
+      const rows = topicsToShow.map((t) => {
+        const i = subject.topics.indexOf(t);
         const a = topicAgg(t.id);
         return '<tr class="topic-row-tr">' +
           '<td class="check-cell"><button class="check-topic' + (t.done ? " done" : "") + '" data-toggle-topic="' + subject.id + '|' + t.id + '">' + (t.done ? "&check;" : "") + '</button></td>' +
@@ -2646,7 +2713,7 @@ try {
         '</div>' +
         (collapsed ? "" :
           '<div class="subject-body">' +
-            (subject.topics.length === 0 ? '<p class="empty-hint" style="padding:14px 16px;">Nenhum tópico nesta matéria ainda.</p>' :
+            (topicsToShow.length === 0 ? '<p class="empty-hint" style="padding:14px 16px;">Nenhum tópico nesta matéria ainda.</p>' :
             '<table class="topics-table"><thead><tr><th></th><th>Tópicos</th><th>Acertos</th><th>Erros</th><th>%</th><th>Último estudo</th><th></th><th></th><th></th></tr></thead><tbody>' +
               rows +
               '<tr class="total-row"><td></td><td>TOTAL</td><td>' + agg.corretas + '</td><td>' + agg.erradas + '</td><td>' + (agg.pct == null ? '-' : agg.pct + '%') + '</td><td></td><td></td><td></td><td></td></tr>' +
@@ -2747,6 +2814,43 @@ try {
       '</svg>';
   }
 
+  const FORGOTTEN_DAYS_THRESHOLD = 10;
+  function renderForgottenSubjects(metricsBySubjectIndex) {
+    const card = document.getElementById("forgottenCard");
+    const list = document.getElementById("forgottenList");
+    if (!card || !list) return;
+    if (state.subjects.length === 0) { card.style.display = "none"; return; }
+    const forgotten = state.subjects
+      .map((subject, i) => ({ subject, m: metricsBySubjectIndex[i] }))
+      .filter(({ m }) => m.daysWithoutStudy == null || m.daysWithoutStudy > FORGOTTEN_DAYS_THRESHOLD)
+      .sort((a, b) => {
+        const da = a.m.daysWithoutStudy == null ? Infinity : a.m.daysWithoutStudy;
+        const db = b.m.daysWithoutStudy == null ? Infinity : b.m.daysWithoutStudy;
+        return db - da;
+      });
+    if (forgotten.length === 0) { card.style.display = "none"; return; }
+    card.style.display = "block";
+    list.innerHTML = forgotten.map(({ subject, m }) => {
+      const label = m.daysWithoutStudy == null ? "Nunca estudada" : m.daysWithoutStudy + " dias sem contato";
+      return '<div class="forgotten-row">' +
+        '<span class="forgotten-name">' + escapeHtml(subject.name) + '</span>' +
+        '<span class="forgotten-days">' + label + '</span>' +
+        '<button class="btn btn-outline btn-small" data-study-forgotten="' + subject.id + '">Estudar agora</button>' +
+      '</div>';
+    }).join("");
+    list.querySelectorAll("[data-study-forgotten]").forEach(el => {
+      el.addEventListener("click", () => {
+        const subjectId = el.getAttribute("data-study-forgotten");
+        setTimerMode("free");
+        populateSubjectSelect(timerSubjectSelect, subjectId, true);
+        populateTopicSelect(timerTopicSelect, subjectId, "", true);
+        timerSetupView.style.display = "block";
+        timerRunningView.style.display = "none";
+        timerOverlay.classList.add("open");
+      });
+    });
+  }
+
   function renderEstatisticas() {
     const allCorretas = state.sessions.reduce((a, s) => a + (s.corretas || 0), 0);
     const allErradas = state.sessions.reduce((a, s) => a + (s.erradas || 0), 0);
@@ -2776,6 +2880,8 @@ try {
     const doneTopics = state.subjects.reduce((a, s) => a + s.topics.filter(t => t.done).length, 0);
     document.getElementById("statProgressoEdital").textContent = progresso + "%";
     document.getElementById("statProgressoSub").textContent = worked + " matérias trabalhadas · " + doneTopics + "/" + totalTopics + " tópicos confirmados";
+
+    renderForgottenSubjects(metrics);
 
     renderStreak();
     renderEvolutionChart();
@@ -2978,15 +3084,34 @@ try {
     });
   }
 
+  // ---------- Render seletivo por aba ----------
+  // Renderizar as 8 seções inteiras a cada pequena edição (útil só quando a aba está visível)
+  // é desperdício quando a edição aconteceu em outra aba. Em vez disso, renderizamos na hora
+  // apenas a aba visível, e marcamos as demais como "sujas" para serem renderizadas (com dados
+  // já atualizados) só quando a pessoa realmente for vê-las — o resultado visual é idêntico,
+  // só evita trabalho invisível.
+  const PAGE_RENDERERS = {
+    edital: [renderEdital, renderPriorities],
+    estatisticas: [renderEstatisticas],
+    historico: [renderHistorico],
+    planejamento: [renderSemanal, renderCiclo],
+    simulados: [renderSimulados],
+    revisoes: [renderRevisoes]
+  };
+  const dirtyPages = new Set(Object.keys(PAGE_RENDERERS));
+  function getActivePageKey() {
+    const activeBtn = document.querySelector("nav.tabs button.active");
+    const key = activeBtn ? activeBtn.getAttribute("data-page") : null;
+    return (key && PAGE_RENDERERS[key]) ? key : "edital";
+  }
+  function renderActivePage() {
+    const key = getActivePageKey();
+    PAGE_RENDERERS[key].forEach(fn => fn());
+    dirtyPages.delete(key);
+  }
   function renderAll() {
-    renderEdital();
-    renderEstatisticas();
-    renderHistorico();
-    renderCiclo();
-    renderSemanal();
-    renderSimulados();
-    renderRevisoes();
-    renderPriorities();
+    Object.keys(PAGE_RENDERERS).forEach(key => dirtyPages.add(key));
+    renderActivePage();
   }
 
   // ---------- PLANEJAMENTO: sub-abas ----------
@@ -3841,6 +3966,23 @@ try {
     if (timerMode === "pomodoro") updatePomodoroDisplay();
     else updateTimerRunningDisplay();
   }
+  const FOCUS_MODE_KEY = "meus-estudos:focus-mode";
+  let focusModeOn = (function () { try { return localStorage.getItem(FOCUS_MODE_KEY) === "1"; } catch (e) { return false; } })();
+  function applyFocusModeUI() {
+    const card = document.querySelector("#timerOverlay .timer-card");
+    const btn = document.getElementById("focusModeToggleBtn");
+    if (card) card.classList.toggle("focus-mode", focusModeOn);
+    if (btn) {
+      btn.classList.toggle("active", focusModeOn);
+      btn.setAttribute("aria-label", focusModeOn ? "Desativar modo foco" : "Ativar modo foco");
+    }
+  }
+  document.getElementById("focusModeToggleBtn").addEventListener("click", () => {
+    focusModeOn = !focusModeOn;
+    try { localStorage.setItem(FOCUS_MODE_KEY, focusModeOn ? "1" : "0"); } catch (e) {}
+    applyFocusModeUI();
+  });
+
   function showTimerRunningView() {
     timerSetupView.style.display = "none";
     timerRunningView.style.display = "block";
@@ -3852,6 +3994,7 @@ try {
     document.getElementById("timerRunningTagline").textContent = isPomo
       ? "Ciclo Pomodoro em andamento."
       : "Em andamento — pause ou finalize quando quiser.";
+    applyFocusModeUI();
     if (isPomo) { updatePomoBadge(); updatePomoCycleInfo(); updatePomodoroDisplay(); }
     else updateTimerRunningDisplay();
   }
