@@ -111,9 +111,9 @@
   [data-theme="dark"] .forgotten-row { border-bottom-color: #333029; }
   [data-theme="dark"] .forgotten-days { color: #E08A8A; }
   .goal-row { padding: 8px 0; }
-  .goal-row-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; margin-bottom: 5px; gap: 8px; }
-  .goal-row-name { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .goal-row-value { color: #6E6B63; white-space: nowrap; font-size: 12.5px; }
+  .goal-row-head { display: flex; justify-content: space-between; align-items: flex-start; font-size: 13px; margin-bottom: 5px; gap: 8px; }
+  .goal-row-name { font-weight: 600; flex: 1; min-width: 0; word-break: break-word; }
+  .goal-row-value { color: #6E6B63; white-space: nowrap; font-size: 12.5px; flex-shrink: 0; margin-top: 1px; }
   .goal-track { height: 8px; background: #E3E0D8; border-radius: 4px; overflow: hidden; }
   .goal-fill { height: 100%; background: #C9A227; border-radius: 4px; transition: width 0.3s ease; }
   .goal-fill.complete { background: #3E8E5A; }
@@ -245,18 +245,20 @@
   .week-day-num { font-size: 17px; font-weight: 700; color: #2A2926; }
   .week-day.is-today .week-day-num { color: #C9A227; }
   .week-section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #9B9890; margin: 4px 0 4px; }
-  .rev-block { background: #4A4842; color: #fff; border-radius: 8px; padding: 6px 8px; margin-bottom: 5px; font-size: 11px; }
+  .rev-block { background: #4A4842; color: #fff; border-radius: 8px; padding: 6px 8px; margin-bottom: 5px; font-size: 11.5px; line-height: 1.35; }
   .rev-block.done { opacity: 0.5; text-decoration: line-through; }
   .rev-block.is-ignored { opacity: 0.4; }
-  .rev-block .rb-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .hist-block { background: #FBF3DC; border: 1px solid #F1E6B8; border-radius: 8px; padding: 5px 8px; margin-bottom: 5px; font-size: 10.5px; display: flex; align-items: center; gap: 5px; color: #6B5A10; }
-  .hist-block .hb-check { color: #8A6A14; flex-shrink: 0; }
-  .hist-block .hb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1 1 auto; }
-  .week-block { border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; font-size: 11.5px; color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 4px; }
-  .week-block .wb-main { flex: 1 1 auto; min-width: 0; overflow: hidden; }
-  .week-block .wb-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .week-block .wb-del { cursor: pointer; opacity: 0.85; flex-shrink: 0; }
-  .week-block .wb-time { font-size: 10px; opacity: 0.9; display: block; }
+  .rev-block .rb-name { font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+  .rev-block .rb-topic { opacity: 0.85; margin-top: 1px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+  .hist-block { background: #FBF3DC; border: 1px solid #F1E6B8; border-radius: 8px; padding: 5px 8px; margin-bottom: 5px; font-size: 11px; line-height: 1.35; display: flex; align-items: flex-start; gap: 5px; color: #6B5A10; }
+  .hist-block .hb-check { color: #8A6A14; flex-shrink: 0; margin-top: 1px; }
+  .hist-block .hb-name { min-width: 0; flex: 1 1 auto; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+  .hist-block .hb-time { flex-shrink: 0; white-space: nowrap; margin-top: 1px; margin-left: auto; }
+  .week-block { border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; font-size: 12px; line-height: 1.35; color: #fff; display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+  .week-block .wb-main { flex: 1 1 auto; min-width: 0; }
+  .week-block .wb-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; font-weight: 600; }
+  .week-block .wb-del { cursor: pointer; opacity: 0.85; flex-shrink: 0; margin-top: 1px; }
+  .week-block .wb-time { font-size: 10.5px; opacity: 0.9; display: block; margin-top: 2px; }
   .cycle-layout { display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
   .cycle-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #F1EFE8; }
   .cycle-item:last-child { border-bottom: none; }
@@ -3251,7 +3253,7 @@ try {
       const goalSeconds = subject.weeklyGoalMinutes * 60;
       const pct = Math.min(100, Math.round((subjSeconds / goalSeconds) * 100));
       return '<div class="goal-row">' +
-        '<div class="goal-row-head"><span class="goal-row-name">' + escapeHtml(subject.name) + '</span><span class="goal-row-value">' + fmtHoursLong(subjSeconds) + ' / ' + fmtHoursLong(goalSeconds) + '</span></div>' +
+        '<div class="goal-row-head"><span class="goal-row-name" title="' + escapeHtml(subject.name) + '">' + escapeHtml(subject.name) + '</span><span class="goal-row-value">' + fmtHoursLong(subjSeconds) + ' / ' + fmtHoursLong(goalSeconds) + '</span></div>' +
         '<div class="goal-track"><div class="goal-fill' + (pct >= 100 ? " complete" : "") + '" style="width:' + pct + '%;"></div></div>' +
       '</div>';
     }).join("");
@@ -3602,9 +3604,10 @@ try {
             sections += '<div class="week-section-label">Revisões</div>' + revs.map(r => {
               const subject = state.subjects.find(s => s.id === r.subjectId);
               const topic = subject ? subject.topics.find(t => t.id === r.topicId) : null;
-              return '<div class="rev-block' + (r.done ? " done" : "") + (r.ignored ? " is-ignored" : "") + '">' +
-                '<div class="rb-name">' + escapeHtml(subject ? subject.name : "Matéria removida") + '</div>' +
-                (topic ? '<div style="opacity:0.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(topic.name) + '</div>' : '') +
+              const subjName = subject ? subject.name : "Matéria removida";
+              return '<div class="rev-block' + (r.done ? " done" : "") + (r.ignored ? " is-ignored" : "") + '" title="' + escapeHtml(subjName + (topic ? " — " + topic.name : "")) + '">' +
+                '<div class="rb-name">' + escapeHtml(subjName) + '</div>' +
+                (topic ? '<div class="rb-topic">' + escapeHtml(topic.name) + '</div>' : '') +
               '</div>';
             }).join("");
           }
@@ -3617,7 +3620,7 @@ try {
               const subject = state.subjects.find(s => s.id === b.subjectId);
               if (!subject) return "";
               const color = subjectColor(subject);
-              return '<div class="week-block" style="background:' + color + ';">' +
+              return '<div class="week-block" style="background:' + color + ';" title="' + escapeHtml(subject.name) + '">' +
                 '<div class="wb-main"><span class="wb-name">' + escapeHtml(subject.name) + '</span><span class="wb-time">' + b.minutes + 'min</span></div>' +
                 '<span class="wb-del" data-del-schedule="' + b.id + '">&times;</span>' +
               '</div>';
@@ -3631,7 +3634,7 @@ try {
             sections += '<div class="week-section-label">Histórico</div>' + sessions.map(s => {
               const subject = state.subjects.find(sub => sub.id === s.subjectId);
               const name = subject ? subject.name : (s.subjectId ? "Matéria removida" : "Estudo geral");
-              return '<div class="hist-block"><span class="hb-check">&#10003;</span><span class="hb-name">' + escapeHtml(name) + '</span><span style="margin-left:auto;flex-shrink:0;">' + fmtHShort(s.seconds) + '</span></div>';
+              return '<div class="hist-block" title="' + escapeHtml(name) + '"><span class="hb-check">&#10003;</span><span class="hb-name">' + escapeHtml(name) + '</span><span class="hb-time">' + fmtHShort(s.seconds) + '</span></div>';
             }).join("");
           }
         }
