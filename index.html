@@ -1907,7 +1907,8 @@ try {
 
       if (cloudProfiles.length && (
           cloudProfilesVersion > localProfilesVersion ||
-          (!localProfilesVersion && (localOnlyLooksLikeFreshDefault || !profiles.length)) ||
+          localOnlyLooksLikeFreshDefault ||
+          !profiles.length ||
           (!cloudProfilesVersion && !cloudHasKnownLocalProfile)
         )) {
         if (localProfilesMeta.dirty && !localOnlyLooksLikeFreshDefault) {
