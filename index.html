@@ -337,6 +337,7 @@
   .modal-overlay { position: fixed; inset: 0; background: rgba(20,18,10,0.5); display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
   .modal-overlay.open { display: flex; }
   #timerOverlay { background: rgba(20,18,10,0.58); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  #authOverlay { background: rgba(20,18,10,0.58); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   .modal-box { background: #FFFFFF; border-radius: 18px; padding: 1.5rem; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; box-shadow: 0 16px 40px -12px rgba(20,15,5,0.25); }
   .modal-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 17px; margin: 0 0 16px; }
   .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
@@ -416,6 +417,16 @@
   .priority-domain.mid { background:#FFF4E0; color:#C77700; }
   .priority-domain.consolidation { background:#FBF3DC; color:#8A6A14; }
   .priority-domain.high { background:#E8EAF0; color:#24365C; }
+  [data-theme="dark"] .priority-domain.low { background:rgba(163,74,67,0.22); color:#E7938C; }
+  [data-theme="dark"] .priority-domain.mid { background:rgba(199,119,0,0.2); color:#E8A855; }
+  [data-theme="dark"] .priority-domain.consolidation { background:rgba(138,106,20,0.25); color:#D9B44A; }
+  [data-theme="dark"] .priority-domain.high { background:rgba(36,54,92,0.4); color:#93A9D6; }
+  .plan-forgotten-tag { font-size: 10px; font-weight: 700; color: #B23B3B; background: #FDEEEE; padding: 2px 6px; border-radius: 999px; white-space: nowrap; }
+  [data-theme="dark"] .plan-forgotten-tag { color: #E08A8A; background: rgba(224,138,138,0.15); }
+  .plan-forgotten-banner { display:flex; flex-wrap:wrap; align-items:center; gap:8px; background:#FDEEEE; border:1px solid #F6D6D6; border-radius:12px; padding:10px 12px; margin-bottom:14px; font-size:12.5px; color:#8A3A34; }
+  .plan-forgotten-banner .btn-small { white-space:nowrap; }
+  [data-theme="dark"] .plan-forgotten-banner { background:rgba(224,138,138,0.1); border-color:rgba(224,138,138,0.25); color:#E08A8A; }
+  .wb-forgotten-flag { flex: none; }
   .priority-recommendation { margin:10px 0 12px; padding:9px 10px; border-radius: 12px; background:#F1EFE8; font-size:12px; }
   .priority-recommendation strong { display:block; margin-bottom:2px; }
   .priority-config { font-size:11px; color:#6E6B63; margin-top:8px; }
@@ -619,6 +630,7 @@
         <div class="profile-dropdown dropdown-right" id="moreMenuDropdown">
           <div class="profile-dropdown-title">Este edital</div>
           <button type="button" class="menu-item" id="toggleImportBtn">&#128196; Importar edital (IA)</button>
+          <button type="button" class="menu-item" id="toggleFlashcardImportBtn">&#127183; Gerar flashcards (IA)</button>
           <button type="button" class="menu-item" id="exportBackupBtn">&#11015; Baixar backup</button>
           <button type="button" class="menu-item" id="importBackupBtn">&#11014; Restaurar backup</button>
           <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none;" />
@@ -703,6 +715,41 @@
     </div>
     <div class="import-status" id="importStatus"></div>
     <div class="import-results" id="importResults" style="display:none;"></div>
+  </div>
+
+  <!-- Flashcard AI generation panel -->
+  <div class="card import-panel" id="flashcardImportPanel">
+    <div style="font-size:12px;font-weight:600;color:#6E6B63;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:14px;">Gerar flashcards com IA</div>
+
+    <div class="import-step">
+      <div class="step-title"><span class="step-num">1</span> Escolha as matérias</div>
+      <p class="field-hint">Desmarque o que não quiser incluir. O prompt abaixo é montado com as matérias e tópicos já cadastrados no edital atual.</p>
+      <div id="flashcardPromptSubjectPicker" style="display:grid;gap:4px;max-height:140px;overflow-y:auto;margin-top:6px;"></div>
+    </div>
+
+    <div class="import-step">
+      <div class="step-title"><span class="step-num">2</span> Copie o prompt para uma IA gratuita</div>
+      <div class="row-with-btn">
+        <textarea class="prompt-box" id="flashcardPromptBox" readonly></textarea>
+        <button class="btn btn-outline btn-small" id="copyFlashcardPromptBtn" style="white-space:nowrap;">Copiar prompt</button>
+      </div>
+      <div class="import-prompt-meta">
+        <span id="flashcardPromptCharCount">0 caracteres</span>
+      </div>
+    </div>
+
+    <div class="import-step">
+      <div class="step-title"><span class="step-num">3</span> Cole a resposta da IA</div>
+      <textarea id="flashcardAiResponseBox" placeholder="Cole aqui a resposta formatada que a IA gerou..." style="width:100%;min-height:110px;"></textarea>
+      <p class="field-hint">Formato esperado: <code>## Matéria</code>, <code>### Tópico</code> e <code>- P: pergunta | R: resposta</code>. Só entram flashcards de matérias/tópicos que já existem no seu edital.</p>
+    </div>
+
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button class="btn btn-primary" id="processFlashcardsBtn">Analisar resposta</button>
+      <button class="btn btn-outline" id="cancelFlashcardImportBtn">Fechar</button>
+    </div>
+    <div class="import-status" id="flashcardImportStatus"></div>
+    <div class="import-results" id="flashcardImportResults" style="display:none;"></div>
   </div>
 
   <!-- PAGE: EDITAL -->
@@ -841,6 +888,7 @@
         <p class="empty-hint" style="margin:0;">O cronograma se repete toda semana. As camadas de Revisões e Histórico mostram o que está agendado e o que você já estudou nos dias reais.</p>
         <button class="btn btn-outline btn-small" id="openAutoScheduleBtn" style="white-space:nowrap;">&#9889; Gerar automaticamente</button>
       </div>
+      <div id="planSemanalForgottenBanner"></div>
 
       <div class="week-toolbar">
         <div class="week-nav">
@@ -896,6 +944,7 @@
 
     <div class="plan-subpage" id="plan-ciclo">
       <p class="empty-hint" style="margin-bottom:14px;">Monte a sequência de matérias do seu ciclo com uma meta de tempo para cada uma. O progresso é calculado pelo tempo já estudado de cada matéria no Histórico.</p>
+      <div id="planCicloForgottenBanner"></div>
       <div class="cycle-layout">
         <div class="card">
           <div id="cycleList"></div>
@@ -997,6 +1046,14 @@
       <div class="field-row">
         <label class="field-label">Tópico <span style="font-weight:400;color:#9B9890;">(opcional)</span></label>
         <select id="timerTopicSelect"></select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Tipo de estudo</label>
+        <select id="timerTipoSelect">
+          <option value="teoria">Teoria</option>
+          <option value="revisao">Revisão</option>
+          <option value="questoes" selected>Questões</option>
+        </select>
       </div>
       <div class="field-row" id="freeGoalFields">
         <label class="field-label">Meta de tempo</label>
@@ -3185,6 +3242,35 @@ try {
   }
 
   const FORGOTTEN_DAYS_THRESHOLD = 10;
+  function getForgottenSubjectsList() {
+    return state.subjects
+      .map(subject => ({ subject, m: subjectStudyMetrics(subject) }))
+      .filter(({ m }) => m.daysWithoutStudy == null || m.daysWithoutStudy > FORGOTTEN_DAYS_THRESHOLD);
+  }
+  function renderPlanForgottenBanner(containerId, excludeSubjectIds, onAdd) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const forgotten = getForgottenSubjectsList().filter(({ subject }) => !excludeSubjectIds.has(subject.id));
+    if (forgotten.length === 0) { el.innerHTML = ""; return; }
+    el.innerHTML = '<div class="plan-forgotten-banner">' +
+      '<span>&#9203; <strong>' + forgotten.length + '</strong> matéria' + (forgotten.length === 1 ? "" : "s") + ' esquecida' + (forgotten.length === 1 ? "" : "s") + ' fora do plano:</span>' +
+      forgotten.map(({ subject }) => '<button class="btn btn-outline btn-small" data-plan-add-forgotten="' + subject.id + '">+ ' + escapeHtml(subject.name) + '</button>').join("") +
+      '</div>';
+    el.querySelectorAll("[data-plan-add-forgotten]").forEach(btn => {
+      btn.addEventListener("click", () => onAdd(btn.getAttribute("data-plan-add-forgotten")));
+    });
+  }
+  function subjectPlanningBadges(subject) {
+    const m = subjectStudyMetrics(subject);
+    const domain = getDomainInfo(m);
+    const forgotten = m.daysWithoutStudy == null || m.daysWithoutStudy > FORGOTTEN_DAYS_THRESHOLD;
+    const daysLabel = m.daysWithoutStudy == null ? "nunca estudada" : m.daysWithoutStudy + " dias sem contato";
+    return {
+      forgotten, daysLabel,
+      domainTag: '<span class="priority-domain ' + domain.className + '" style="margin:0;font-size:9.5px;padding:2px 6px;" title="' + escapeHtml(domain.label + ' · ' + domain.phase) + '">' + escapeHtml(domain.label) + '</span>',
+      forgottenTag: forgotten ? '<span class="plan-forgotten-tag" title="Matéria esquecida — ' + escapeHtml(daysLabel) + '">&#9203; esquecida</span>' : ""
+    };
+  }
   function renderForgottenSubjects(metricsBySubjectIndex) {
     const card = document.getElementById("forgottenCard");
     const list = document.getElementById("forgottenList");
@@ -3408,43 +3494,70 @@ try {
     }
     hint.style.display = "none";
 
-    const width = Math.max(500, dates.length * 46);
-    const height = 220;
-    const padBottom = 26, padTop = 24;
+    const isDark = document.body.getAttribute("data-theme") === "dark";
+    const colors = isDark
+      ? { grid: "rgba(255,255,255,0.09)", axisText: "#9C978D", barText: "#C9C5B9", bar: "#D9B44A", line: "#7FA8E8", dot: "#7FA8E8" }
+      : { grid: "#EDEAE0", axisText: "#9B9890", barText: "#6E6B63", bar: "#E8C468", line: "#2C3E63", dot: "#2C3E63" };
+
+    const stepX = 52, barW = 24;
+    const width = Math.max(540, dates.length * stepX + 40);
+    const height = 260;
+    const padLeft = 34, padRight = 14, padBottom = 30, padTop = 20;
     const plotH = height - padBottom - padTop;
+    const plotW = width - padLeft - padRight;
     const maxQ = Math.max(1, ...dates.map(d => byDate[d].corretas + byDate[d].erradas));
-    const barW = 20;
+    // Arredonda o topo da escala pra um número "redondo" (mais fácil de ler nas linhas de grade)
+    const niceMax = (() => {
+      const raw = maxQ * 1.15;
+      const mag = Math.pow(10, Math.floor(Math.log10(Math.max(1, raw))));
+      const norm = raw / mag;
+      const step = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10;
+      return step * mag;
+    })();
+
+    // Linhas de grade horizontais + rótulos do eixo Y (quantidade de questões)
+    let grid = "", yLabels = "";
+    const GRID_STEPS = 4;
+    for (let i = 0; i <= GRID_STEPS; i++) {
+      const val = Math.round((niceMax / GRID_STEPS) * i);
+      const y = padTop + plotH - (val / niceMax) * plotH;
+      grid += '<line x1="' + padLeft + '" y1="' + y + '" x2="' + (width - padRight) + '" y2="' + y + '" stroke="' + colors.grid + '" stroke-width="1"></line>';
+      yLabels += '<text x="' + (padLeft - 8) + '" y="' + (y + 3) + '" font-size="10" fill="' + colors.axisText + '" text-anchor="end">' + val + '</text>';
+    }
 
     let bars = "", points = [], labels = "";
     dates.forEach((d, i) => {
-      const x = i * 46 + 23;
+      const x = padLeft + i * stepX + stepX / 2;
       const q = byDate[d].corretas + byDate[d].erradas;
-      const pct = q > 0 ? (byDate[d].corretas / q) * 100 : 0;
-      const barH = (q / maxQ) * plotH;
-      bars += '<rect x="' + (x - barW/2) + '" y="' + (height - padBottom - barH) + '" width="' + barW + '" height="' + barH + '" rx="3" fill="#F1E6B8"></rect>';
-      bars += '<text x="' + x + '" y="' + (height - padBottom - barH - 6) + '" font-size="10" fill="#6E6B63" text-anchor="middle">' + q + '</text>';
-      const py = height - padBottom - (pct / 100) * plotH;
+      const pct = q > 0 ? Math.round((byDate[d].corretas / q) * 100) : 0;
+      const barH = (q / niceMax) * plotH;
+      const barY = padTop + plotH - barH;
+      bars += '<rect x="' + (x - barW / 2) + '" y="' + barY + '" width="' + barW + '" height="' + Math.max(barH, q > 0 ? 2 : 0) + '" rx="4" fill="' + colors.bar + '">' +
+        '<title>' + fmtDateLabel(d) + ': ' + q + ' questão' + (q === 1 ? '' : 'ões') + ' · ' + byDate[d].corretas + ' certas / ' + byDate[d].erradas + ' erradas (' + pct + '% de acerto)</title></rect>';
+      if (q > 0) bars += '<text x="' + x + '" y="' + (barY - 6) + '" font-size="10.5" font-weight="600" fill="' + colors.barText + '" text-anchor="middle">' + q + '</text>';
+      const py = padTop + plotH - (pct / 100) * plotH;
       points.push(x + "," + py);
-      labels += '<text x="' + x + '" y="' + (height - 8) + '" font-size="10" fill="#9B9890" text-anchor="middle">' + fmtDateLabel(d).slice(0,5) + '</text>';
+      labels += '<text x="' + x + '" y="' + (height - padBottom + 16) + '" font-size="10" fill="' + colors.axisText + '" text-anchor="middle">' + fmtDateLabel(d).slice(0, 5) + '</text>';
     });
 
     let lineDots = dates.map((d, i) => {
-      const x = i * 46 + 23;
+      const x = padLeft + i * stepX + stepX / 2;
       const q = byDate[d].corretas + byDate[d].erradas;
-      const pct = q > 0 ? (byDate[d].corretas / q) * 100 : 0;
-      const py = height - padBottom - (pct / 100) * plotH;
-      return '<circle cx="' + x + '" cy="' + py + '" r="3.5" fill="#2C3E63"></circle>';
+      const pct = q > 0 ? Math.round((byDate[d].corretas / q) * 100) : 0;
+      const py = padTop + plotH - (pct / 100) * plotH;
+      return '<circle cx="' + x + '" cy="' + py + '" r="3.5" fill="' + colors.dot + '"><title>' + fmtDateLabel(d) + ': ' + pct + '% de acerto</title></circle>';
     }).join("");
 
-    el.innerHTML = '<div style="overflow-x:auto;"><svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '">' +
+    el.innerHTML = '<div style="overflow-x:auto;"><svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '" style="max-width:100%;">' +
+      grid + yLabels +
       bars +
-      '<polyline points="' + points.join(" ") + '" fill="none" stroke="#2C3E63" stroke-width="2"></polyline>' +
+      '<polyline points="' + points.join(" ") + '" fill="none" stroke="' + colors.line + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>' +
       lineDots +
       labels +
       '</svg></div>' +
-      '<div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:#6E6B63;">' +
-      '<span><span style="display:inline-block;width:10px;height:10px;background:#F1E6B8;border-radius: 2px;margin-right:5px;"></span>Questões respondidas</span>' +
-      '<span><span style="display:inline-block;width:10px;height:10px;background:#2C3E63;border-radius:50%;margin-right:5px;"></span>% de acerto no dia</span>' +
+      '<div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:' + colors.axisText + ';">' +
+      '<span><span style="display:inline-block;width:10px;height:10px;background:' + colors.bar + ';border-radius: 2px;margin-right:5px;"></span>Questões respondidas</span>' +
+      '<span><span style="display:inline-block;width:10px;height:10px;background:' + colors.line + ';border-radius:50%;margin-right:5px;"></span>% de acerto no dia</span>' +
       '</div>';
   }
 
@@ -3622,8 +3735,10 @@ try {
               const subject = state.subjects.find(s => s.id === b.subjectId);
               if (!subject) return "";
               const color = subjectColor(subject);
-              return '<div class="week-block" style="background:' + color + ';" title="' + escapeHtml(subject.name) + '">' +
+              const badges = subjectPlanningBadges(subject);
+              return '<div class="week-block" style="background:' + color + ';" title="' + escapeHtml(subject.name) + (badges.forgotten ? " — esquecida (" + badges.daysLabel + ")" : "") + '">' +
                 '<div class="wb-main"><span class="wb-name">' + escapeHtml(subject.name) + '</span><span class="wb-time">' + b.minutes + 'min</span></div>' +
+                (badges.forgotten ? '<span class="wb-forgotten-flag" title="Matéria esquecida — ' + escapeHtml(badges.daysLabel) + '">&#9203;</span>' : '') +
                 '<span class="wb-del" data-del-schedule="' + b.id + '">&times;</span>' +
               '</div>';
             }).join("");
@@ -3654,6 +3769,13 @@ try {
         });
       });
     }
+
+    const scheduledSubjectIds = new Set(state.schedule.map(b => b.subjectId));
+    renderPlanForgottenBanner("planSemanalForgottenBanner", scheduledSubjectIds, (subjectId) => {
+      state.schedule.push({ id: uid(), day: new Date().getDay(), subjectId: subjectId, minutes: 60 });
+      save(); renderSemanal();
+      showUndoToast("Adicionada ao cronograma de hoje (60min) — ajuste o dia/tempo se quiser.", null);
+    });
 
     renderMiniCalendar();
   }
@@ -3853,10 +3975,11 @@ try {
           .reduce((sum, s) => sum + (s.seconds || 0), 0);
         const targetSec = item.minutes * 60;
         const pct = targetSec > 0 ? Math.min(100, Math.round((studiedSec / targetSec) * 100)) : 0;
+        const badges = subjectPlanningBadges(subject);
         return '<div class="cycle-item">' +
           '<div class="cycle-color-dot" style="background:' + color + ';"></div>' +
           '<div class="cycle-item-info">' +
-            '<div class="cycle-item-name">' + escapeHtml(subject.name) + '</div>' +
+            '<div class="cycle-item-name">' + escapeHtml(subject.name) + ' ' + badges.domainTag + ' ' + badges.forgottenTag + '</div>' +
             '<div class="cycle-bar-track"><div class="cycle-bar-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>' +
           '</div>' +
           '<div class="cycle-item-time">' + fmtHoursLong(studiedSec) + ' / ' + fmtHoursLong(targetSec) + '</div>' +
@@ -3870,6 +3993,13 @@ try {
         });
       });
     }
+
+    const cycleSubjectIds = new Set(state.cycle.map(c => c.subjectId));
+    renderPlanForgottenBanner("planCicloForgottenBanner", cycleSubjectIds, (subjectId) => {
+      state.cycle.push({ id: uid(), subjectId: subjectId, minutes: 60, createdAt: Date.now() });
+      save(); renderCiclo();
+      showUndoToast("Adicionada ao ciclo com meta de 60min — ajuste se quiser.", null);
+    });
 
     const totalTargetSec = state.cycle.reduce((a, c) => a + c.minutes * 60, 0);
     const totalStudiedSec = state.cycle.reduce((a, c) => {
@@ -4174,6 +4304,7 @@ try {
       populateSubjectSelect(formSubjectSelect, subjectId, true);
       populateTopicSelect(formTopicSelect, subjectId, opts.topicId != null ? opts.topicId : "", true);
       if (opts.seconds) document.getElementById("formMinutesInput").value = Math.round(opts.seconds / 60);
+      if (opts.tipo) document.getElementById("formTipoSelect").value = opts.tipo;
     }
     overlay.classList.add("open");
   }
@@ -4230,6 +4361,7 @@ try {
   const timerRunningView = document.getElementById("timerRunningView");
   const timerSubjectSelect = document.getElementById("timerSubjectSelect");
   const timerTopicSelect = document.getElementById("timerTopicSelect");
+  const timerTipoSelect = document.getElementById("timerTipoSelect");
   const fabTimerBtn = document.getElementById("fabTimerBtn");
 
   let timerMode = "free"; // "free" | "pomodoro"
@@ -4249,7 +4381,7 @@ try {
     const snapshot = {
       timerMode, timerSeconds, timerTargetSeconds, pomoConfig, pomoPhase, pomoCycleCount,
       pomoPhaseElapsed, pomoPhaseTarget, pomoFocusAccumulated, running: running ? { startedAt: running.startedAt } : null,
-      subjectId: timerSubjectSelect.value || "", topicId: timerTopicSelect.value || "", savedAt: Date.now()
+      subjectId: timerSubjectSelect.value || "", topicId: timerTopicSelect.value || "", tipo: timerTipoSelect.value || "questoes", savedAt: Date.now()
     };
     try { localStorage.setItem(timerStateKey(), JSON.stringify(snapshot)); timerStateDirty = false; } catch (e) {}
   }
@@ -4277,6 +4409,7 @@ try {
       if (s.subjectId) timerSubjectSelect.value = s.subjectId;
       populateSubjectSelect(timerSubjectSelect, s.subjectId || "", true);
       populateTopicSelect(timerTopicSelect, s.subjectId || timerSubjectSelect.value, s.topicId || "", true);
+      timerTipoSelect.value = s.tipo || "questoes";
       let staleHours = 0;
       if (s.running && Number(s.running.startedAt) > 0) {
         staleHours = (Date.now() - Number(s.running.startedAt)) / 3600000;
@@ -4356,9 +4489,13 @@ try {
     const doneInCycle = pomoCycleCount % pomoConfig.cycles;
     el.textContent = "Pomodoros completos: " + pomoCycleCount + " • ciclo até a pausa longa: " + doneInCycle + "/" + pomoConfig.cycles;
   }
+  let pomodoroAudioCtx = null;
   function playPomodoroChime() {
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!pomodoroAudioCtx || pomodoroAudioCtx.state === "closed") {
+        pomodoroAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const ctx = pomodoroAudioCtx;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain); gain.connect(ctx.destination);
@@ -4548,7 +4685,7 @@ try {
     fabTimerBtn.classList.remove("active");
     timerOverlay.classList.remove("open");
     if (total < 1) return;
-    openSessionModal({ subjectId: timerSubjectSelect.value, topicId: timerTopicSelect.value, seconds: total });
+    openSessionModal({ subjectId: timerSubjectSelect.value, topicId: timerTopicSelect.value, seconds: total, tipo: timerTipoSelect.value });
   });
 
   // ---------- Tema claro/escuro ----------
@@ -4571,6 +4708,8 @@ try {
     applyTheme(next);
     localStorage.setItem(THEME_KEY, next);
     pushThemeToCloud(next);
+    const statsPage = document.getElementById("page-estatisticas");
+    if (statsPage && statsPage.classList.contains("active")) renderEvolutionChart();
   });
 
   // ---------- Backup (exportar / importar tudo) ----------
@@ -5145,6 +5284,187 @@ try {
       importFileName.textContent = "Nenhum arquivo selecionado";
     });
   }
+
+  // ---------- Geração de flashcards com IA (mesmo padrão da importação de edital) ----------
+  const flashcardImportPanel = document.getElementById("flashcardImportPanel");
+  const flashcardImportStatus = document.getElementById("flashcardImportStatus");
+  const flashcardImportResults = document.getElementById("flashcardImportResults");
+  const FLASHCARD_PROMPT_HEADER =
+    "Crie flashcards de estudo (pergunta e resposta) para quem está estudando para um concurso público, com base na lista de matérias e tópicos abaixo.\n" +
+    "Para cada tópico, gere de 2 a 4 flashcards cobrindo os pontos mais importantes/mais cobrados em prova. Perguntas objetivas, respostas curtas e diretas (não repita a pergunta na resposta, não invente conteúdo que não é comum nesse tipo de prova).\n" +
+    "Responda SOMENTE no formato abaixo, sem nenhum texto extra, sem markdown adicional:\n\n" +
+    "## Nome da matéria\n### Nome do tópico\n- P: pergunta 1 | R: resposta 1\n- P: pergunta 2 | R: resposta 2\n### Outro tópico\n- P: pergunta | R: resposta\n\n## Outra matéria\n### Tópico\n- P: pergunta | R: resposta\n\n" +
+    "Aqui estão as matérias e tópicos:\n\n";
+
+  function buildFlashcardPrompt() {
+    const picker = document.getElementById("flashcardPromptSubjectPicker");
+    const checked = new Set(Array.from(picker.querySelectorAll("input:checked")).map(i => i.value));
+    const chosen = state.subjects.filter(s => checked.has(s.id));
+    const listText = chosen.map(s =>
+      "- " + s.name + "\n" + s.topics.map(t => "  - " + t.name).join("\n")
+    ).join("\n");
+    const prompt = FLASHCARD_PROMPT_HEADER + (listText || "(nenhuma matéria selecionada)");
+    const box = document.getElementById("flashcardPromptBox");
+    box.value = prompt;
+    const count = document.getElementById("flashcardPromptCharCount");
+    if (count) count.textContent = prompt.length.toLocaleString("pt-BR") + " caracteres";
+  }
+
+  function renderFlashcardSubjectPicker() {
+    const picker = document.getElementById("flashcardPromptSubjectPicker");
+    if (state.subjects.length === 0) {
+      picker.innerHTML = '<p class="empty-hint" style="margin:0;">Cadastre matérias no Edital antes de gerar flashcards.</p>';
+      return;
+    }
+    picker.innerHTML = state.subjects.map(s =>
+      '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;">' +
+        '<input type="checkbox" value="' + s.id + '" checked> ' + escapeHtml(s.name) + ' <span style="color:#9B9890;">(' + s.topics.length + ' tópicos)</span>' +
+      '</label>'
+    ).join("");
+    picker.querySelectorAll("input").forEach(cb => cb.addEventListener("change", buildFlashcardPrompt));
+  }
+
+  document.getElementById("toggleFlashcardImportBtn").addEventListener("click", () => {
+    document.getElementById("moreMenuDropdown").classList.remove("open");
+    flashcardImportPanel.classList.toggle("open");
+    renderFlashcardSubjectPicker();
+    buildFlashcardPrompt();
+  });
+  document.getElementById("cancelFlashcardImportBtn").addEventListener("click", () => {
+    flashcardImportPanel.classList.remove("open");
+    flashcardImportStatus.textContent = ""; flashcardImportStatus.className = "import-status";
+    flashcardImportResults.style.display = "none"; flashcardImportResults.innerHTML = "";
+  });
+  document.getElementById("copyFlashcardPromptBtn").addEventListener("click", (e) => {
+    const prompt = document.getElementById("flashcardPromptBox").value.trim();
+    if (!prompt) return;
+    copyToClipboard(prompt, e.target);
+  });
+
+  // Espera blocos "## Matéria" / "### Tópico" / "- P: pergunta | R: resposta"
+  function parseFlashcardAiResponse(raw) {
+    const lines = raw.replace(/\r\n/g, "\n").split("\n");
+    const materias = [];
+    const errors = [];
+    let currentMateria = null, currentTopico = null;
+    lines.forEach((lineRaw, idx) => {
+      const line = lineRaw.trim();
+      if (!line) return;
+      const mMateria = line.match(/^##\s+(.+)$/);
+      const mTopico = line.match(/^###\s+(.+)$/);
+      const mCard = line.match(/^[-*]\s*P:\s*(.+?)\s*\|\s*R:\s*(.+)$/i);
+      if (mMateria) {
+        currentMateria = { nome: mMateria[1].trim(), topicos: [] };
+        materias.push(currentMateria);
+        currentTopico = null;
+      } else if (mTopico) {
+        if (!currentMateria) { errors.push("Linha " + (idx + 1) + ": tópico fora de uma matéria — ignorado."); return; }
+        currentTopico = { nome: mTopico[1].trim(), cards: [] };
+        currentMateria.topicos.push(currentTopico);
+      } else if (mCard) {
+        if (!currentTopico) { errors.push("Linha " + (idx + 1) + ": flashcard fora de um tópico — ignorado."); return; }
+        const front = mCard[1].trim(), back = mCard[2].trim();
+        if (front && back) currentTopico.cards.push({ front, back });
+      } else {
+        errors.push("Linha " + (idx + 1) + ": não reconhecida — \"" + line.slice(0, 60) + "\"");
+      }
+    });
+    return { materias, errors };
+  }
+
+  let pendingFlashcardImport = null;
+  document.getElementById("processFlashcardsBtn").addEventListener("click", () => {
+    const raw = document.getElementById("flashcardAiResponseBox").value.trim();
+    flashcardImportResults.style.display = "none";
+    flashcardImportResults.innerHTML = "";
+    flashcardImportStatus.className = "import-status";
+    if (!raw) {
+      flashcardImportStatus.className = "import-status error";
+      flashcardImportStatus.textContent = "Cole a resposta da IA antes de continuar.";
+      return;
+    }
+    const parsed = parseFlashcardAiResponse(raw);
+
+    // Só entram cards de matérias/tópicos que já existem no edital atual — não criamos matérias/tópicos novos aqui.
+    let matched = [], unmatchedSubjects = [], unmatchedTopics = [];
+    parsed.materias.forEach(m => {
+      const subject = state.subjects.find(s => namesMatch(s.name, m.nome));
+      if (!subject) { unmatchedSubjects.push(m.nome); return; }
+      m.topicos.forEach(t => {
+        const topic = subject.topics.find(x => namesMatch(x.name, t.nome));
+        if (!topic) { unmatchedTopics.push(m.nome + " — " + t.nome); return; }
+        t.cards.forEach(card => matched.push({ subjectId: subject.id, subjectName: subject.name, topicId: topic.id, topicName: topic.name, front: card.front, back: card.back }));
+      });
+    });
+
+    if (matched.length === 0) {
+      flashcardImportStatus.className = "import-status error";
+      flashcardImportStatus.textContent = "Não encontrei flashcards válidos casando com matérias/tópicos já cadastrados. Confira o formato ## Matéria / ### Tópico / - P: ... | R: ...";
+      return;
+    }
+    pendingFlashcardImport = matched;
+    renderFlashcardImportResults(matched, parsed.errors, unmatchedSubjects, unmatchedTopics);
+  });
+
+  function renderFlashcardImportResults(matched, errors, unmatchedSubjects, unmatchedTopics) {
+    const byTopic = {};
+    matched.forEach(c => {
+      const key = c.subjectName + " — " + c.topicName;
+      byTopic[key] = byTopic[key] || [];
+      byTopic[key].push(c);
+    });
+    flashcardImportResults.style.display = "block";
+    flashcardImportResults.innerHTML =
+      '<div class="import-summary">' +
+        '<span class="import-summary-badge"><strong>' + matched.length + '</strong> flashcards novos</span>' +
+        '<span class="import-summary-badge"><strong>' + Object.keys(byTopic).length + '</strong> tópicos</span>' +
+      '</div>' +
+      (unmatchedSubjects.length ? '<div class="import-warning"><strong>Atenção:</strong> matéria(s) não encontrada(s) no edital atual, ignoradas: ' + unmatchedSubjects.map(escapeHtml).join(", ") + '</div>' : '') +
+      (unmatchedTopics.length ? '<div class="import-warning"><strong>Atenção:</strong> tópico(s) não encontrado(s), ignorados: ' + unmatchedTopics.map(escapeHtml).join(", ") + '</div>' : '') +
+      '<div style="font-size:13px;font-weight:600;margin:10px 0 8px;">Prévia da importação</div>' +
+      Object.keys(byTopic).map(key =>
+        '<div class="result-row" style="display:block;">' +
+          '<div class="result-name">' + escapeHtml(key) + '</div>' +
+          '<div class="result-topics">' + byTopic[key].length + ' flashcard(s)</div>' +
+        '</div>'
+      ).join("") +
+      (errors.length ? '<details style="margin-top:10px;"><summary style="cursor:pointer;font-size:12px;">Ver avisos</summary><ul style="font-size:11px;color:#6E6B63;line-height:1.5;">' +
+        errors.slice(0, 20).map(e => '<li>' + escapeHtml(e) + '</li>').join('') + '</ul></details>' : '') +
+      '<div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+        '<button class="btn btn-primary" id="confirmFlashcardImportBtn">Confirmar importação</button>' +
+        '<button class="btn btn-outline" id="cancelFlashcardImportPreviewBtn">Cancelar</button>' +
+      '</div>';
+
+    document.getElementById("cancelFlashcardImportPreviewBtn").addEventListener("click", () => {
+      flashcardImportResults.style.display = "none";
+      flashcardImportResults.innerHTML = "";
+      flashcardImportStatus.textContent = "Importação cancelada. Nenhum dado foi alterado.";
+      pendingFlashcardImport = null;
+    });
+
+    document.getElementById("confirmFlashcardImportBtn").addEventListener("click", () => {
+      if (!pendingFlashcardImport) return;
+      let added = 0;
+      pendingFlashcardImport.forEach(c => {
+        const subject = state.subjects.find(s => s.id === c.subjectId);
+        const topic = subject ? subject.topics.find(t => t.id === c.topicId) : null;
+        if (!topic) return;
+        topic.flashcards = topic.flashcards || [];
+        topic.flashcards.push({ id: uid(), front: c.front, back: c.back, stage: 0, nextDate: todayKey(), lastReviewed: null });
+        added++;
+      });
+      save();
+      renderAll();
+      flashcardImportStatus.className = "import-status success";
+      flashcardImportStatus.textContent = added + " flashcard(s) adicionados.";
+      flashcardImportResults.style.display = "none";
+      flashcardImportResults.innerHTML = "";
+      document.getElementById("flashcardAiResponseBox").value = "";
+      pendingFlashcardImport = null;
+    });
+  }
+
+
 
   document.getElementById("profileSwitcherBtn").addEventListener("click", (e) => {
     e.stopPropagation();
