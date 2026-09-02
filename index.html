@@ -3300,7 +3300,7 @@ try {
     const totalTopics = state.subjects.reduce((a, s) => a + s.topics.length, 0);
     const doneTopics = state.subjects.reduce((a, s) => a + s.topics.filter(t => t.done).length, 0);
     document.getElementById("statProgressoEdital").textContent = progresso + "%";
-    document.getElementById("statProgressoSub").textContent = worked + " matérias trabalhadas · " + doneTopics + "/" + totalTopics + " tópicos confirmados";
+    document.getElementById("statProgressoSub").textContent = worked + "/" + state.subjects.length + " matérias · " + doneTopics + "/" + totalTopics + " tópicos";
 
     renderForgottenSubjects(metrics);
     renderWeeklyGoal();
