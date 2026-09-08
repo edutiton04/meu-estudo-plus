@@ -26,7 +26,8 @@
     --mono: 'IBM Plex Mono', 'Courier New', monospace;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  html { overflow-x: hidden; }
+  body { margin: 0; font-family: var(--sans); background: var(--paper); color: var(--ink); overflow-x: hidden; }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 5rem; }
 
   /* Header / nav */
@@ -116,6 +117,9 @@
   .field-row { margin-bottom: 12px; }
   .field-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .field-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .tipo-checks { display: flex; gap: 12px; flex-wrap: wrap; padding-top: 5px; }
+  .tipo-check { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink); cursor: pointer; }
+  .tipo-check input[type="checkbox"] { width: 15px; height: 15px; min-height: 0; accent-color: var(--accent); cursor: pointer; }
 
   .save-warning { background: var(--paper-raised); border: 1px solid var(--danger); border-left: 3px solid var(--danger); color: var(--danger); padding: 0.6rem 0.9rem; border-radius: 0; font-size: 13px; margin-bottom: 1.25rem; display: none; }
   .status-banner { background: var(--paper-raised); border: 1px solid var(--bronze); border-left: 3px solid var(--bronze); color: #6B5A10; padding: 0.65rem 0.9rem; border-radius: 0; font-size: 13px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; line-height: 1.4; }
@@ -196,7 +200,30 @@
   /* ---- ESTATISTICAS PAGE ---- */
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; margin-bottom: 20px; border: 1px solid var(--line); }
   .stats-grid .stat-card { border: none; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-  #weeklyGoalCard, #forgottenCard { margin-bottom: 20px; }
+  .stats-top-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .compact-card { padding: 13px 15px; }
+  .compact-card .chart-title { font-size: 9.5px; margin-bottom: 8px; padding-bottom: 6px; }
+  .compact-card .goal-row { padding: 5px 0; }
+  .compact-card .goal-row-head { font-size: 12px; margin-bottom: 4px; }
+  .compact-card .forgotten-row { padding: 5px 0; font-size: 12px; }
+  .compact-card .empty-hint { font-size: 11px; }
+  .stats-columns { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .hrs-bar-row { display: grid; grid-template-columns: minmax(0,120px) 1fr 62px; align-items: center; gap: 10px; padding: 7px 0; }
+  .hrs-bar-name { font-size: 12.5px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hrs-bar-track { height: 8px; background: var(--line); overflow: hidden; }
+  .hrs-bar-fill { height: 100%; }
+  .hrs-bar-value { font-size: 12px; font-weight: 700; font-family: var(--mono); text-align: right; white-space: nowrap; }
+  .week-legend { display: flex; flex-direction: column; gap: 8px; margin-left: 4px; min-width: 0; }
+  .week-legend-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .week-legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .week-legend-name { flex: 1; min-width: 0; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .week-legend-pct { font-weight: 700; font-family: var(--mono); color: var(--ink); white-space: nowrap; }
+  .stat-sub-positive { color: var(--olive); font-weight: 600; }
+  @media (max-width: 900px) { .stats-columns { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .stats-grid { grid-template-columns: 1fr; } .stats-grid .stat-card { border-right: none; } }
+  @media (max-width: 480px) { .hrs-bar-row { grid-template-columns: minmax(0,90px) 1fr 56px; gap: 6px; } }
+  [data-theme="dark"] .hrs-bar-track { background: #35312A; }
+  #weeklyGoalCard, #forgottenCard { margin-bottom: 0; }
   .stat-card { padding: 1.3rem 1.2rem; }
   .stat-card .stat-label { font-size: 10.5px; line-height: 1.3; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; margin-bottom: 10px; min-height: 28.6px; }
   .stat-card .stat-value { font-family: var(--serif); font-weight: 700; font-size: 26px; color: var(--ink); }
@@ -478,6 +505,14 @@
     table.topics-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
     header { gap: 12px; }
     .header-actions { width: 100%; flex-wrap: wrap; justify-content: flex-end; }
+    .wrap { padding: 1.5rem 1.25rem 5rem; }
+    .cycle-ring-wrap { width: 190px; height: 190px; }
+  }
+  @media (min-width: 641px) and (max-width: 1024px) {
+    /* Tablet: mantém 2 colunas onde couber, mas com menos respiro que no desktop */
+    .stats-top-grid { grid-template-columns: 1fr 1fr; }
+    .field-grid-3 { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .priority-meta-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
   }
   @media (max-width: 780px) {
     .field-grid-2, .field-grid-3 { grid-template-columns: 1fr; }
@@ -493,6 +528,11 @@
     .header-inner { padding: 12px 1rem; gap: 12px; }
     .plan-sidebar { flex-direction: column; }
     .plan-sidebar .card { min-width: 0; }
+    .stats-top-grid { grid-template-columns: 1fr; }
+    .add-cycle-row { flex-direction: column; align-items: stretch; }
+    .add-cycle-row .field-item { width: 100%; }
+    .week-toolbar { flex-direction: column; align-items: stretch; }
+    .week-range-label { min-width: 0; }
   }
   @media (max-width: 480px) {
     .week-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -505,6 +545,15 @@
     .priority-meta-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0; }
     .stat-card { padding: 1.1rem 1rem; }
     .stat-card .stat-value { font-size: 20px; }
+    .cycle-ring-wrap { width: 160px; height: 160px; }
+    .timer-card { padding: 1.3rem 1rem; }
+    .tipo-checks { gap: 8px 14px; }
+    .header-inner { padding: 10px 0.85rem; }
+    .logo-badge { width: 26px; height: 26px; }
+    .wrap { padding: 0.85rem 0.85rem 5rem; }
+    .edital-title { font-size: 19px; }
+    .modal-actions { flex-wrap: wrap; }
+    .field-grid-3 > div, .field-grid-2 > div { min-width: 0; }
   }
 
   /* ---- MODO ESCURO ---- */
@@ -846,18 +895,53 @@
   <!-- PAGE: ESTATISTICAS -->
   <div class="page" id="page-estatisticas">
     <h1 class="edital-title" style="margin-bottom:16px;">Estatísticas</h1>
-    <div class="card" id="weeklyGoalCard">
-      <div class="chart-title" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <span>&#127919; Meta semanal</span>
-        <button type="button" class="icon-btn" id="editWeeklyGoalBtn" title="Definir meta geral" aria-label="Definir meta semanal geral">&#9998;</button>
+
+    <div class="stats-top-grid">
+      <div class="card compact-card" id="weeklyGoalCard">
+        <div class="chart-title" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <span>Meta semanal</span>
+          <button type="button" class="icon-btn" id="editWeeklyGoalBtn" title="Definir meta geral" aria-label="Definir meta semanal geral">&#9998;</button>
+        </div>
+        <div id="weeklyGoalOverall"></div>
+        <div id="weeklyGoalBySubject"></div>
       </div>
-      <div id="weeklyGoalOverall"></div>
-      <div id="weeklyGoalBySubject"></div>
+      <div class="card compact-card" id="forgottenCard" style="display:none;">
+        <div class="chart-title">Matérias esquecidas</div>
+        <div id="forgottenList"></div>
+      </div>
     </div>
-    <div class="card" id="forgottenCard" style="display:none;">
-      <div class="chart-title">&#8987; Matérias esquecidas</div>
-      <div id="forgottenList"></div>
+
+    <div class="stats-grid">
+      <div class="card stat-card">
+        <div class="stat-label">Horas estudadas</div>
+        <div class="stat-value" id="statTempo">0min</div>
+        <div class="stat-sub" id="statTempoSub">Nenhum estudo essa semana ainda</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Sequência de estudos</div>
+        <div class="stat-value" id="statStreak"><span class="streak-flame">&#128293;</span> 0</div>
+        <div class="stat-sub" id="statStreakSub">Recorde: 0 dias</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Cobertura do edital</div>
+        <div class="stat-value" id="statProgressoEdital">0%</div>
+        <div class="stat-sub" id="statProgressoSub">0/0 tópicos revisados</div>
+      </div>
     </div>
+
+    <div class="stats-columns">
+      <div class="card chart-card">
+        <div class="chart-title">Horas por matéria (últimos 30 dias)</div>
+        <div id="hoursBySubjectList"></div>
+        <p class="empty-hint" id="hoursBySubjectEmptyHint" style="display:none;">Registre sessões de estudo para ver as horas por matéria aqui.</p>
+      </div>
+      <div class="card chart-card">
+        <div class="chart-title">Distribuição da semana</div>
+        <div id="weekDistribution"></div>
+        <p class="empty-hint" id="weekDistributionEmptyHint" style="display:none;">Nenhuma sessão registrada esta semana ainda.</p>
+      </div>
+    </div>
+
     <div class="stats-grid">
       <div class="card stat-card donut-card">
         <div id="desempenhoDonut"></div>
@@ -867,26 +951,12 @@
         </div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">Tempo de estudo</div>
-        <div class="stat-value" id="statTempo">0min</div>
-        <div class="stat-sub" id="statTempoSub">0 dias estudados</div>
-      </div>
-      <div class="card stat-card">
         <div class="stat-label">Constância nos estudos</div>
         <div class="stat-value" id="statConstancia">0%</div>
         <div class="stat-sub" id="statConstanciaSub">0 dias estudados / 0 dias totais</div>
       </div>
-      <div class="card stat-card">
-        <div class="stat-label">Progresso no edital</div>
-        <div class="stat-value" id="statProgressoEdital">0%</div>
-        <div class="stat-sub" id="statProgressoSub">0 matérias trabalhadas</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-label">Sequência de dias</div>
-        <div class="stat-value" id="statStreak"><span class="streak-flame">&#128293;</span> 0</div>
-        <div class="stat-sub" id="statStreakSub">Estude hoje para começar</div>
-      </div>
     </div>
+
     <div class="card chart-card">
       <div class="chart-title" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
         <span>Evolução no tempo (questões respondidas e desempenho por dia)</span>
@@ -1084,12 +1154,13 @@
         <select id="timerTopicSelect"></select>
       </div>
       <div class="field-row">
-        <label class="field-label">Tipo de estudo</label>
-        <select id="timerTipoSelect">
-          <option value="teoria">Teoria</option>
-          <option value="revisao">Revisão</option>
-          <option value="questoes" selected>Questões</option>
-        </select>
+        <label class="field-label">Tipo de estudo <span style="font-weight:400;color:var(--muted);">(marque quantos precisar)</span></label>
+        <div class="tipo-checks">
+          <label class="tipo-check"><input type="checkbox" class="timerTipoCheck" value="teoria" /> Teoria</label>
+          <label class="tipo-check"><input type="checkbox" class="timerTipoCheck" value="revisao" /> Revisão</label>
+          <label class="tipo-check"><input type="checkbox" class="timerTipoCheck" value="questoes" checked /> Questões</label>
+        </div>
+        <p class="field-hint" id="timerTipoSplitHint" style="display:none;">O tempo cronometrado será dividido igualmente entre os tipos marcados ao salvar.</p>
       </div>
       <div class="field-row" id="freeGoalFields">
         <label class="field-label">Meta de tempo</label>
@@ -1176,18 +1247,19 @@
       </div>
       <div class="field-grid-2 field-row">
         <div>
-          <label class="field-label">Tipo</label>
-          <select id="formTipoSelect">
-            <option value="teoria">Teoria</option>
-            <option value="revisao">Revisão</option>
-            <option value="questoes">Questões</option>
-          </select>
+          <label class="field-label">Tipo <span style="font-weight:400;color:var(--muted);">(marque quantos precisar)</span></label>
+          <div class="tipo-checks">
+            <label class="tipo-check"><input type="checkbox" class="formTipoCheck" value="teoria" /> Teoria</label>
+            <label class="tipo-check"><input type="checkbox" class="formTipoCheck" value="revisao" /> Revisão</label>
+            <label class="tipo-check"><input type="checkbox" class="formTipoCheck" value="questoes" checked /> Questões</label>
+          </div>
         </div>
         <div>
           <label class="field-label">Data</label>
           <input type="date" id="formDateInput" />
         </div>
       </div>
+      <p class="field-hint" id="formTipoSplitHint" style="display:none;margin-top:-6px;">A duração total abaixo será dividida igualmente entre os tipos marcados.</p>
       <div class="field-grid-3 field-row">
         <div>
           <label class="field-label">Duração (min)</label>
@@ -3395,6 +3467,15 @@ try {
     save(); renderAll();
   });
 
+  function currentWeekSeconds(subjectId) {
+    const weekStart = getWeekStart(new Date());
+    const weekStartKey = todayKey(weekStart);
+    const weekEndKey = todayKey(addDays(weekStart, 7));
+    return state.sessions
+      .filter(s => s.date >= weekStartKey && s.date < weekEndKey && (!subjectId || s.subjectId === subjectId))
+      .reduce((a, s) => a + (Number(s.seconds) || 0), 0);
+  }
+
   function renderEstatisticas() {
     const allCorretas = state.sessions.reduce((a, s) => a + (s.corretas || 0), 0);
     const allErradas = state.sessions.reduce((a, s) => a + (s.erradas || 0), 0);
@@ -3405,7 +3486,10 @@ try {
     const totalSeconds = state.sessions.reduce((a, s) => a + (s.seconds || 0), 0);
     const studyDates = Array.from(new Set(state.sessions.map(s => s.date))).sort();
     document.getElementById("statTempo").textContent = fmtHoursLong(totalSeconds);
-    document.getElementById("statTempoSub").textContent = studyDates.length + (studyDates.length === 1 ? " dia estudado" : " dias estudados");
+    const weekSeconds = currentWeekSeconds();
+    const tempoSubEl = document.getElementById("statTempoSub");
+    tempoSubEl.textContent = weekSeconds > 0 ? "+" + fmtHoursLong(weekSeconds) + " essa semana" : "Nenhum estudo essa semana ainda";
+    tempoSubEl.className = "stat-sub" + (weekSeconds > 0 ? " stat-sub-positive" : "");
 
     let constancia = 0, diasTotais = 0;
     if (studyDates.length > 0) {
@@ -3419,16 +3503,17 @@ try {
 
     const metrics = state.subjects.map(subjectStudyMetrics);
     const progresso = metrics.length ? Math.round(metrics.reduce((a, m) => a + m.coverage, 0) / metrics.length) : 0;
-    const worked = metrics.filter(m => m.sessions.length > 0 || m.doneTopics > 0).length;
     const totalTopics = state.subjects.reduce((a, s) => a + s.topics.length, 0);
     const doneTopics = state.subjects.reduce((a, s) => a + s.topics.filter(t => t.done).length, 0);
     document.getElementById("statProgressoEdital").textContent = progresso + "%";
-    document.getElementById("statProgressoSub").textContent = worked + "/" + state.subjects.length + " matérias · " + doneTopics + "/" + totalTopics + " tópicos";
+    document.getElementById("statProgressoSub").textContent = doneTopics + "/" + totalTopics + " tópicos revisados";
 
     renderForgottenSubjects(metrics);
     renderWeeklyGoal();
 
     renderStreak();
+    renderHoursBySubject();
+    renderWeekDistribution();
     renderEvolutionChart();
     renderSubjectStats();
   }
@@ -3448,16 +3533,104 @@ try {
     }
     return streak;
   }
+  function computeLongestStreak() {
+    const dates = Array.from(new Set(state.sessions.map(s => s.date))).sort();
+    if (dates.length === 0) return 0;
+    let longest = 1, current = 1;
+    for (let i = 1; i < dates.length; i++) {
+      const prev = new Date(dates[i - 1] + "T00:00:00");
+      const cur = new Date(dates[i] + "T00:00:00");
+      const diffDays = Math.round((cur - prev) / 86400000);
+      if (diffDays === 1) { current++; longest = Math.max(longest, current); }
+      else if (diffDays > 1) { current = 1; }
+    }
+    return longest;
+  }
   function renderStreak() {
     const streak = computeStreak();
+    const record = Math.max(streak, computeLongestStreak());
     const valueEl = document.getElementById("statStreak");
     const subEl = document.getElementById("statStreakSub");
     if (!valueEl || !subEl) return;
     valueEl.innerHTML = '<span class="streak-flame">&#128293;</span> ' + streak;
-    const studiedToday = state.sessions.some(s => s.date === todayKey());
-    if (streak === 0) subEl.textContent = "Estude hoje para começar";
-    else if (studiedToday) subEl.textContent = streak === 1 ? "1 dia seguido — continue amanhã!" : streak + " dias seguidos — continue assim!";
-    else subEl.textContent = "Estude hoje para manter a sequência";
+    subEl.textContent = "Recorde: " + record + (record === 1 ? " dia" : " dias");
+  }
+
+  // ---------- Horas por matéria (últimos 30 dias) ----------
+  function renderHoursBySubject() {
+    const listEl = document.getElementById("hoursBySubjectList");
+    const hint = document.getElementById("hoursBySubjectEmptyHint");
+    if (!listEl) return;
+    const cutoff = todayKey(addDays(new Date(), -30));
+    const bySubject = state.subjects.map(subject => {
+      const seconds = state.sessions
+        .filter(s => s.subjectId === subject.id && s.date >= cutoff)
+        .reduce((a, s) => a + (Number(s.seconds) || 0), 0);
+      return { subject, seconds };
+    }).filter(r => r.seconds > 0).sort((a, b) => b.seconds - a.seconds);
+    if (bySubject.length === 0) {
+      listEl.innerHTML = "";
+      if (hint) hint.style.display = "block";
+      return;
+    }
+    if (hint) hint.style.display = "none";
+    const max = bySubject[0].seconds;
+    listEl.innerHTML = bySubject.slice(0, 10).map(r => {
+      const pct = max > 0 ? Math.max(4, Math.round((r.seconds / max) * 100)) : 0;
+      const color = subjectColor(r.subject);
+      return '<div class="hrs-bar-row">' +
+        '<div class="hrs-bar-name" title="' + escapeHtml(r.subject.name) + '">' + escapeHtml(r.subject.name) + '</div>' +
+        '<div class="hrs-bar-track"><div class="hrs-bar-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>' +
+        '<div class="hrs-bar-value">' + fmtHoursLong(r.seconds) + '</div>' +
+      '</div>';
+    }).join("");
+  }
+
+  // ---------- Distribuição da semana (por matéria) ----------
+  function renderWeekDistribution() {
+    const wrap = document.getElementById("weekDistribution");
+    const hint = document.getElementById("weekDistributionEmptyHint");
+    if (!wrap) return;
+    const weekStart = getWeekStart(new Date());
+    const weekStartKey = todayKey(weekStart);
+    const weekEndKey = todayKey(addDays(weekStart, 7));
+    const weekSessions = state.sessions.filter(s => s.date >= weekStartKey && s.date < weekEndKey);
+    const totalSeconds = weekSessions.reduce((a, s) => a + (Number(s.seconds) || 0), 0);
+    if (totalSeconds <= 0) {
+      wrap.innerHTML = "";
+      if (hint) hint.style.display = "block";
+      return;
+    }
+    if (hint) hint.style.display = "none";
+    const bySubject = state.subjects.map(subject => {
+      const seconds = weekSessions.filter(s => s.subjectId === subject.id).reduce((a, s) => a + (Number(s.seconds) || 0), 0);
+      return { subject, seconds };
+    }).filter(r => r.seconds > 0).sort((a, b) => b.seconds - a.seconds);
+    const accountedSeconds = bySubject.reduce((a, r) => a + r.seconds, 0);
+    const outrosSeconds = totalSeconds - accountedSeconds;
+    const segments = bySubject.map(r => ({ label: r.subject.name, seconds: r.seconds, color: subjectColor(r.subject) }));
+    if (outrosSeconds > 0) segments.push({ label: "Outras sessões", seconds: outrosSeconds, color: "#9C978D" });
+
+    const isDark = document.body.getAttribute("data-theme") === "dark";
+    const trackColor = isDark ? "#35312A" : "#D8D0BE";
+    const size = 132, stroke = 20, r = (size - stroke) / 2, c = 2 * Math.PI * r;
+    let cursor = 0;
+    const arcs = segments.map(seg => {
+      const frac = seg.seconds / totalSeconds;
+      const dash = frac * c;
+      const offset = c - cursor;
+      cursor += dash;
+      return '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" stroke="' + seg.color + '" stroke-width="' + stroke + '" fill="none" stroke-dasharray="' + dash + ' ' + (c - dash) + '" stroke-dashoffset="' + offset + '"></circle>';
+    }).join("");
+    const svg = '<svg width="' + size + '" height="' + size + '" style="flex-shrink:0;transform:rotate(-90deg);">' +
+      '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" stroke="' + trackColor + '" stroke-width="' + stroke + '" fill="none"></circle>' +
+      arcs +
+      '</svg>';
+    const legend = '<div class="week-legend">' + segments.map(seg => {
+      const pct = Math.round((seg.seconds / totalSeconds) * 100);
+      return '<div class="week-legend-row"><span class="week-legend-dot" style="background:' + seg.color + ';"></span><span class="week-legend-name" title="' + escapeHtml(seg.label) + '">' + escapeHtml(seg.label) + '</span><span class="week-legend-pct">' + pct + '%</span></div>';
+    }).join("") + '</div>';
+    wrap.innerHTML = '<div class="donut-card">' + svg + legend + '</div>';
   }
 
   // ---------- Estatísticas por matéria ----------
@@ -4309,6 +4482,18 @@ try {
     if (selectedId != null) selectEl.value = selectedId;
   }
 
+  function setFormTipoChecks(tipos) {
+    document.querySelectorAll(".formTipoCheck").forEach(cb => { cb.checked = tipos.indexOf(cb.value) !== -1; });
+    updateTipoSplitHint();
+  }
+  function updateTipoSplitHint() {
+    const hint = document.getElementById("formTipoSplitHint");
+    if (!hint) return;
+    const checked = document.querySelectorAll(".formTipoCheck:checked").length;
+    hint.style.display = checked > 1 ? "block" : "none";
+  }
+  document.querySelectorAll(".formTipoCheck").forEach(cb => cb.addEventListener("change", updateTipoSplitHint));
+
   function openSessionModal(opts) {
     opts = opts || {};
     editingSessionId = null;
@@ -4318,7 +4503,7 @@ try {
     document.getElementById("formErradasInput").value = 0;
     document.getElementById("formNotesInput").value = "";
     document.getElementById("formDateInput").value = todayKey();
-    document.getElementById("formTipoSelect").value = "questoes";
+    setFormTipoChecks(["questoes"]);
     document.getElementById("sessionModalTitle").textContent = "Adicionar estudo";
 
     if (opts.editId) {
@@ -4328,7 +4513,7 @@ try {
         document.getElementById("sessionModalTitle").textContent = "Editar estudo";
         populateSubjectSelect(formSubjectSelect, s.subjectId || "", true);
         populateTopicSelect(formTopicSelect, s.subjectId, s.topicId || "", true);
-        document.getElementById("formTipoSelect").value = s.tipo;
+        setFormTipoChecks([s.tipo]);
         document.getElementById("formDateInput").value = s.date;
         document.getElementById("formMinutesInput").value = Math.round(s.seconds / 60);
         document.getElementById("formCorretasInput").value = s.corretas;
@@ -4340,7 +4525,7 @@ try {
       populateSubjectSelect(formSubjectSelect, subjectId, true);
       populateTopicSelect(formTopicSelect, subjectId, opts.topicId != null ? opts.topicId : "", true);
       if (opts.seconds) document.getElementById("formMinutesInput").value = Math.round(opts.seconds / 60);
-      if (opts.tipo) document.getElementById("formTipoSelect").value = opts.tipo;
+      if (opts.tipo) setFormTipoChecks(Array.isArray(opts.tipo) ? opts.tipo : [opts.tipo]);
     }
     overlay.classList.add("open");
   }
@@ -4367,23 +4552,42 @@ try {
       if (t) topicId = t.id;
     }
 
-    const minutes = Number(document.getElementById("formMinutesInput").value) || 0;
+    const totalMinutes = Number(document.getElementById("formMinutesInput").value) || 0;
     const corretas = Number(document.getElementById("formCorretasInput").value) || 0;
     const erradas = Number(document.getElementById("formErradasInput").value) || 0;
-    const tipo = document.getElementById("formTipoSelect").value;
     const date = document.getElementById("formDateInput").value || todayKey();
     const notes = document.getElementById("formNotesInput").value.trim();
+
+    let tipos = Array.from(document.querySelectorAll(".formTipoCheck:checked")).map(cb => cb.value);
+    if (tipos.length === 0) tipos = ["questoes"]; // fallback: nenhum tipo marcado
+
+    // Quando mais de um tipo é marcado (ex.: estudou teoria e questões no mesmo bloco),
+    // a duração total é dividida igualmente entre eles e cada tipo vira um registro próprio.
+    const perTypeSeconds = Math.round((totalMinutes / tipos.length) * 60);
 
     if (editingSessionId) {
       const s = state.sessions.find(x => x.id === editingSessionId);
       if (s) {
-        s.subjectId = subjectId; s.topicId = topicId; s.tipo = tipo; s.date = date;
-        s.seconds = minutes * 60; s.corretas = corretas; s.erradas = erradas; s.notes = notes;
+        s.subjectId = subjectId; s.topicId = topicId; s.tipo = tipos[0]; s.date = date;
+        s.seconds = perTypeSeconds;
+        s.corretas = tipos[0] === "questoes" ? corretas : 0;
+        s.erradas = tipos[0] === "questoes" ? erradas : 0;
+        s.notes = notes;
       }
+      tipos.slice(1).forEach(tipo => {
+        state.sessions.push({
+          id: uid(), subjectId: subjectId, topicId: topicId, tipo: tipo, date: date,
+          seconds: perTypeSeconds, corretas: tipo === "questoes" ? corretas : 0, erradas: tipo === "questoes" ? erradas : 0,
+          notes: "", createdAt: Date.now()
+        });
+      });
     } else {
-      state.sessions.push({
-        id: uid(), subjectId: subjectId, topicId: topicId, tipo: tipo, date: date,
-        seconds: minutes * 60, corretas: corretas, erradas: erradas, notes: notes, createdAt: Date.now()
+      tipos.forEach((tipo, i) => {
+        state.sessions.push({
+          id: uid(), subjectId: subjectId, topicId: topicId, tipo: tipo, date: date,
+          seconds: perTypeSeconds, corretas: tipo === "questoes" ? corretas : 0, erradas: tipo === "questoes" ? erradas : 0,
+          notes: i === 0 ? notes : "", createdAt: Date.now()
+        });
       });
     }
     save();
@@ -4397,8 +4601,23 @@ try {
   const timerRunningView = document.getElementById("timerRunningView");
   const timerSubjectSelect = document.getElementById("timerSubjectSelect");
   const timerTopicSelect = document.getElementById("timerTopicSelect");
-  const timerTipoSelect = document.getElementById("timerTipoSelect");
   const fabTimerBtn = document.getElementById("fabTimerBtn");
+
+  function getTimerTipos() {
+    const checked = Array.from(document.querySelectorAll(".timerTipoCheck:checked")).map(cb => cb.value);
+    return checked.length ? checked : ["questoes"];
+  }
+  function setTimerTipoChecks(tipos) {
+    tipos = Array.isArray(tipos) ? tipos : [tipos || "questoes"];
+    document.querySelectorAll(".timerTipoCheck").forEach(cb => { cb.checked = tipos.indexOf(cb.value) !== -1; });
+    updateTimerTipoSplitHint();
+  }
+  function updateTimerTipoSplitHint() {
+    const hint = document.getElementById("timerTipoSplitHint");
+    if (!hint) return;
+    hint.style.display = document.querySelectorAll(".timerTipoCheck:checked").length > 1 ? "block" : "none";
+  }
+  document.querySelectorAll(".timerTipoCheck").forEach(cb => cb.addEventListener("change", updateTimerTipoSplitHint));
 
   let timerMode = "free"; // "free" | "pomodoro"
   let timerSeconds = 0;
@@ -4417,7 +4636,7 @@ try {
     const snapshot = {
       timerMode, timerSeconds, timerTargetSeconds, pomoConfig, pomoPhase, pomoCycleCount,
       pomoPhaseElapsed, pomoPhaseTarget, pomoFocusAccumulated, running: running ? { startedAt: running.startedAt } : null,
-      subjectId: timerSubjectSelect.value || "", topicId: timerTopicSelect.value || "", tipo: timerTipoSelect.value || "questoes", savedAt: Date.now()
+      subjectId: timerSubjectSelect.value || "", topicId: timerTopicSelect.value || "", tipo: getTimerTipos(), savedAt: Date.now()
     };
     try { localStorage.setItem(timerStateKey(), JSON.stringify(snapshot)); timerStateDirty = false; } catch (e) {}
   }
@@ -4445,7 +4664,7 @@ try {
       if (s.subjectId) timerSubjectSelect.value = s.subjectId;
       populateSubjectSelect(timerSubjectSelect, s.subjectId || "", true);
       populateTopicSelect(timerTopicSelect, s.subjectId || timerSubjectSelect.value, s.topicId || "", true);
-      timerTipoSelect.value = s.tipo || "questoes";
+      setTimerTipoChecks(s.tipo || "questoes");
       let staleHours = 0;
       if (s.running && Number(s.running.startedAt) > 0) {
         staleHours = (Date.now() - Number(s.running.startedAt)) / 3600000;
@@ -4721,7 +4940,7 @@ try {
     fabTimerBtn.classList.remove("active");
     timerOverlay.classList.remove("open");
     if (total < 1) return;
-    openSessionModal({ subjectId: timerSubjectSelect.value, topicId: timerTopicSelect.value, seconds: total, tipo: timerTipoSelect.value });
+    openSessionModal({ subjectId: timerSubjectSelect.value, topicId: timerTopicSelect.value, seconds: total, tipo: getTimerTipos() });
   });
 
   // ---------- Tema claro/escuro ----------
