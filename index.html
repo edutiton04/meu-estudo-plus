@@ -98,10 +98,11 @@
     transform: none;
   }
   .stats-grid .stat-card, .sim-stats .stat-card, .hist-entry, .sim-row { box-shadow: none; }
-  .btn { cursor: pointer; border: 1px solid var(--ink); border-radius: 0; background: transparent; color: var(--ink); padding: 9px 16px; font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; font-family: var(--sans); display: inline-flex; align-items: center; gap: 6px; min-height: 38px; transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
-  .btn:active { transform: none; }
-  .btn:disabled { opacity: 0.5; cursor: default; }
-  .btn-primary { background: var(--accent); color: #F3EFE6; border-color: var(--accent); font-weight: 700; box-shadow: none; }
+  .btn { cursor: pointer; border: 1px solid var(--ink); border-radius: 0; background: transparent; color: var(--ink); padding: 9px 16px; font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; font-family: var(--sans); display: inline-flex; align-items: center; gap: 6px; min-height: 38px; box-shadow: 2px 2px 0 rgba(33,31,27,0.14); transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
+  .btn:hover { box-shadow: 4px 4px 0 rgba(33,31,27,0.20); transform: translate(-1px, -2px); }
+  .btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 rgba(33,31,27,0.14); }
+  .btn:disabled { opacity: 0.5; cursor: default; box-shadow: none; transform: none; }
+  .btn-primary { background: var(--accent); color: #F3EFE6; border-color: var(--accent); font-weight: 700; }
   .btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
   .btn-primary:active { background: var(--accent-dark); }
   .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--line-strong); }
@@ -592,6 +593,9 @@
   [data-theme="dark"] .sync-status, [data-theme="dark"] .account-email { color: #A8AEB8; }
   [data-theme="dark"] .auth-forgot-link { color: #C99A97; }
   [data-theme="dark"] .auth-security-note { color: #737B87; }
+  [data-theme="dark"] .btn { box-shadow: 2px 2px 0 rgba(0,0,0,0.35); }
+  [data-theme="dark"] .btn:hover { box-shadow: 4px 4px 0 rgba(0,0,0,0.45); }
+  [data-theme="dark"] .btn:active { box-shadow: 1px 1px 0 rgba(0,0,0,0.35); }
   [data-theme="dark"] .btn-outline { background: transparent; color: #E4E6EA; border-color: #2B303A; }
   [data-theme="dark"] .btn-outline:hover { background: #262B33; border-color: #E4E6EA; }
   [data-theme="dark"] .btn-ghost { background: transparent; }
