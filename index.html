@@ -27,11 +27,13 @@
   }
   * { box-sizing: border-box; }
   html { overflow-x: hidden; }
-  body { margin: 0; font-family: var(--sans); background: var(--paper); color: var(--ink); overflow-x: hidden; }
+  body { margin: 0; font-family: var(--sans); background: var(--paper-deep); color: var(--ink); overflow-x: hidden; }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 5rem; }
 
   /* Header / nav */
-  header { background: var(--paper); border-bottom: 3px double var(--ink); box-shadow: none; margin-bottom: 1.75rem; position: relative; z-index: 30; }
+  header { background: var(--paper); border-bottom: 3px double var(--ink); box-shadow: none; margin-bottom: 1.75rem; position: relative; z-index: 30; transition: box-shadow 0.2s ease; }
+  header.is-scrolled { box-shadow: 0 3px 0 rgba(33,31,27,0.08), 0 6px 0 rgba(33,31,27,0.05); }
+  [data-theme="dark"] header.is-scrolled { box-shadow: 0 3px 0 rgba(0,0,0,0.3), 0 6px 0 rgba(0,0,0,0.18); }
   .header-inner { max-width: 1180px; margin: 0 auto; padding: 16px 1.5rem 12px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
   .logo { display: flex; align-items: center; gap: 10px; }
   .logo-badge { width: 30px; height: 30px; border-radius: 0; background: transparent; color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; font-weight: 700; border: 1.5px solid var(--ink); }
@@ -86,12 +88,16 @@
   .examinfo-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; width: 150px; flex-shrink: 0; padding-top: 1px; }
   .examinfo-value { flex: 1; font-size: 13.5px; color: var(--ink); line-height: 1.5; }
 
-  .card { background: var(--paper-raised); border-radius: 0; border: 1px solid var(--line); box-shadow: none; transition: border-color 0.15s ease; padding: 20px; }
-  .stat-card, .subject-card, .sim-row, .hist-entry, .week-day { transition: border-color 0.15s ease; }
-  .stat-card:hover, .subject-card:hover, .sim-row:hover, .hist-entry:hover, .week-day:hover {
+  .card { background: var(--paper-raised); border-radius: 0; border: 1px solid var(--line); box-shadow: 3px 3px 0 rgba(33,31,27,0.10); transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; padding: 20px; }
+  .card:hover { box-shadow: 5px 5px 0 rgba(33,31,27,0.15); border-color: var(--line-strong); transform: translate(-1px, -2px); }
+  .stat-card, .subject-card, .sim-row, .hist-entry, .week-day { transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
+  /* linhas de listas e células de grade ficam "encaixadas": sem sombra própria nem elevação, só o realce de borda */
+  .stat-card:hover, .sim-row:hover, .hist-entry:hover, .week-day:hover {
     box-shadow: none;
     border-color: var(--line-strong);
+    transform: none;
   }
+  .stats-grid .stat-card, .sim-stats .stat-card, .hist-entry, .sim-row { box-shadow: none; }
   .btn { cursor: pointer; border: 1px solid var(--ink); border-radius: 0; background: transparent; color: var(--ink); padding: 9px 16px; font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; font-family: var(--sans); display: inline-flex; align-items: center; gap: 6px; min-height: 38px; transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
   .btn:active { transform: none; }
   .btn:disabled { opacity: 0.5; cursor: default; }
@@ -157,7 +163,7 @@
 
   /* ---- EDITAL PAGE ---- */
   .edital-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--ink); padding-bottom: 10px; }
-  .edital-title { font-family: var(--serif); font-weight: 700; font-size: 22px; margin: 0; }
+  .edital-title { font-family: var(--serif); font-weight: 700; font-size: 22px; margin: 0; padding-bottom: 10px; border-bottom: 3px double var(--line-strong); }
   .edital-title::before { content: "Edital Verticalizado — "; font-family: var(--sans); font-weight: 700; font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
   .edital-progress-wrap { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
   .edital-progress-bar { flex: 1; height: 6px; background: var(--line); border-radius: 0; overflow: hidden; }
@@ -564,11 +570,14 @@
   /* Paleta "gabinete à noite": base neutra sai do sépia quente e passa a um
      ardósia frio, mantendo a identidade oxblood/bronze/oliva como acento
      para não parecer só uma inversão de cores do tema claro. */
-  body[data-theme="dark"] { background: #14171C; color: #E4E6EA; }
+  body[data-theme="dark"] { background: #1B1F26; color: #E4E6EA; }
   [data-theme="dark"] { --paper: #14171C; --paper-deep: #1B1F26; --paper-raised: #20242C; --ink: #E4E6EA; --ink-soft: #A8AEB8; --muted: #737B87; --line: #2B303A; --line-strong: #3A404C; --accent: #A3494B; --accent-dark: #D0837E; --olive: #7C9179; --danger: #D0837E; --bronze: #D9B44A; }
-  [data-theme="dark"] .card, [data-theme="dark"] .modal-box { background: #20242C; border-color: #2B303A; box-shadow: none; }
+  [data-theme="dark"] .card { background: #20242C; border-color: #2B303A; box-shadow: 3px 3px 0 rgba(0,0,0,0.35); }
+  [data-theme="dark"] .card:hover { box-shadow: 5px 5px 0 rgba(0,0,0,0.45); border-color: #3A404C; }
+  [data-theme="dark"] .modal-box { background: #20242C; border-color: #2B303A; }
   [data-theme="dark"] #flashcardReviewCard { border-color: #2B303A; }
-  [data-theme="dark"] .stat-card:hover, [data-theme="dark"] .subject-card:hover, [data-theme="dark"] .sim-row:hover, [data-theme="dark"] .hist-entry:hover, [data-theme="dark"] .week-day:hover { box-shadow: none; border-color: #3A404C; }
+  [data-theme="dark"] .stat-card:hover, [data-theme="dark"] .sim-row:hover, [data-theme="dark"] .hist-entry:hover, [data-theme="dark"] .week-day:hover { box-shadow: none; border-color: #3A404C; transform: none; }
+  [data-theme="dark"] .stats-grid .stat-card, [data-theme="dark"] .sim-stats .stat-card, [data-theme="dark"] .hist-entry, [data-theme="dark"] .sim-row { box-shadow: none; }
   [data-theme="dark"] .profile-dropdown { background: #20242C; }
   [data-theme="dark"] .profile-row { color: #E4E6EA; }
   [data-theme="dark"] .profile-row:hover { background: #262B33; }
@@ -656,6 +665,7 @@
   }
   [data-theme="dark"] .modal-title { border-color: #2B303A; }
   [data-theme="dark"] .edital-title::before, [data-theme="dark"] .logo-text::after { color: #737B87; }
+  [data-theme="dark"] .edital-title { border-bottom-color: #3A404C; }
   .header-inner .btn-outline { background: transparent; color: var(--ink); border-color: var(--line-strong); }
   .header-inner .btn-outline:hover { background: var(--paper-deep); }
 </style>
@@ -5834,6 +5844,18 @@ try {
     restoreTimerState();
     updateStatusBanner();
   }
+
+  // Header "flutua" com uma sombra sutil assim que a página é rolada,
+  // reforçando a sensação de camada por cima do conteúdo.
+  (function initHeaderScrollShadow() {
+    const headerEl = document.querySelector("header");
+    if (!headerEl) return;
+    const onScroll = () => {
+      headerEl.classList.toggle("is-scrolled", window.scrollY > 4);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  })();
 
   window.addEventListener("offline", () => setSyncStatus("offline"));
   window.addEventListener("online", () => {
