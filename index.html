@@ -132,8 +132,8 @@
   .forgotten-row:last-child { border-bottom: none; }
   .forgotten-name { font-weight: 600; font-size: 13.5px; flex: 1; min-width: 140px; }
   .forgotten-days { font-size: 12px; font-family: var(--mono); color: var(--danger); white-space: nowrap; }
-  [data-theme="dark"] .forgotten-row { border-bottom-color: #322D26; }
-  [data-theme="dark"] .forgotten-days { color: #C97F79; }
+  [data-theme="dark"] .forgotten-row { border-bottom-color: #2B303A; }
+  [data-theme="dark"] .forgotten-days { color: #D0837E; }
   .goal-row { padding: 8px 0; }
   .goal-row-head { display: flex; justify-content: space-between; align-items: flex-start; font-size: 13px; margin-bottom: 5px; gap: 8px; }
   .goal-row-name { font-weight: 600; flex: 1; min-width: 0; word-break: break-word; }
@@ -141,15 +141,15 @@
   .goal-track { height: 6px; background: var(--line); border-radius: 0; overflow: hidden; }
   .goal-fill { height: 100%; background: var(--accent); border-radius: 0; transition: width 0.3s ease; }
   .goal-fill.complete { background: var(--olive); }
-  [data-theme="dark"] .goal-track { background: #35312A; }
-  [data-theme="dark"] .goal-row-value { color: #9C978D; }
+  [data-theme="dark"] .goal-track { background: #2B303A; }
+  [data-theme="dark"] .goal-row-value { color: #A8AEB8; }
   .flashcard-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
   .flashcard-item:last-child { border-bottom: none; }
   .flashcard-item-text { flex: 1; min-width: 0; font-size: 12.5px; line-height: 1.4; }
   .flashcard-item-front { font-weight: 700; margin-bottom: 2px; }
   .flashcard-item-back { color: var(--muted); }
-  [data-theme="dark"] .flashcard-item { border-bottom-color: #35312A; }
-  [data-theme="dark"] .flashcard-item-back { color: #9C978D; }
+  [data-theme="dark"] .flashcard-item { border-bottom-color: #2B303A; }
+  [data-theme="dark"] .flashcard-item-back { color: #A8AEB8; }
 
   /* Page switching */
   .page { display: none; }
@@ -222,7 +222,7 @@
   @media (max-width: 900px) { .stats-columns { grid-template-columns: 1fr; } }
   @media (max-width: 560px) { .stats-grid { grid-template-columns: 1fr; } .stats-grid .stat-card { border-right: none; } }
   @media (max-width: 480px) { .hrs-bar-row { grid-template-columns: minmax(0,90px) 1fr 56px; gap: 6px; } }
-  [data-theme="dark"] .hrs-bar-track { background: #35312A; }
+  [data-theme="dark"] .hrs-bar-track { background: #2B303A; }
   #weeklyGoalCard, #forgottenCard { margin-bottom: 0; }
   .stat-card { padding: 1.3rem 1.2rem; }
   .stat-card .stat-label { font-size: 10.5px; line-height: 1.3; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; margin-bottom: 10px; min-height: 28.6px; }
@@ -239,9 +239,9 @@
   .subject-stats-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .subject-stats-bar-track { background: var(--line); border-radius: 0; height: 5px; width: 100%; overflow: hidden; }
   .subject-stats-bar-fill { height: 100%; border-radius: 0; }
-  [data-theme="dark"] .subject-stats-table th { border-color: #35312A; }
-  [data-theme="dark"] .subject-stats-table td { border-color: #2A2620; }
-  [data-theme="dark"] .subject-stats-bar-track { background: #35312A; }
+  [data-theme="dark"] .subject-stats-table th { border-color: #2B303A; }
+  [data-theme="dark"] .subject-stats-table td { border-color: #262B33; }
+  [data-theme="dark"] .subject-stats-bar-track { background: #2B303A; }
 
   /* ---- HISTORICO PAGE ---- */
   .hist-day-header { display: flex; align-items: baseline; gap: 10px; margin: 24px 0 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.07em; color: var(--ink); text-transform: uppercase; border-bottom: 1px solid var(--ink); padding-bottom: 6px; }
@@ -263,6 +263,9 @@
   .hist-actions { display: flex; gap: 2px; opacity: 0.6; }
   .hist-entry:hover .hist-actions, .hist-actions:focus-within { opacity: 1; }
   .hist-note { font-size: 12px; color: var(--muted); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--line); white-space: pre-wrap; }
+  .hist-legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 11px; color: var(--muted); margin-bottom: 14px; font-family: var(--sans); }
+  .hist-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .hist-legend .ok, .hist-legend .err { font-size: 9px; }
   .note-icon { color: var(--accent); }
 
   /* ---- CICLO PAGE ---- */
@@ -432,14 +435,14 @@
   .import-prompt-badge { padding:4px 8px; border-radius: 0; border: 1px solid var(--line-strong); }
   .import-text-details { margin-top:10px; }
   .import-text-details summary { cursor:pointer; font-size:12px; color:var(--muted); }
-  [data-theme="dark"] .import-prompt-badge { border-color: #35312A; }
+  [data-theme="dark"] .import-prompt-badge { border-color: #2B303A; }
   .import-summary { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
   .import-summary-badge { padding:5px 9px; border-radius: 0; border: 1px solid var(--line-strong); font-size:11.5px; }
   .import-preview-topic { margin:3px 0 0 24px; font-size:11px; color:var(--muted); line-height:1.45; }
   .import-warning { margin-top:10px; padding:9px 10px; border-radius: 0; border-left: 3px solid var(--bronze); background:var(--paper-deep); color:#6B5A10; font-size:12px; }
-  [data-theme="dark"] .import-dropzone { background:#232019; border-color:#8A6A14; }
-  [data-theme="dark"] .import-dropzone:hover, [data-theme="dark"] .import-dropzone.dragover { background:#2B2620; }
-  [data-theme="dark"] .import-summary-badge { border-color:#35312A; }
+  [data-theme="dark"] .import-dropzone { background:#1E222A; border-color:#8A6A14; }
+  [data-theme="dark"] .import-dropzone:hover, [data-theme="dark"] .import-dropzone.dragover { background:#262B33; }
+  [data-theme="dark"] .import-summary-badge { border-color:#2B303A; }
   [data-theme="dark"] .import-warning { background:#2A2416; color:#D9C67E; }
 
   /* ---- CENTRAL DE PRIORIDADES ---- */
@@ -486,15 +489,15 @@
   .priority-recommendation strong { display:block; margin-bottom:2px; }
   .priority-config { font-size:11px; color:var(--muted); margin-top:8px; }
   [data-theme="dark"] .priority-meta { background:transparent; }
-  [data-theme="dark"] .priority-recommendation { background:#232019; }
+  [data-theme="dark"] .priority-recommendation { background:#1E222A; }
   @media (max-width:780px) { .priority-meta-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-  [data-theme="dark"] .priority-breakdown { border-color:#35312A; }
-  [data-theme="dark"] .priority-breakdown-row strong { color:#E3E0D8; }
+  [data-theme="dark"] .priority-breakdown { border-color:#2B303A; }
+  [data-theme="dark"] .priority-breakdown-row strong { color:#E4E6EA; }
   [data-theme="dark"] .priority-level.high { color:#E39B95; }
   [data-theme="dark"] .priority-level.medium { color:#D9C67E; }
   [data-theme="dark"] .priority-level.low { color:#93A9D6; }
-  [data-theme="dark"] .priority-main { background:#211F1B; border-color:#35312A; }
-  [data-theme="dark"] .priority-item { border-color:#35312A; }
+  [data-theme="dark"] .priority-main { background:#20242C; border-color:#2B303A; }
+  [data-theme="dark"] .priority-item { border-color:#2B303A; }
   @media (max-width: 1024px) {
     .cycle-layout { grid-template-columns: 1fr; }
     .sim-stats { grid-template-columns: 1fr 1fr; }
@@ -558,46 +561,49 @@
 
   /* ---- MODO ESCURO ---- */
   [data-theme="dark"] body,
-  body[data-theme="dark"] { background: #171513; color: #E8E0D2; }
-  [data-theme="dark"] { --paper: #171513; --paper-deep: #1F1C18; --paper-raised: #211F1B; --ink: #E8E0D2; --ink-soft: #B7AEA0; --muted: #8A8275; --line: #35312A; --line-strong: #453F35; --accent: #9A4A4C; --accent-dark: #C97F79; --olive: #8A9A7A; --danger: #C97F79; --bronze: #D9B44A; }
-  [data-theme="dark"] .card, [data-theme="dark"] .modal-box { background: #211F1B; border-color: #35312A; box-shadow: none; }
-  [data-theme="dark"] #flashcardReviewCard { border-color: #35312A; }
-  [data-theme="dark"] .stat-card:hover, [data-theme="dark"] .subject-card:hover, [data-theme="dark"] .sim-row:hover, [data-theme="dark"] .hist-entry:hover, [data-theme="dark"] .week-day:hover { box-shadow: none; border-color: #453F35; }
-  [data-theme="dark"] .profile-dropdown { background: #211F1B; }
-  [data-theme="dark"] .profile-row { color: #E8E0D2; }
-  [data-theme="dark"] .profile-row:hover { background: #2A2620; }
-  [data-theme="dark"] .menu-item { color: #E8E0D2; }
-  [data-theme="dark"] .menu-item:hover { background: #2A2620; }
-  [data-theme="dark"] #examInfoBody { border-color: #35312A; }
-  [data-theme="dark"] .examinfo-row { border-color: #2E2A23; }
-  [data-theme="dark"] .examinfo-label { color: #9C978D; }
-  [data-theme="dark"] .examinfo-value { color: #E8E0D2; }
-  [data-theme="dark"] .profile-row.active { background: #2A2620; border-left-color: #9A4A4C; }
-  [data-theme="dark"] .profile-add-row, [data-theme="dark"] .account-row { border-color: #35312A; }
-  [data-theme="dark"] .sync-status, [data-theme="dark"] .account-email { color: #9C978D; }
+  /* Paleta "gabinete à noite": base neutra sai do sépia quente e passa a um
+     ardósia frio, mantendo a identidade oxblood/bronze/oliva como acento
+     para não parecer só uma inversão de cores do tema claro. */
+  body[data-theme="dark"] { background: #14171C; color: #E4E6EA; }
+  [data-theme="dark"] { --paper: #14171C; --paper-deep: #1B1F26; --paper-raised: #20242C; --ink: #E4E6EA; --ink-soft: #A8AEB8; --muted: #737B87; --line: #2B303A; --line-strong: #3A404C; --accent: #A3494B; --accent-dark: #D0837E; --olive: #7C9179; --danger: #D0837E; --bronze: #D9B44A; }
+  [data-theme="dark"] .card, [data-theme="dark"] .modal-box { background: #20242C; border-color: #2B303A; box-shadow: none; }
+  [data-theme="dark"] #flashcardReviewCard { border-color: #2B303A; }
+  [data-theme="dark"] .stat-card:hover, [data-theme="dark"] .subject-card:hover, [data-theme="dark"] .sim-row:hover, [data-theme="dark"] .hist-entry:hover, [data-theme="dark"] .week-day:hover { box-shadow: none; border-color: #3A404C; }
+  [data-theme="dark"] .profile-dropdown { background: #20242C; }
+  [data-theme="dark"] .profile-row { color: #E4E6EA; }
+  [data-theme="dark"] .profile-row:hover { background: #262B33; }
+  [data-theme="dark"] .menu-item { color: #E4E6EA; }
+  [data-theme="dark"] .menu-item:hover { background: #262B33; }
+  [data-theme="dark"] #examInfoBody { border-color: #2B303A; }
+  [data-theme="dark"] .examinfo-row { border-color: #262B33; }
+  [data-theme="dark"] .examinfo-label { color: #A8AEB8; }
+  [data-theme="dark"] .examinfo-value { color: #E4E6EA; }
+  [data-theme="dark"] .profile-row.active { background: #262B33; border-left-color: #A3494B; }
+  [data-theme="dark"] .profile-add-row, [data-theme="dark"] .account-row { border-color: #2B303A; }
+  [data-theme="dark"] .sync-status, [data-theme="dark"] .account-email { color: #A8AEB8; }
   [data-theme="dark"] .auth-forgot-link { color: #C99A97; }
-  [data-theme="dark"] .auth-security-note { color: #7C766B; }
-  [data-theme="dark"] .btn-outline { background: transparent; color: #E8E0D2; border-color: #35312A; }
-  [data-theme="dark"] .btn-outline:hover { background: #2A2620; border-color: #E8E0D2; }
+  [data-theme="dark"] .auth-security-note { color: #737B87; }
+  [data-theme="dark"] .btn-outline { background: transparent; color: #E4E6EA; border-color: #2B303A; }
+  [data-theme="dark"] .btn-outline:hover { background: #262B33; border-color: #E4E6EA; }
   [data-theme="dark"] .btn-ghost { background: transparent; }
-  [data-theme="dark"] .week-day { background: #211F1B; }
-  [data-theme="dark"] .week-range-label, [data-theme="dark"] .week-day-num { color: #F2ECDD; }
-  [data-theme="dark"] .mini-cal-day { color: #E8E0D2; }
-  [data-theme="dark"] .mini-cal-day:hover { background: #2A2620; }
-  [data-theme="dark"] .mini-cal-day.other-month { color: #4A463C; }
-  [data-theme="dark"] .mini-cal-day.in-week { background: #2A2620; }
+  [data-theme="dark"] .week-day { background: #20242C; }
+  [data-theme="dark"] .week-range-label, [data-theme="dark"] .week-day-num { color: #ECEEF1; }
+  [data-theme="dark"] .mini-cal-day { color: #E4E6EA; }
+  [data-theme="dark"] .mini-cal-day:hover { background: #262B33; }
+  [data-theme="dark"] .mini-cal-day.other-month { color: #3F4652; }
+  [data-theme="dark"] .mini-cal-day.in-week { background: #262B33; }
   [data-theme="dark"] .hist-block { border-color: #4A3F1C; color: #D9C67E; }
   [data-theme="dark"] .hist-block .hb-check { color: #D9B44A; }
-  [data-theme="dark"] .week-day-label { color: #9C978D; }
-  [data-theme="dark"] .rev-tabs { border-color: #35312A; }
-  [data-theme="dark"] .rev-tabs button { color: #9C978D; }
+  [data-theme="dark"] .week-day-label { color: #A8AEB8; }
+  [data-theme="dark"] .rev-tabs { border-color: #2B303A; }
+  [data-theme="dark"] .rev-tabs button { color: #A8AEB8; }
   [data-theme="dark"] input[type="text"], [data-theme="dark"] input[type="number"],
   [data-theme="dark"] input[type="date"], [data-theme="dark"] input[type="email"], [data-theme="dark"] input[type="password"],
   [data-theme="dark"] select, [data-theme="dark"] textarea {
     background: #2A2620; border-color: #35312A; color: #E8E0D2;
   }
-  [data-theme="dark"] .icon-btn { color: #9C978D; }
-  [data-theme="dark"] .icon-btn:hover, [data-theme="dark"] .icon-btn:focus-visible { color: #fff; background: #35312A; }
+  [data-theme="dark"] .icon-btn { color: #A8AEB8; }
+  [data-theme="dark"] .icon-btn:hover, [data-theme="dark"] .icon-btn:focus-visible { color: #fff; background: #2B303A; }
   [data-theme="dark"] .del-btn:hover { background: #3A2320; }
   [data-theme="dark"] .subtitle, [data-theme="dark"] .empty-hint, [data-theme="dark"] .field-hint,
   [data-theme="dark"] .stat-sub, [data-theme="dark"] .field-label, [data-theme="dark"] .chart-title,
@@ -605,51 +611,51 @@
   [data-theme="dark"] .hist-duration, [data-theme="dark"] .hist-day-total, [data-theme="dark"] .last-study-cell,
   [data-theme="dark"] .cycle-item-time, [data-theme="dark"] .sim-meta, [data-theme="dark"] .rev-date,
   [data-theme="dark"] .subject-header-meta, [data-theme="dark"] .import-status, [data-theme="dark"] .hist-note,
-  [data-theme="dark"] table.topics-table th, [data-theme="dark"] .chevron { color: #9C978D; }
-  [data-theme="dark"] .hist-day-header { border-color: #E8E0D2; }
+  [data-theme="dark"] table.topics-table th, [data-theme="dark"] .chevron { color: #A8AEB8; }
+  [data-theme="dark"] .hist-day-header { border-color: #E4E6EA; }
   [data-theme="dark"] .topic-num, [data-theme="dark"] .pct-none, [data-theme="dark"] .rev-name.done,
-  [data-theme="dark"] .topic-name-cell.done { color: #7C766B; }
+  [data-theme="dark"] .topic-name-cell.done { color: #737B87; }
   [data-theme="dark"] table.topics-table td, [data-theme="dark"] table.topics-table th,
   [data-theme="dark"] .subject-body, [data-theme="dark"] .hist-note,
   [data-theme="dark"] .import-step, [data-theme="dark"] .cycle-item, [data-theme="dark"] .hist-day-header {
     border-color: #35312A;
   }
-  [data-theme="dark"] table.topics-table th { border-bottom-color: #E8E0D2; }
+  [data-theme="dark"] table.topics-table th { border-bottom-color: #E4E6EA; }
   [data-theme="dark"] tr.topic-row-tr:hover, [data-theme="dark"] tr.total-row, [data-theme="dark"] tr.total-row td,
-  [data-theme="dark"] .prompt-box, [data-theme="dark"] #pdfTextBox { background: #2A2620; }
-  [data-theme="dark"] tr.total-row td { border-top-color: #E8E0D2; }
+  [data-theme="dark"] .prompt-box, [data-theme="dark"] #pdfTextBox { background: #262B33; }
+  [data-theme="dark"] tr.total-row td { border-top-color: #E4E6EA; }
   [data-theme="dark"] .edital-progress-bar, [data-theme="dark"] .cycle-bar-track,
   [data-theme="dark"] .check-topic, [data-theme="dark"] .rev-check, [data-theme="dark"] .check {
     border-color: #453F35;
   }
-  [data-theme="dark"] .edital-progress-bar, [data-theme="dark"] .cycle-bar-track { background: #35312A; }
+  [data-theme="dark"] .edital-progress-bar, [data-theme="dark"] .cycle-bar-track { background: #2B303A; }
   [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.62); }
   [data-theme="dark"] #timerOverlay { background: rgba(0,0,0,0.68); }
-  [data-theme="dark"] .save-warning { background: #211F1B; border-color: #6B3532; color: #C97F79; }
-  [data-theme="dark"] .status-banner { background: #211F1B; border-color: #6B551D; color: #D9B44A; }
-  [data-theme="dark"] .status-banner.storage { background: #211F1B; border-color: #6B3532; color: #C97F79; }
+  [data-theme="dark"] .save-warning { background: #20242C; border-color: #6B3532; color: #D0837E; }
+  [data-theme="dark"] .status-banner { background: #20242C; border-color: #6B551D; color: #D9B44A; }
+  [data-theme="dark"] .status-banner.storage { background: #20242C; border-color: #6B3532; color: #D0837E; }
   [data-theme="dark"] .fab-timer { box-shadow: 3px 3px 0 rgba(0,0,0,0.4); }
   [data-theme="dark"] .fab-timer.active { box-shadow: 0 0 0 3px rgba(154,74,76,0.35), 3px 3px 0 rgba(0,0,0,0.4); }
-  [data-theme="dark"] .timer-card { background: #1B1815; border-color: #35312A; color: #E8E0D2; box-shadow: 6px 6px 0 rgba(0,0,0,0.4); }
-  [data-theme="dark"] .timer-mode-toggle { border-color: #35312A; }
-  [data-theme="dark"] .timer-mode-btn { color: #9C978D; }
-  [data-theme="dark"] .timer-mode-btn.active { background: #E8E0D2; color: #171513; }
+  [data-theme="dark"] .timer-card { background: #171B21; border-color: #2B303A; color: #E4E6EA; box-shadow: 6px 6px 0 rgba(0,0,0,0.4); }
+  [data-theme="dark"] .timer-mode-toggle { border-color: #2B303A; }
+  [data-theme="dark"] .timer-mode-btn { color: #A8AEB8; }
+  [data-theme="dark"] .timer-mode-btn.active { background: #E4E6EA; color: #14171C; }
   [data-theme="dark"] .timer-phase-badge.work { color: #93A9D6; }
   [data-theme="dark"] .timer-phase-badge.short, [data-theme="dark"] .timer-phase-badge.long { color: #D9B44A; }
-  [data-theme="dark"] .timer-logo { color: #E8E0D2; }
-  [data-theme="dark"] .timer-card .field-label, [data-theme="dark"] .timer-progress-label, [data-theme="dark"] .timer-add-label { color: #9C978D; }
-  [data-theme="dark"] .timer-card select, [data-theme="dark"] .timer-card input { background: #2A2620; border-color: #35312A; color: #E8E0D2; }
-  [data-theme="dark"] .timer-progress-track { background: #35312A; }
-  [data-theme="dark"] .timer-big-display { color: #F2ECDD; }
-  [data-theme="dark"] .timer-round-btn-lg.white { background: #2A2620; color: #E8E0D2; border-color: #35312A; }
+  [data-theme="dark"] .timer-logo { color: #E4E6EA; }
+  [data-theme="dark"] .timer-card .field-label, [data-theme="dark"] .timer-progress-label, [data-theme="dark"] .timer-add-label { color: #A8AEB8; }
+  [data-theme="dark"] .timer-card select, [data-theme="dark"] .timer-card input { background: #262B33; border-color: #2B303A; color: #E4E6EA; }
+  [data-theme="dark"] .timer-progress-track { background: #2B303A; }
+  [data-theme="dark"] .timer-big-display { color: #ECEEF1; }
+  [data-theme="dark"] .timer-round-btn-lg.white { background: #262B33; color: #E4E6EA; border-color: #2B303A; }
   [data-theme="dark"] .logo-text, [data-theme="dark"] .edital-title, [data-theme="dark"] .subject-header-name,
   [data-theme="dark"] .hist-subject, [data-theme="dark"] .sim-title, [data-theme="dark"] .cycle-item-name,
   [data-theme="dark"] .modal-title, [data-theme="dark"] .stat-value, [data-theme="dark"] .edital-progress-pct,
   [data-theme="dark"] .ring-time {
     color: #F2ECDD;
   }
-  [data-theme="dark"] .modal-title { border-color: #35312A; }
-  [data-theme="dark"] .edital-title::before, [data-theme="dark"] .logo-text::after { color: #8A8275; }
+  [data-theme="dark"] .modal-title { border-color: #2B303A; }
+  [data-theme="dark"] .edital-title::before, [data-theme="dark"] .logo-text::after { color: #737B87; }
   .header-inner .btn-outline { background: transparent; color: var(--ink); border-color: var(--line-strong); }
   .header-inner .btn-outline:hover { background: var(--paper-deep); }
 </style>
@@ -975,6 +981,11 @@
   <!-- PAGE: HISTORICO -->
   <div class="page" id="page-historico">
     <h1 class="edital-title" style="margin-bottom:16px;">Histórico</h1>
+    <div class="hist-legend" id="historicoLegend">
+      <span><span class="ok">&#9679;</span> acertos</span>
+      <span><span class="err">&#9679;</span> erros</span>
+      <span><span class="pct-badge pct-good" style="padding:1px 6px;">%</span> aproveitamento</span>
+    </div>
     <p class="empty-hint" id="historicoEmptyHint">Nenhuma sessão de estudo registrada ainda.</p>
     <div id="historicoContainer"></div>
   </div>
@@ -1511,8 +1522,9 @@
         <textarea id="flashcardBackInput" style="min-height:56px;" required></textarea>
       </div>
       <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="flashcardEditCancelBtn" style="display:none;">Cancelar edição</button>
         <button type="button" class="btn btn-outline" id="flashcardsCloseBtn">Fechar</button>
-        <button type="submit" class="btn btn-primary">+ Adicionar card</button>
+        <button type="submit" class="btn btn-primary" id="flashcardSubmitBtn">+ Adicionar card</button>
       </div>
     </form>
   </div>
@@ -2862,6 +2874,9 @@ try {
   const flashcardFrontInput = document.getElementById("flashcardFrontInput");
   const flashcardBackInput = document.getElementById("flashcardBackInput");
   let flashcardsModalTarget = null; // { subjectId, topicId }
+  let flashcardEditId = null; // id do card em edição, ou null se estiver criando um novo
+  const flashcardSubmitBtn = document.getElementById("flashcardSubmitBtn");
+  const flashcardEditCancelBtn = document.getElementById("flashcardEditCancelBtn");
 
   function renderFlashcardsExistingList() {
     if (!flashcardsModalTarget) return;
@@ -2875,25 +2890,47 @@ try {
     flashcardsExistingList.innerHTML = cards.map(c =>
       '<div class="flashcard-item">' +
         '<div class="flashcard-item-text"><div class="flashcard-item-front">' + escapeHtml(c.front) + '</div><div class="flashcard-item-back">' + escapeHtml(c.back) + '</div></div>' +
+        '<button type="button" class="icon-btn" data-edit-flashcard="' + c.id + '" aria-label="Editar card">&#9998;</button>' +
         '<button type="button" class="icon-btn" data-del-flashcard="' + c.id + '" aria-label="Excluir card">&#128465;</button>' +
       '</div>'
     ).join("");
+    flashcardsExistingList.querySelectorAll("[data-edit-flashcard]").forEach(el => {
+      el.addEventListener("click", () => {
+        const card = cards.find(c => c.id === el.getAttribute("data-edit-flashcard"));
+        if (!card) return;
+        flashcardEditId = card.id;
+        flashcardFrontInput.value = card.front;
+        flashcardBackInput.value = card.back;
+        flashcardSubmitBtn.textContent = "Salvar edição";
+        flashcardEditCancelBtn.style.display = "inline-block";
+        flashcardFrontInput.focus();
+      });
+    });
     flashcardsExistingList.querySelectorAll("[data-del-flashcard]").forEach(el => {
       el.addEventListener("click", () => {
         if (!topic) return;
-        topic.flashcards = topic.flashcards.filter(c => c.id !== el.getAttribute("data-del-flashcard"));
+        const delId = el.getAttribute("data-del-flashcard");
+        topic.flashcards = topic.flashcards.filter(c => c.id !== delId);
+        if (flashcardEditId === delId) resetFlashcardForm();
         save(); renderFlashcardsExistingList(); renderAll();
       });
     });
   }
+  function resetFlashcardForm() {
+    flashcardEditId = null;
+    flashcardFrontInput.value = "";
+    flashcardBackInput.value = "";
+    flashcardSubmitBtn.textContent = "+ Adicionar card";
+    flashcardEditCancelBtn.style.display = "none";
+  }
+  flashcardEditCancelBtn.addEventListener("click", resetFlashcardForm);
   function openTopicFlashcardsModal(subjectId, topicId) {
     const subj = state.subjects.find(s => s.id === subjectId);
     const topic = subj ? subj.topics.find(t => t.id === topicId) : null;
     if (!topic) return;
     flashcardsModalTarget = { subjectId, topicId };
     flashcardsModalSubtitle.textContent = subj.name + " · " + topic.name;
-    flashcardFrontInput.value = "";
-    flashcardBackInput.value = "";
+    resetFlashcardForm();
     renderFlashcardsExistingList();
     topicFlashcardsOverlay.classList.add("open");
     setTimeout(() => flashcardFrontInput.focus(), 0);
@@ -2901,6 +2938,7 @@ try {
   function closeTopicFlashcardsModal() {
     topicFlashcardsOverlay.classList.remove("open");
     flashcardsModalTarget = null;
+    resetFlashcardForm();
   }
   document.getElementById("flashcardsCloseBtn").addEventListener("click", closeTopicFlashcardsModal);
   topicFlashcardsOverlay.addEventListener("click", (e) => { if (e.target === topicFlashcardsOverlay) closeTopicFlashcardsModal(); });
@@ -2914,11 +2952,14 @@ try {
     const back = flashcardBackInput.value.trim();
     if (!front || !back) return;
     topic.flashcards = topic.flashcards || [];
-    topic.flashcards.push({ id: uid(), front: front, back: back, stage: 0, nextDate: todayKey(), lastReviewed: null });
+    if (flashcardEditId) {
+      const card = topic.flashcards.find(c => c.id === flashcardEditId);
+      if (card) { card.front = front; card.back = back; }
+    } else {
+      topic.flashcards.push({ id: uid(), front: front, back: back, stage: 0, nextDate: todayKey(), lastReviewed: null });
+    }
     save();
-    flashcardFrontInput.value = "";
-    flashcardBackInput.value = "";
-    flashcardFrontInput.focus();
+    resetFlashcardForm();
     renderFlashcardsExistingList();
     renderAll();
   });
@@ -3774,12 +3815,15 @@ try {
   function renderHistorico() {
     const container = document.getElementById("historicoContainer");
     const hint = document.getElementById("historicoEmptyHint");
+    const legend = document.getElementById("historicoLegend");
     if (state.sessions.length === 0) {
       container.innerHTML = "";
       hint.style.display = "block";
+      if (legend) legend.style.display = "none";
       return;
     }
     hint.style.display = "none";
+    if (legend) legend.style.display = "flex";
 
     const byDate = {};
     state.sessions.forEach(s => { (byDate[s.date] = byDate[s.date] || []).push(s); });
@@ -3803,11 +3847,12 @@ try {
             (s.notes ? '<div class="hist-note">&#128221; ' + escapeHtml(s.notes) + '</div>' : '') +
           '</div>' +
           '<div class="hist-duration">' + fmtHMS(s.seconds) + '</div>' +
+          (s.tipo === "questoes" ? (
           '<div class="hist-score">' +
             '<span class="ok">' + s.corretas + '</span>' +
             '<span class="err">' + s.erradas + '</span>' +
             (pct == null ? '<span class="pct-none">-</span>' : '<span class="pct-badge ' + pctClass(pct) + '">' + pct + '</span>') +
-          '</div>' +
+          '</div>') : '') +
           '<span class="tag ' + tagClass + '">' + tagLabel + '</span>' +
           '<div class="hist-actions">' +
             '<button class="icon-btn" data-edit-session="' + s.id + '" aria-label="Editar">&#9998;</button>' +
