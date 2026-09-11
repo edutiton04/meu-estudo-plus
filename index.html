@@ -83,7 +83,7 @@
   .menu-item:last-child { border-bottom: none; }
   .menu-item:hover { background: var(--paper-deep); }
   .examinfo-card { margin-bottom: 16px; overflow: hidden; padding: 0; }
-  .examinfo-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; }
+  .examinfo-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: default; }
   .examinfo-title { font-family: var(--serif); font-weight: 700; font-size: 14px; }
   #examInfoBody { padding: 0 16px 16px; border-top: 1px solid var(--line); }
   .examinfo-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
@@ -725,6 +725,7 @@
     </div>
     <nav class="tabs">
       <button data-page="edital" class="active">Edital</button>
+      <button data-page="concurso">Sobre o Concurso</button>
       <button data-page="estatisticas">Estatísticas</button>
       <button data-page="historico">Histórico</button>
       <button data-page="planejamento">Planejamento</button>
@@ -870,26 +871,6 @@
       <input type="text" id="globalSearchInput" placeholder="Buscar matéria ou tópico..." aria-label="Buscar matéria ou tópico" style="width:100%;padding-right:34px;" />
       <button type="button" id="globalSearchClearBtn" aria-label="Limpar busca" style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9B9890;font-size:15px;padding:4px;">&#10005;</button>
     </div>
-    <div class="card examinfo-card" id="examInfoCard" style="display:none;">
-      <div class="examinfo-header" id="examInfoHeader">
-        <span class="examinfo-title">Sobre o concurso</span>
-        <svg class="chevron" id="examInfoChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-      </div>
-      <div id="examInfoBody">
-        <div id="examInfoList"></div>
-        <div class="add-cycle-row">
-          <div class="field-item grow">
-            <label for="examInfoLabelInput">Rótulo</label>
-            <input type="text" id="examInfoLabelInput" placeholder="ex: TAF - Teste de Aptidão Física" />
-          </div>
-          <div class="field-item grow">
-            <label for="examInfoValueInput">Valor</label>
-            <input type="text" id="examInfoValueInput" placeholder="ex: Barra fixa, corrida 12min..." />
-          </div>
-          <button class="btn btn-primary btn-small" id="addExamInfoBtn">Adicionar</button>
-        </div>
-      </div>
-    </div>
     <div class="edital-progress-wrap">
       <span class="edital-progress-label" id="editalProgressLabel">Cobertura do edital: 0% · 0/0 matérias trabalhadas</span>
       <div class="edital-progress-bar"><div class="edital-progress-fill" id="editalProgressFill" style="width:0%;"></div></div>
@@ -911,6 +892,35 @@
       <div class="add-subject-row">
         <input type="text" id="subjectInput" placeholder="Nome da matéria" autocomplete="off" />
         <button class="btn btn-primary" id="addSubjectBtn">Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: SOBRE O CONCURSO -->
+  <div class="page" id="page-concurso">
+    <h1 class="edital-title" style="margin-bottom:16px;">Sobre o Concurso</h1>
+    <p class="field-hint" style="margin:-6px 0 16px;max-width:640px;">
+      Reúna aqui as informações do edital que fogem do conteúdo programático — etapas do certame,
+      requisitos, datas e qualquer exigência extra (ex: TAF/teste físico, exame psicológico, exame
+      toxicológico, curso de formação, investigação social, nota de corte, número de vagas).
+    </p>
+    <div class="card examinfo-card" id="examInfoCard" style="display:none;">
+      <div class="examinfo-header">
+        <span class="examinfo-title">Informações cadastradas</span>
+      </div>
+      <div id="examInfoBody">
+        <div id="examInfoList"></div>
+        <div class="add-cycle-row">
+          <div class="field-item grow">
+            <label for="examInfoLabelInput">Rótulo</label>
+            <input type="text" id="examInfoLabelInput" placeholder="ex: TAF - Teste de Aptidão Física" />
+          </div>
+          <div class="field-item grow">
+            <label for="examInfoValueInput">Valor</label>
+            <input type="text" id="examInfoValueInput" placeholder="ex: Barra fixa, corrida 12min..." />
+          </div>
+          <button class="btn btn-primary btn-small" id="addExamInfoBtn">Adicionar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2691,7 +2701,10 @@ try {
   }
 
   let priorityCollapsed = (function () {
-    try { return localStorage.getItem("meus-estudos:priority-collapsed") === "1"; } catch (e) { return false; }
+    try {
+      const v = localStorage.getItem("meus-estudos:priority-collapsed");
+      return v === null ? true : v === "1";
+    } catch (e) { return true; }
   })();
   function renderPriorities() {
     const content = document.getElementById("priorityContent");
@@ -3128,23 +3141,21 @@ try {
   });
 
   document.getElementById("toggleCollapseAllBtn").addEventListener("click", () => {
-    const anyExpanded = state.subjects.some(s => !collapsedState[s.id]);
+    const anyExpanded = state.subjects.some(s => collapsedState[s.id] === false) || !priorityCollapsed;
     state.subjects.forEach(s => { collapsedState[s.id] = anyExpanded; });
+    priorityCollapsed = anyExpanded;
+    try { localStorage.setItem("meus-estudos:priority-collapsed", priorityCollapsed ? "1" : "0"); } catch (e) {}
+    renderPriorities();
     renderEdital();
   });
 
-  // ---------- Render: Edital ----------
-  let examInfoCollapsed = true;
+  // ---------- Render: Sobre o Concurso ----------
   function renderExamInfo() {
     const card = document.getElementById("examInfoCard");
     const list = document.getElementById("examInfoList");
-    const body = document.getElementById("examInfoBody");
-    const chevron = document.getElementById("examInfoChevron");
     const info = state.examInfo || [];
 
     card.style.display = "block";
-    body.style.display = examInfoCollapsed ? "none" : "block";
-    chevron.classList.toggle("collapsed", examInfoCollapsed);
 
     if (info.length === 0) {
       list.innerHTML = '<p class="empty-hint">Nenhuma informação cadastrada ainda. Importe um edital ou adicione manualmente abaixo (ex: TAF, nota de corte, vagas...).</p>';
@@ -3177,10 +3188,6 @@ try {
       });
     }
   }
-  document.getElementById("examInfoHeader").addEventListener("click", () => {
-    examInfoCollapsed = !examInfoCollapsed;
-    renderExamInfo();
-  });
   document.getElementById("addExamInfoBtn").addEventListener("click", () => {
     const labelInput = document.getElementById("examInfoLabelInput");
     const valueInput = document.getElementById("examInfoValueInput");
@@ -3195,8 +3202,8 @@ try {
     save(); renderExamInfo();
   });
 
+  // ---------- Render: Edital ----------
   function renderEdital() {
-    renderExamInfo();
     const totalTopics = state.subjects.reduce((a, s) => a + s.topics.length, 0);
     const doneTopics = state.subjects.reduce((a, s) => a + s.topics.filter(t => t.done).length, 0);
     const subjectMetrics = state.subjects.map(subjectStudyMetrics);
@@ -3211,7 +3218,7 @@ try {
       collapseAllBtn.style.display = "none";
     } else {
       collapseAllBtn.style.display = "inline-flex";
-      const anyExpanded = state.subjects.some(s => !collapsedState[s.id]);
+      const anyExpanded = state.subjects.some(s => collapsedState[s.id] === false) || !priorityCollapsed;
       collapseAllBtn.textContent = anyExpanded ? "Recolher todas" : "Expandir todas";
     }
 
@@ -3245,7 +3252,7 @@ try {
       const color = subjectColor(subject);
       const agg = subjectAgg(subject);
       const studyMetrics = subjectStudyMetrics(subject);
-      const collapsed = forceExpand ? false : !!collapsedState[subject.id];
+      const collapsed = forceExpand ? false : (subject.id in collapsedState ? collapsedState[subject.id] : true);
       const topicsToShow = onlyTopics || subject.topics;
       const rows = topicsToShow.map((t) => {
         const i = subject.topics.indexOf(t);
@@ -3294,7 +3301,8 @@ try {
     container.querySelectorAll("[data-toggle-collapse]").forEach(el => {
       el.addEventListener("click", () => {
         const id = el.getAttribute("data-toggle-collapse");
-        collapsedState[id] = !collapsedState[id];
+        const current = id in collapsedState ? collapsedState[id] : true;
+        collapsedState[id] = !current;
         renderEdital();
       });
     });
@@ -3899,6 +3907,7 @@ try {
   // só evita trabalho invisível.
   const PAGE_RENDERERS = {
     edital: [renderEdital, renderPriorities],
+    concurso: [renderExamInfo],
     estatisticas: [renderEstatisticas],
     historico: [renderHistorico],
     planejamento: [renderSemanal, renderCiclo],
