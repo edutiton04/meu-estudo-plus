@@ -30,6 +30,13 @@
   body { margin: 0; font-family: var(--sans); background: var(--paper-deep); color: var(--ink); overflow-x: hidden; }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 5rem; }
 
+  .quote-strip { background: var(--paper); border-bottom: 1px solid var(--line); padding: 12px 24px; text-align: center; }
+  .quote-strip-text { font-family: var(--serif); font-style: italic; font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; margin: 0; }
+  .quote-strip-text::before { content: "“"; }
+  .quote-strip-text::after { content: "”"; }
+  .quote-strip-author { display: block; margin-top: 5px; font-family: var(--sans); font-style: normal; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  [data-theme="dark"] .quote-strip { background: var(--paper); border-color: var(--line); }
+
   /* Header / nav */
   header { background: var(--paper); border-bottom: 3px double var(--ink); box-shadow: none; margin-bottom: 1.75rem; position: relative; z-index: 30; transition: box-shadow 0.2s ease; }
   header.is-scrolled { box-shadow: 0 3px 0 rgba(33,31,27,0.08), 0 6px 0 rgba(33,31,27,0.05); }
@@ -38,7 +45,7 @@
   .logo { display: flex; align-items: center; gap: 10px; }
   .logo-badge { width: 30px; height: 30px; border-radius: 0; background: transparent; color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; font-weight: 700; border: 1.5px solid var(--ink); }
   .logo-text { font-family: var(--serif); font-weight: 700; font-size: 18px; color: var(--ink); letter-spacing: 0.02em; line-height: 1.15; text-transform: uppercase; }
-  .logo-text::after { content: "Gabinete pessoal de preparação"; display: block; font-family: var(--sans); font-weight: 500; font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+  .logo-subtitle { font-family: var(--sans); font-weight: 500; font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
   .profile-switcher-wrap { position: relative; }
   .profile-switcher { background: none; border: none; color: var(--accent); font-size: 12.5px; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 3px; font-family: var(--sans); }
   .chevron-down { font-size: 10px; }
@@ -552,7 +559,7 @@
     .week-day { min-height: 190px; padding: 8px; }
     nav.tabs button { padding: 7px 9px; font-size: 10.5px; }
     .logo-text { font-size: 15px; }
-    .logo-text::after { display: none; }
+    .logo-subtitle { display: none; }
     .modal-box { padding: 1.1rem; }
     .donut-card { flex-direction: column; align-items: flex-start; gap: 8px; }
     .priority-meta-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0; }
@@ -671,7 +678,7 @@
     color: #F2ECDD;
   }
   [data-theme="dark"] .modal-title { border-color: #2B303A; }
-  [data-theme="dark"] .edital-title::before, [data-theme="dark"] .logo-text::after { color: #737B87; }
+  [data-theme="dark"] .edital-title::before, [data-theme="dark"] .logo-subtitle { color: #737B87; }
   [data-theme="dark"] .edital-title { border-bottom-color: #3A404C; }
   .header-inner .btn-outline { background: transparent; color: var(--ink); border-color: var(--line-strong); }
   .header-inner .btn-outline:hover { background: var(--paper-deep); }
@@ -690,6 +697,7 @@
       </div>
       <div>
         <div class="logo-text">Meus Estudos</div>
+        <div class="logo-subtitle" id="logoSubtitle">Gabinete pessoal de preparação</div>
         <div class="profile-switcher-wrap">
           <button class="profile-switcher" id="profileSwitcherBtn">
             <span id="activeProfileName">Meu Edital</span> <span class="chevron-down">&#9662;</span>
@@ -749,6 +757,11 @@
     </div>
   </div>
 </header>
+
+<div class="quote-strip" id="quoteStrip">
+  <p class="quote-strip-text" id="quoteStripText"></p>
+  <span class="quote-strip-author" id="quoteStripAuthor"></span>
+</div>
 
 <div class="toast-container" id="toastContainer"></div>
 
@@ -5860,6 +5873,54 @@ try {
     restoreTimerState();
     updateStatusBanner();
   }
+
+  // Saudação do header muda de acordo com o horário do dia.
+  (function initGreeting() {
+    const el = document.getElementById("logoSubtitle");
+    if (!el) return;
+    const hour = new Date().getHours();
+    let greeting;
+    if (hour >= 5 && hour < 12) greeting = "Bom dia. Hora de avançar.";
+    else if (hour >= 12 && hour < 18) greeting = "Boa tarde. Siga firme.";
+    else if (hour >= 18 && hour < 24) greeting = "Boa noite. Mais uma sessão antes de descansar?";
+    else greeting = "Virando a noite? Cuide do descanso também.";
+    el.textContent = greeting;
+  })();
+
+  // Frase motivacional do dia — muda uma vez por dia (mesma frase o dia todo),
+  // pra virar um pequeno ritual ao abrir a plataforma.
+  const MOTIVATIONAL_QUOTES = [
+    { text: "Só sei que nada sei.", author: "Sócrates" },
+    { text: "A educação é a arma mais poderosa que você pode usar para mudar o mundo.", author: "Nelson Mandela" },
+    { text: "Feliz aquele que transfere o que sabe e aprende o que ensina.", author: "Cora Coralina" },
+    { text: "Há uma força motriz mais poderosa que o vapor, a eletricidade e a energia atômica: a vontade.", author: "Albert Einstein" },
+    { text: "A disciplina é a ponte entre metas e realizações.", author: "Jim Rohn" },
+    { text: "Sem pressa, mas sem pausa.", author: "Johann Wolfgang von Goethe" },
+    { text: "A paciência é amarga, mas seu fruto é doce.", author: "Aristóteles" },
+    { text: "O único lugar onde o sucesso vem antes do trabalho é no dicionário.", author: "Vidal Sassoon" },
+    { text: "Ninguém educa ninguém, ninguém se educa sozinho; os homens se educam entre si, mediatizados pelo mundo.", author: "Paulo Freire" },
+    { text: "O que sabemos é uma gota, o que ignoramos é um oceano.", author: "Isaac Newton" },
+    { text: "Quanto mais eu estudo, mais percebo o quanto ainda não sei.", author: "Voltaire" },
+    { text: "A mente que se abre a uma nova ideia jamais volta ao seu tamanho original.", author: "Albert Einstein" },
+    { text: "Educar não é encher um balde, mas acender um fogo.", author: "William Butler Yeats" },
+    { text: "Aprender é a única coisa de que a mente nunca se cansa, nunca tem medo e nunca se arrepende.", author: "Leonardo da Vinci" },
+    { text: "Investir em conhecimento rende sempre os melhores juros.", author: "Benjamin Franklin" },
+    { text: "A vitória sobre si mesmo é a maior das vitórias.", author: "Platão" },
+    { text: "Não é o que fazemos de vez em quando que nos define, mas o que fazemos constantemente.", author: "Aristóteles" },
+    { text: "O sucesso é a soma de pequenos esforços repetidos dia após dia.", author: "Robert Collier" },
+    { text: "Toda grande jornada começa com um único passo.", author: "Lao-Tsé" },
+    { text: "Comece onde você está, use o que você tem, faça o que você pode.", author: "Arthur Ashe" }
+  ];
+  (function initDailyQuote() {
+    const textEl = document.getElementById("quoteStripText");
+    const authorEl = document.getElementById("quoteStripAuthor");
+    if (!textEl || !authorEl) return;
+    const now = new Date();
+    const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+    const quote = MOTIVATIONAL_QUOTES[dayOfYear % MOTIVATIONAL_QUOTES.length];
+    textEl.textContent = quote.text;
+    authorEl.textContent = "— " + quote.author;
+  })();
 
   // Header "flutua" com uma sombra sutil assim que a página é rolada,
   // reforçando a sensação de camada por cima do conteúdo.
