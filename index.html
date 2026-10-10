@@ -74,6 +74,53 @@
   .outcome-option { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid var(--line); margin-bottom: 6px; cursor: pointer; font-size: 13.5px; }
   .outcome-option input { width: auto; min-height: 0; margin: 0; }
   .outcome-option:has(input:checked) { border-color: var(--accent); background: var(--paper-deep); }
+  .journey-highlights { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: -6px 0 20px; font-size: 12.5px; color: var(--ink-soft); }
+  .journey-highlights b { color: var(--ink); font-family: var(--mono); font-weight: 600; }
+  .journey-chart { display: flex; align-items: flex-end; gap: 8px; height: 215px; overflow-x: auto; padding-top: 6px; }
+  .journey-col { flex: 1 0 40px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .journey-col-total { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-bottom: 3px; white-space: nowrap; }
+  .journey-stack { width: 100%; max-width: 46px; display: flex; flex-direction: column-reverse; }
+  .journey-seg { width: 100%; }
+  .journey-col-label { margin-top: 6px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); white-space: nowrap; }
+  .journey-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-soft); }
+  .journey-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; }
+  .journey-timeline { margin: 14px 0 0 8px; padding-left: 24px; border-left: 2px solid var(--line-strong); }
+  .journey-item { position: relative; padding-bottom: 24px; }
+  .journey-item:last-child { padding-bottom: 4px; }
+  .journey-item::before { content: ""; position: absolute; left: -32px; top: 5px; width: 11px; height: 11px; background: var(--paper-raised); border: 2px solid var(--accent); }
+  .journey-item.current::before { background: var(--accent); }
+  .journey-item-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .journey-item-name { font-family: var(--serif); font-weight: 700; font-size: 16px; color: var(--ink); }
+  .journey-item-period { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+  .journey-item-stats { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 8px; font-size: 12.5px; color: var(--ink-soft); }
+  .journey-item-stats b { color: var(--ink); font-family: var(--mono); font-weight: 600; }
+  .journey-item-actions { margin-top: 10px; }
+  .outcome-badge.andamento { color: var(--accent); }
+  .outcome-badge.neutro { color: var(--muted); }
+  [data-theme="dark"] .journey-item::before { background: #20242C; }
+  [data-theme="dark"] .journey-item.current::before { background: var(--accent); }
+  .ach-summary { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--muted); margin-left: 8px; letter-spacing: 0; text-transform: none; }
+  .ach-group-title { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+  .ach-group-title:first-child { margin-top: 6px; }
+  .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .ach-card { display: flex; flex-direction: column; gap: 3px; border: 1px solid var(--line); padding: 10px 10px 9px; background: var(--paper-raised); }
+  .ach-card.unlocked { border-color: var(--bronze); }
+  .ach-card.locked { opacity: 0.62; }
+  .ach-icon { font-size: 20px; line-height: 1; filter: grayscale(1); }
+  .ach-card.unlocked .ach-icon { filter: none; }
+  .ach-title { font-family: var(--serif); font-weight: 700; font-size: 13.5px; color: var(--ink); margin-top: 2px; }
+  .ach-desc { font-size: 11.5px; color: var(--ink-soft); line-height: 1.35; }
+  .ach-meta { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: auto; padding-top: 5px; }
+  .ach-bar { height: 3px; background: var(--line); margin-top: 4px; }
+  .ach-bar > i { display: block; height: 100%; background: var(--accent); }
+  [data-theme="dark"] .ach-card { background: #20242C; border-color: #2B303A; }
+  [data-theme="dark"] .ach-card.unlocked { border-color: var(--bronze); }
+  .profile-type-select { font-size: 13px; padding: 8px 10px; min-height: 36px; }
+  .dup-subject-list { max-height: 220px; overflow-y: auto; border: 1px solid var(--line); padding: 8px 8px 2px; }
+  .dup-subject-list .outcome-option { margin-bottom: 6px; }
+  .dup-subject-count { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .dup-link-btn { background: none; border: none; padding: 0 4px; font-family: var(--sans); font-size: 11.5px; font-weight: 600; color: var(--accent); cursor: pointer; text-decoration: underline; }
+  [data-theme="dark"] .dup-subject-list { border-color: #2B303A; }
   .status-banner.archived { border-color: var(--olive); border-left-color: var(--olive); color: var(--ink-soft); }
   [data-theme="dark"] .status-banner.archived { color: #C9CDD4; }
   [data-theme="dark"] .outcome-option { border-color: #2B303A; }
@@ -206,7 +253,7 @@
   /* ---- EDITAL PAGE ---- */
   .edital-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--ink); padding-bottom: 10px; }
   .edital-title { font-family: var(--serif); font-weight: 700; font-size: 22px; margin: 0; padding-bottom: 10px; border-bottom: 3px double var(--line-strong); }
-  .edital-title::before { content: "Edital Verticalizado — "; font-family: var(--sans); font-weight: 700; font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
+  .edital-title::before { content: var(--eyebrow, "Edital Verticalizado — "); font-family: var(--sans); font-weight: 700; font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
   .edital-progress-wrap { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
   .edital-progress-bar { flex: 1; height: 6px; background: var(--line) repeating-linear-gradient(to right, rgba(33,31,27,0.3) 0, rgba(33,31,27,0.3) 1px, transparent 1px, transparent 25%); border-radius: 0; overflow: hidden; }
   .edital-progress-fill { height: 100%; background: var(--accent); }
@@ -735,14 +782,15 @@
             <span id="activeProfileName">Meu Edital</span> <span class="chevron-down">&#9662;</span>
           </button>
           <div class="profile-dropdown" id="profileDropdown">
-            <div class="profile-dropdown-title">Seus editais</div>
+            <div class="profile-dropdown-title">Seus objetivos</div>
             <div id="profileList"></div>
-            <div class="profile-add-row">
-              <input type="text" id="newProfileNameInput" placeholder="Nome do novo edital (ex: PRF)" />
+            <div class="profile-add-row" style="flex-wrap:wrap;">
+              <select id="newProfileTypeSelect" class="profile-type-select" style="flex:1 1 100%;" aria-label="Tipo do novo objetivo"></select>
+              <input type="text" id="newProfileNameInput" placeholder="Nome do novo objetivo (ex: PRF, Inglês B2)" />
               <button class="btn btn-primary btn-small" id="addProfileBtn">Criar</button>
             </div>
             <div class="profile-add-row" style="flex-direction:column; align-items:stretch; gap:6px;">
-              <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#9B9890;">Backup completo (todos os editais)</div>
+              <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#9B9890;">Backup completo (todos os objetivos)</div>
               <div style="display:flex; gap:6px;">
                 <button type="button" class="btn btn-outline btn-small" id="exportAllBackupBtn" style="flex:1;">&#11015; Exportar tudo</button>
                 <button type="button" class="btn btn-outline btn-small" id="importAllBackupBtn" style="flex:1;">&#11014; Importar tudo</button>
@@ -771,6 +819,7 @@
       <button data-page="planejamento">Planejamento</button>
       <button data-page="simulados">Simulados</button>
       <button data-page="revisoes">Revisões</button>
+      <button data-page="jornada">Jornada</button>
     </nav>
     <div class="header-actions">
       <button class="btn btn-outline btn-small" id="themeToggleBtn" title="Alternar modo claro/escuro" aria-label="Alternar modo claro/escuro">&#127769;</button>
@@ -947,7 +996,11 @@
   <!-- PAGE: SOBRE O CONCURSO -->
   <div class="page" id="page-concurso">
     <h1 class="edital-title" style="margin-bottom:16px;">Sobre o Concurso</h1>
-    <p class="field-hint" style="margin:-6px 0 16px;max-width:640px;">
+    <div class="field-row" style="max-width:320px;margin-bottom:14px;">
+      <label class="field-label" for="profileTypeSelect">Tipo de objetivo</label>
+      <select id="profileTypeSelect"></select>
+    </div>
+    <p class="field-hint" id="aboutHint" style="margin:-6px 0 16px;max-width:640px;">
       Reúna aqui as informações do edital que fogem do conteúdo programático — etapas do certame,
       requisitos, datas e qualquer exigência extra (ex: TAF/teste físico, exame psicológico, exame
       toxicológico, curso de formação, investigação social, nota de corte, número de vagas).
@@ -969,6 +1022,30 @@
           </div>
           <button class="btn btn-primary btn-small" id="addExamInfoBtn">Adicionar</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: JORNADA -->
+  <div class="page" id="page-jornada">
+    <h1 class="edital-title" style="margin-bottom:6px;">Jornada</h1>
+    <p class="empty-hint" style="margin:0 0 16px;">Tudo o que você estudou ao longo dos seus objetivos, reunido em um só lugar.</p>
+    <p class="empty-hint" id="jornadaEmptyHint" style="display:none;">Sua jornada começa na primeira sessão registrada — assim que ela existir, a linha do tempo aparece aqui.</p>
+    <div id="jornadaContent">
+      <div class="stats-grid" id="jornadaStats"></div>
+      <div class="journey-highlights" id="jornadaHighlights"></div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="chart-title">Horas por mês</div>
+        <div class="journey-chart" id="jornadaChart"></div>
+        <div class="journey-legend" id="jornadaLegend"></div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Linha do tempo dos objetivos</div>
+        <div class="journey-timeline" id="jornadaTimeline"></div>
+      </div>
+      <div class="card" style="margin-top:20px;">
+        <div class="chart-title">Conquistas <span class="ach-summary" id="achSummary"></span></div>
+        <div id="achievementsBody"></div>
       </div>
     </div>
   </div>
@@ -1004,7 +1081,7 @@
         <div class="stat-sub" id="statStreakSub">Recorde: 0 dias</div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">Cobertura do edital</div>
+        <div class="stat-label" id="statCoverageLabel">Cobertura do edital</div>
         <div class="stat-value" id="statProgressoEdital">0%</div>
         <div class="stat-sub" id="statProgressoSub">0/0 tópicos revisados</div>
       </div>
@@ -1509,15 +1586,15 @@
 <!-- Modal: Data da prova -->
 <div class="modal-overlay" id="examModalOverlay">
   <div class="modal-box">
-    <h2 class="modal-title">Data da prova</h2>
+    <h2 class="modal-title" id="examModalTitle">Data da prova</h2>
     <p class="field-hint" style="margin-bottom:14px;">Usado para mostrar a contagem no cabeçalho e para calibrar a geração automática do cronograma semanal (quanto menos tempo falta, maior a intensidade sugerida).</p>
     <form id="examForm">
       <div class="field-row">
-        <label class="field-label">Data da prova</label>
+        <label class="field-label" id="examDateLabel">Data da prova</label>
         <input type="date" id="examDateInput" />
       </div>
       <div class="field-row">
-        <label class="field-label">Quantidade de questões da prova (opcional)</label>
+        <label class="field-label" id="examQuestionsLabel">Quantidade de questões da prova (opcional)</label>
         <input type="number" id="examQuestionsInput" min="0" placeholder="ex: 120" />
       </div>
       <div class="modal-actions">
@@ -1568,15 +1645,42 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="duplicateProfileOverlay">
+  <div class="modal-box">
+    <h2 class="modal-title">Duplicar objetivo</h2>
+    <p class="empty-hint" id="duplicateProfileSubtitle" style="margin:-10px 0 12px;"></p>
+    <div class="field-row">
+      <label class="field-label" for="duplicateProfileName">Nome do novo objetivo</label>
+      <input type="text" id="duplicateProfileName" placeholder="ex: PRF 2027" />
+      <p class="field-hint" id="duplicateProfileError" style="display:none;color:var(--danger);"></p>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 6px;">
+      <label class="field-label" style="margin:0;">Matérias a trazer</label>
+      <span><button type="button" class="dup-link-btn" id="dupSelectAllBtn">Todas</button><button type="button" class="dup-link-btn" id="dupSelectNoneBtn">Nenhuma</button></span>
+    </div>
+    <div class="dup-subject-list" id="duplicateSubjectList"></div>
+    <div style="margin-top:12px;">
+      <label class="outcome-option"><input type="checkbox" id="dupIncludeTopics" checked> Trazer os tópicos (todos como pendentes)</label>
+      <label class="outcome-option"><input type="checkbox" id="dupIncludeNotes" checked> Trazer as anotações dos tópicos</label>
+      <label class="outcome-option"><input type="checkbox" id="dupIncludeFlashcards"> Trazer os flashcards (revisão reiniciada)</label>
+    </div>
+    <p class="field-hint" style="margin-bottom:4px;">Não são copiados: histórico de estudos, revisões, cronograma, ciclo, simulados e data da prova. Pesos e metas semanais também começam do zero, já que mudam de concurso para concurso.</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" id="duplicateProfileCancelBtn">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="duplicateProfileConfirmBtn">Criar edital</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="archiveProfileOverlay">
   <div class="modal-box">
-    <h2 class="modal-title">Arquivar edital</h2>
+    <h2 class="modal-title">Arquivar objetivo</h2>
     <p class="empty-hint" id="archiveProfileSubtitle" style="margin:-10px 0 12px;"></p>
-    <p style="font-size:13px;line-height:1.5;margin:0 0 12px;color:var(--ink-soft);">O edital sai da lista principal, mas todos os dados ficam guardados e você pode restaurá-lo quando quiser. Como terminou essa jornada?</p>
+    <p style="font-size:13px;line-height:1.5;margin:0 0 12px;color:var(--ink-soft);">O objetivo sai da lista principal, mas todos os dados ficam guardados e você pode restaurá-lo quando quiser. Como terminou essa jornada?</p>
     <div id="archiveOutcomeOptions">
-      <label class="outcome-option"><input type="radio" name="archiveOutcome" value="aprovado"> Fui aprovado(a)</label>
-      <label class="outcome-option"><input type="radio" name="archiveOutcome" value="nao_aprovado"> Não fui aprovado(a)</label>
-      <label class="outcome-option"><input type="radio" name="archiveOutcome" value="aguardando"> Aguardando resultado</label>
+      <label class="outcome-option"><input type="radio" name="archiveOutcome" value="aprovado"> <span data-outcome-radio="aprovado">Fui aprovado(a)</span></label>
+      <label class="outcome-option"><input type="radio" name="archiveOutcome" value="nao_aprovado"> <span data-outcome-radio="nao_aprovado">Não fui aprovado(a)</span></label>
+      <label class="outcome-option"><input type="radio" name="archiveOutcome" value="aguardando"> <span data-outcome-radio="aguardando">Aguardando resultado</span></label>
       <label class="outcome-option"><input type="radio" name="archiveOutcome" value="" checked> Prefiro não informar</label>
     </div>
     <div class="modal-actions">
@@ -2337,6 +2441,7 @@ try {
     }
     schedulePushProfileData();
     updateStatusBanner();
+    scheduleAchievementCheck();
   }
 
   // ---------- Aviso de espaço em localStorage e lembrete de backup ----------
@@ -2370,8 +2475,8 @@ try {
     if (activeP && activeP.archived) {
       banner.className = "status-banner archived";
       banner.innerHTML =
-        '<span class="status-banner-msg">&#128230; Este edital está <strong>arquivado</strong>' + (activeP.outcome && OUTCOME_LABELS[activeP.outcome] ? ' (' + OUTCOME_LABELS[activeP.outcome].toLowerCase() + ')' : '') + '. Você pode consultar tudo, mas ele não aparece na lista principal.</span>' +
-        '<div class="status-banner-actions"><button type="button" class="btn btn-outline btn-small" id="statusBannerRestoreBtn">Restaurar edital</button></div>';
+        '<span class="status-banner-msg">&#128230; Este objetivo está <strong>arquivado</strong>' + (activeP.outcome && outcomeLabel(activeP.outcome, activeP) ? ' (' + outcomeLabel(activeP.outcome, activeP).toLowerCase() + ')' : '') + '. Você pode consultar tudo, mas ele não aparece na lista principal.</span>' +
+        '<div class="status-banner-actions"><button type="button" class="btn btn-outline btn-small" id="statusBannerRestoreBtn">Restaurar objetivo</button></div>';
       banner.style.display = "flex";
       document.getElementById("statusBannerRestoreBtn").addEventListener("click", () => restoreProfile(activeP.id));
       return;
@@ -2425,7 +2530,7 @@ try {
   async function switchProfile(id) {
     if (id === activeProfileId) return;
     if (running) {
-      const ok = await confirmDialog("Você tem um cronômetro em andamento. Trocar de edital vai descartar esse tempo não salvo. Continuar?", { danger: true, confirmLabel: "Trocar mesmo assim" });
+      const ok = await confirmDialog("Você tem um cronômetro em andamento. Trocar de objetivo vai descartar esse tempo não salvo. Continuar?", { danger: true, confirmLabel: "Trocar mesmo assim" });
       if (!ok) return;
       running = null;
       clearPersistedTimerState();
@@ -2438,16 +2543,208 @@ try {
     renderProfileSwitcher();
     updateStatusBanner();
   }
-  function createProfile(name) {
-    name = (name || "").trim() || "Novo edital";
+  function createProfile(name, type) {
+    name = (name || "").trim() || "Novo objetivo";
     const id = uid();
-    profiles.push({ id: id, name: name });
+    profiles.push({ id: id, name: name, type: OBJECTIVE_TYPES[type] ? type : "concurso" });
     activeProfileId = id;
     state = { subjects: [], sessions: [], cycle: [], simulados: [], revisions: [], schedule: [], examDate: null, examQuestions: null, examInfo: [], planningConfig: { targetPct: 80, minQuestions: 50 } };
     saveProfilesList();
     save();
     return id;
   }
+  // ---------- Tipos de objetivo (vocabulário da plataforma) ----------
+  const OBJ_CONCURSO = {
+    label: "Concurso público", tab: "Edital", title: "Edital Verticalizado", eyebrow: "Edital Verticalizado — ",
+    about: "Sobre o Concurso",
+    aboutHint: "Reúna aqui as informações do edital que fogem do conteúdo programático — etapas do certame, requisitos, datas e qualquer exigência extra (ex: TAF/teste físico, exame psicológico, exame toxicológico, curso de formação, investigação social, nota de corte, número de vagas).",
+    coverage: "Cobertura do edital", target: "a prova", past: "Prova foi há",
+    dateTitle: "Data da prova", dateSet: "Definir data da prova",
+    questionsLabel: "Quantidade de questões da prova (opcional)",
+    btnTitle: "Clique para definir a data e o nº de questões da prova",
+    out: { aprovado: "Aprovado", nao_aprovado: "Não aprovado", aguardando: "Aguardando resultado" },
+    outRadio: { aprovado: "Fui aprovado(a)", nao_aprovado: "Não fui aprovado(a)", aguardando: "Aguardando resultado" },
+    importAI: true
+  };
+  const OBJ_GENERIC = {
+    label: "Outro objetivo", tab: "Conteúdo", title: "Conteúdo Programático", eyebrow: "Plano de Estudos — ",
+    about: "Sobre o Objetivo",
+    aboutHint: "Reúna aqui as informações do seu objetivo que fogem do conteúdo — datas importantes, critérios de avaliação, materiais, requisitos e qualquer observação relevante.",
+    coverage: "Cobertura do conteúdo", target: "a data final", past: "A data final foi há",
+    dateTitle: "Data final", dateSet: "Definir data final",
+    questionsLabel: "Quantidade de questões ou exercícios (opcional)",
+    btnTitle: "Clique para definir a data final e o nº de questões",
+    out: { aprovado: "Alcançado", nao_aprovado: "Não alcançado", aguardando: "Aguardando resultado" },
+    outRadio: { aprovado: "Alcancei o objetivo", nao_aprovado: "Não alcancei o objetivo", aguardando: "Aguardando resultado" },
+    importAI: false
+  };
+  const OBJECTIVE_TYPES = {
+    concurso: OBJ_CONCURSO,
+    faculdade: Object.assign({}, OBJ_GENERIC, { label: "Faculdade", target: "a prova", past: "A prova foi há", dateTitle: "Data da prova", dateSet: "Definir data da prova", btnTitle: "Clique para definir a data da prova e o nº de questões" }),
+    idioma: Object.assign({}, OBJ_GENERIC, { label: "Idioma", target: "o exame", past: "O exame foi há", dateTitle: "Data do exame", dateSet: "Definir data do exame", btnTitle: "Clique para definir a data do exame e o nº de questões" }),
+    certificacao: Object.assign({}, OBJ_GENERIC, { label: "Certificação", target: "o exame", past: "O exame foi há", dateTitle: "Data do exame", dateSet: "Definir data do exame", btnTitle: "Clique para definir a data do exame e o nº de questões" }),
+    curso: Object.assign({}, OBJ_GENERIC, { label: "Curso", target: "o fim do curso", past: "O fim do curso foi há", dateTitle: "Data de conclusão", dateSet: "Definir data de conclusão", btnTitle: "Clique para definir a data de conclusão e o nº de questões" }),
+    outro: OBJ_GENERIC
+  };
+  function profileType(p) { return (p && OBJECTIVE_TYPES[p.type]) ? p.type : "concurso"; }
+  function vocabFor(p) { return OBJECTIVE_TYPES[profileType(p)]; }
+  function activeVocab() { return vocabFor(profiles.find(x => x.id === activeProfileId)); }
+  function capFirst(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+  function outcomeLabel(outcome, p) { const o = vocabFor(p).out; return (outcome && o[outcome]) ? o[outcome] : ""; }
+  function populateTypeSelects() {
+    ["newProfileTypeSelect", "profileTypeSelect"].forEach(idEl => {
+      const sel = document.getElementById(idEl);
+      if (!sel || sel.options.length) return;
+      Object.keys(OBJECTIVE_TYPES).forEach(key => {
+        const o = document.createElement("option");
+        o.value = key; o.textContent = OBJECTIVE_TYPES[key].label;
+        sel.appendChild(o);
+      });
+    });
+  }
+  function applyVocabulary() {
+    populateTypeSelects();
+    const p = profiles.find(x => x.id === activeProfileId);
+    const V = vocabFor(p);
+    const setText = (el, txt) => { if (el) el.textContent = txt; };
+    setText(document.querySelector('nav.tabs button[data-page="edital"]'), V.tab);
+    setText(document.querySelector('nav.tabs button[data-page="concurso"]'), V.about);
+    setText(document.querySelector("#page-edital .edital-title"), V.title);
+    setText(document.querySelector("#page-concurso .edital-title"), V.about);
+    setText(document.getElementById("aboutHint"), V.aboutHint);
+    setText(document.getElementById("statCoverageLabel"), V.coverage);
+    setText(document.getElementById("examModalTitle"), V.dateTitle);
+    setText(document.getElementById("examDateLabel"), V.dateTitle);
+    setText(document.getElementById("examQuestionsLabel"), V.questionsLabel);
+    const cd = document.getElementById("examCountdownBtn");
+    if (cd) cd.title = V.btnTitle;
+    document.documentElement.style.setProperty("--eyebrow", JSON.stringify(V.eyebrow));
+    const typeSel = document.getElementById("profileTypeSelect");
+    if (typeSel) typeSel.value = profileType(p);
+    const imp = document.getElementById("toggleImportBtn");
+    if (imp) imp.style.display = V.importAI ? "" : "none";
+    renderExamCountdown();
+  }
+  document.addEventListener("change", (e) => {
+    if (!e.target || e.target.id !== "profileTypeSelect") return;
+    const p = profiles.find(x => x.id === activeProfileId);
+    if (!p) return;
+    p.type = e.target.value;
+    saveProfilesList();
+    renderProfileSwitcher();
+  });
+
+  // ---------- Duplicar objetivo (modelo reaproveitável) ----------
+  const duplicateProfileOverlay = document.getElementById("duplicateProfileOverlay");
+  const duplicateSubjectList = document.getElementById("duplicateSubjectList");
+  const duplicateProfileName = document.getElementById("duplicateProfileName");
+  const duplicateProfileError = document.getElementById("duplicateProfileError");
+  let duplicateSourceId = null;
+  let duplicateSourceData = null;
+
+  function readProfileData(id) {
+    if (id === activeProfileId) return state;
+    try { const raw = localStorage.getItem(profileDataKey(id)); return raw ? JSON.parse(raw) : {}; } catch (e) { return {}; }
+  }
+  function openDuplicateProfileModal(id) {
+    const p = profiles.find(x => x.id === id);
+    if (!p) return;
+    duplicateSourceId = id;
+    duplicateSourceData = readProfileData(id) || {};
+    const subjects = duplicateSourceData.subjects || [];
+    document.getElementById("duplicateProfileSubtitle").textContent = "Baseado em: " + p.name;
+    duplicateProfileName.value = "Cópia de " + p.name;
+    duplicateProfileError.style.display = "none";
+    duplicateSubjectList.innerHTML = subjects.length
+      ? subjects.map((sj, i) => {
+          const n = (sj.topics || []).length;
+          return '<label class="outcome-option"><input type="checkbox" data-dup-subject="' + i + '" checked> <span>' + escapeHtml(sj.name) + '</span>' +
+            '<span class="dup-subject-count">' + n + ' tópico' + (n === 1 ? "" : "s") + '</span></label>';
+        }).join("")
+      : '<p class="empty-hint" style="margin:0 0 8px;">Este objetivo ainda não tem matérias — será criado um objetivo vazio.</p>';
+    document.getElementById("dupIncludeTopics").checked = true;
+    document.getElementById("dupIncludeNotes").checked = true;
+    document.getElementById("dupIncludeFlashcards").checked = false;
+    syncDuplicateOptionsState();
+    duplicateProfileOverlay.classList.add("open");
+    setTimeout(() => { duplicateProfileName.focus(); duplicateProfileName.select(); }, 0);
+  }
+  function closeDuplicateProfileModal() {
+    duplicateProfileOverlay.classList.remove("open");
+    duplicateSourceId = null;
+    duplicateSourceData = null;
+  }
+  // Anotações e flashcards só fazem sentido se os tópicos forem trazidos
+  function syncDuplicateOptionsState() {
+    const withTopics = document.getElementById("dupIncludeTopics").checked;
+    ["dupIncludeNotes", "dupIncludeFlashcards"].forEach(idEl => {
+      const el = document.getElementById(idEl);
+      el.disabled = !withTopics;
+      el.parentElement.style.opacity = withTopics ? "1" : "0.5";
+    });
+  }
+  document.getElementById("dupIncludeTopics").addEventListener("change", syncDuplicateOptionsState);
+  document.getElementById("dupSelectAllBtn").addEventListener("click", () => {
+    duplicateSubjectList.querySelectorAll("[data-dup-subject]").forEach(c => { c.checked = true; });
+  });
+  document.getElementById("dupSelectNoneBtn").addEventListener("click", () => {
+    duplicateSubjectList.querySelectorAll("[data-dup-subject]").forEach(c => { c.checked = false; });
+  });
+  document.getElementById("duplicateProfileCancelBtn").addEventListener("click", closeDuplicateProfileModal);
+  duplicateProfileOverlay.addEventListener("click", (e) => { if (e.target === duplicateProfileOverlay) closeDuplicateProfileModal(); });
+  duplicateProfileName.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); document.getElementById("duplicateProfileConfirmBtn").click(); }
+  });
+
+  async function confirmDuplicateProfile() {
+    const name = duplicateProfileName.value.trim();
+    if (!name) { duplicateProfileError.textContent = "Dê um nome ao novo edital."; duplicateProfileError.style.display = "block"; return; }
+    if (profiles.some(p => p.name.trim().toLowerCase() === name.toLowerCase())) {
+      duplicateProfileError.textContent = "Já existe um edital com esse nome — escolha outro.";
+      duplicateProfileError.style.display = "block";
+      return;
+    }
+    const src = duplicateSourceData || {};
+    const srcSubjects = src.subjects || [];
+    const chosen = Array.from(duplicateSubjectList.querySelectorAll("[data-dup-subject]:checked")).map(c => Number(c.getAttribute("data-dup-subject")));
+    const withTopics = document.getElementById("dupIncludeTopics").checked;
+    const withNotes = withTopics && document.getElementById("dupIncludeNotes").checked;
+    const withCards = withTopics && document.getElementById("dupIncludeFlashcards").checked;
+    const today = todayKey();
+    const newSubjects = chosen.map(i => srcSubjects[i]).filter(Boolean).map(sj => ({
+      id: uid(),
+      name: sj.name,
+      weight: null,
+      topics: withTopics ? (sj.topics || []).map(t => {
+        const nt = { id: uid(), name: t.name, done: false };
+        if (withNotes && t.notes) nt.notes = t.notes;
+        if (withCards && Array.isArray(t.flashcards) && t.flashcards.length) {
+          nt.flashcards = t.flashcards.map(c => ({ id: uid(), front: c.front, back: c.back, stage: 0, nextDate: today, lastReviewed: null }));
+        }
+        return nt;
+      }) : []
+    }));
+    const newState = {
+      subjects: newSubjects, sessions: [], cycle: [], simulados: [], revisions: [], schedule: [],
+      examDate: null, examQuestions: null, examInfo: [], planningConfig: { targetPct: 80, minQuestions: 50 }
+    };
+    const newId = uid();
+    try { localStorage.setItem(profileDataKey(newId), JSON.stringify(newState)); }
+    catch (e) { alert("Não consegui criar o objetivo: o armazenamento do navegador está cheio."); return; }
+    markProfileChanged(newId);
+    const dupSrcProfile = profiles.find(x => x.id === duplicateSourceId);
+    profiles.push({ id: newId, name: name, type: profileType(dupSrcProfile) });
+    saveProfilesList();
+    closeDuplicateProfileModal();
+    document.getElementById("profileDropdown").classList.remove("open");
+    await switchProfile(newId);
+    save(); // garante o envio do novo objetivo para a nuvem
+    renderProfileSwitcher();
+    const nSub = newSubjects.length;
+    showUndoToast('Objetivo "' + name + '" criado com ' + nSub + ' matéria' + (nSub === 1 ? "" : "s") + '.', null);
+  }
+  document.getElementById("duplicateProfileConfirmBtn").addEventListener("click", confirmDuplicateProfile);
+
   // ---------- Arquivamento de editais ----------
   const OUTCOME_LABELS = { aprovado: "Aprovado", nao_aprovado: "Não aprovado", aguardando: "Aguardando resultado" };
   let archivedListOpen = false;
@@ -2478,9 +2775,11 @@ try {
   function openArchiveProfileModal(id) {
     const p = profiles.find(x => x.id === id);
     if (!p || p.archived) return;
-    if (activeProfilesList().length <= 1) { alert("Esse é o único edital ativo — crie outro antes de arquivar este."); return; }
+    if (activeProfilesList().length <= 1) { alert("Esse é o único objetivo ativo — crie outro antes de arquivar este."); return; }
     archiveProfileTargetId = id;
     document.getElementById("archiveProfileSubtitle").textContent = p.name;
+    const Va = vocabFor(p);
+    archiveProfileOverlay.querySelectorAll("[data-outcome-radio]").forEach(sp => { sp.textContent = Va.outRadio[sp.getAttribute("data-outcome-radio")]; });
     const def = archiveProfileOverlay.querySelector('input[name="archiveOutcome"][value="' + (p.outcome || "") + '"]');
     if (def) def.checked = true;
     archiveProfileOverlay.classList.add("open");
@@ -2506,7 +2805,7 @@ try {
     saveProfilesList();
     renderProfileSwitcher();
     updateStatusBanner();
-    showUndoToast('Edital "' + p.name + '" arquivado.', () => {
+    showUndoToast('Objetivo "' + p.name + '" arquivado.', () => {
       p.archived = false; p.archivedAt = null; p.outcome = "";
       saveProfilesList(); renderProfileSwitcher(); updateStatusBanner();
     });
@@ -2520,7 +2819,7 @@ try {
     saveProfilesList();
     renderProfileSwitcher();
     updateStatusBanner();
-    showUndoToast('Edital "' + p.name + '" restaurado.', null);
+    showUndoToast('Objetivo "' + p.name + '" restaurado.', null);
   }
   document.getElementById("archiveProfileCancelBtn").addEventListener("click", closeArchiveProfileModal);
   archiveProfileOverlay.addEventListener("click", (e) => { if (e.target === archiveProfileOverlay) closeArchiveProfileModal(); });
@@ -2540,7 +2839,7 @@ try {
     if (profiles.length <= 1) { alert("Esse é o único edital que você tem — não é possível excluir."); return; }
     const p = profiles.find(x => x.id === id);
     if (!p) return;
-    const ok = await confirmDialog('Excluir o edital "' + p.name + '" e todos os dados dele (matérias, histórico, cronograma etc.)?', { danger: true, confirmLabel: "Excluir" });
+    const ok = await confirmDialog('Excluir o objetivo "' + p.name + '" e todos os dados dele (matérias, histórico, cronograma etc.)?', { danger: true, confirmLabel: "Excluir" });
     if (!ok) return;
     const profileIndex = profiles.indexOf(p);
     const wasActive = activeProfileId === id;
@@ -2555,7 +2854,7 @@ try {
     saveProfilesList();
     renderProfileSwitcher();
     showUndoToast(
-      'Edital "' + p.name + '" excluído.',
+      'Objetivo "' + p.name + '" excluído.',
       () => {
         profiles.splice(Math.min(profileIndex, profiles.length), 0, p);
         if (wasActive) {
@@ -2582,25 +2881,27 @@ try {
     const onlyOneActive = activeProfilesList().length <= 1;
     const rowHtml = (p) => {
       const isActive = p.id === activeProfileId;
-      const sel = 'data-select-profile="' + p.id + '" role="button" tabindex="0" aria-label="Selecionar edital ' + escapeHtml(p.name) + (isActive ? " (ativo)" : "") + '"';
+      const sel = 'data-select-profile="' + p.id + '" role="button" tabindex="0" aria-label="Selecionar objetivo ' + escapeHtml(p.name) + (isActive ? " (ativo)" : "") + '"';
       if (!p.archived) {
         return '<div class="profile-row' + (isActive ? " active" : "") + '" ' + sel + '>' +
           '<span class="profile-row-name">' + escapeHtml(p.name) + (isActive ? ' &#10003;' : '') + '</span>' +
-          '<button class="icon-btn" data-rename-profile="' + p.id + '" title="Renomear" aria-label="Renomear edital ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#9998;</button>' +
-          (onlyOneActive ? '' : '<button class="icon-btn" data-archive-profile="' + p.id + '" title="Arquivar" aria-label="Arquivar edital ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#128230;</button>') +
-          '<button class="icon-btn" data-delete-profile="' + p.id + '" title="Excluir" aria-label="Excluir edital ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#128465;</button>' +
+          '<button class="icon-btn" data-rename-profile="' + p.id + '" title="Renomear" aria-label="Renomear objetivo ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#9998;</button>' +
+          '<button class="icon-btn" data-duplicate-profile="' + p.id + '" title="Duplicar como modelo" aria-label="Duplicar objetivo ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#128203;</button>' +
+          (onlyOneActive ? '' : '<button class="icon-btn" data-archive-profile="' + p.id + '" title="Arquivar" aria-label="Arquivar objetivo ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#128230;</button>') +
+          '<button class="icon-btn" data-delete-profile="' + p.id + '" title="Excluir" aria-label="Excluir objetivo ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#128465;</button>' +
         '</div>';
       }
       const sm = p.summary || {};
       const metaParts = [];
-      if (p.outcome && OUTCOME_LABELS[p.outcome]) metaParts.push('<span class="outcome-badge ' + p.outcome + '">' + OUTCOME_LABELS[p.outcome] + '</span>');
+      if (p.outcome && outcomeLabel(p.outcome, p)) metaParts.push('<span class="outcome-badge ' + p.outcome + '">' + outcomeLabel(p.outcome, p) + '</span>');
       if (sm.seconds != null) metaParts.push('<span>' + fmtHoursLong(sm.seconds || 0) + ' estudadas</span>');
       if (sm.topicsTotal) metaParts.push('<span>' + sm.topicsDone + '/' + sm.topicsTotal + ' tópicos</span>');
       if (p.archivedAt) metaParts.push('<span>arquivado em ' + p.archivedAt.split("-").reverse().join("/") + '</span>');
       return '<div class="profile-row archived' + (isActive ? " active" : "") + '" ' + sel + '>' +
         '<span class="profile-row-name">&#128230; ' + escapeHtml(p.name) + (isActive ? ' &#10003;' : '') + '</span>' +
-        '<button class="icon-btn" data-restore-profile="' + p.id + '" title="Restaurar" aria-label="Restaurar edital ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#8617;</button>' +
-        '<button class="icon-btn" data-delete-profile="' + p.id + '" title="Excluir" aria-label="Excluir edital ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#128465;</button>' +
+        '<button class="icon-btn" data-duplicate-profile="' + p.id + '" title="Duplicar como modelo" aria-label="Duplicar objetivo ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#128203;</button>' +
+        '<button class="icon-btn" data-restore-profile="' + p.id + '" title="Restaurar" aria-label="Restaurar objetivo ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#8617;</button>' +
+        '<button class="icon-btn" data-delete-profile="' + p.id + '" title="Excluir" aria-label="Excluir objetivo ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#128465;</button>' +
         (metaParts.length ? '<div class="profile-archived-meta">' + metaParts.join("") + '</div>' : '') +
       '</div>';
     };
@@ -2618,6 +2919,12 @@ try {
       el.addEventListener("click", () => {
         document.getElementById("profileDropdown").classList.remove("open");
         openArchiveProfileModal(el.getAttribute("data-archive-profile"));
+      });
+    });
+    listEl.querySelectorAll("[data-duplicate-profile]").forEach(el => {
+      el.addEventListener("click", () => {
+        document.getElementById("profileDropdown").classList.remove("open");
+        openDuplicateProfileModal(el.getAttribute("data-duplicate-profile"));
       });
     });
     listEl.querySelectorAll("[data-restore-profile]").forEach(el => {
@@ -2648,14 +2955,17 @@ try {
       el.addEventListener("click", () => deleteProfile(el.getAttribute("data-delete-profile")));
     });
     renderExamCountdown();
+    applyVocabulary();
+    if (getActivePageKey() === "jornada") renderJornada();
   }
 
   function renderExamCountdown() {
     const el = document.getElementById("examCountdownText");
     const btn = document.getElementById("examCountdownBtn");
     if (!el || !btn) return;
+    const V = activeVocab();
     if (!state.examDate) {
-      el.textContent = "Definir data da prova";
+      el.textContent = V.dateSet;
       btn.classList.remove("urgent");
       return;
     }
@@ -2663,13 +2973,13 @@ try {
     const exam = new Date(state.examDate + "T00:00:00");
     const diffDays = Math.round((exam - today) / 86400000);
     if (diffDays > 0) {
-      el.textContent = "Faltam " + diffDays + (diffDays === 1 ? " dia" : " dias") + " para a prova";
+      el.textContent = "Faltam " + diffDays + (diffDays === 1 ? " dia" : " dias") + " para " + V.target;
       btn.classList.toggle("urgent", diffDays <= 14);
     } else if (diffDays === 0) {
-      el.textContent = "A prova é hoje!";
+      el.textContent = capFirst(V.target) + " é hoje!";
       btn.classList.add("urgent");
     } else {
-      el.textContent = "Prova foi há " + Math.abs(diffDays) + " dias";
+      el.textContent = V.past + " " + Math.abs(diffDays) + (Math.abs(diffDays) === 1 ? " dia" : " dias");
       btn.classList.remove("urgent");
     }
   }
@@ -4174,6 +4484,296 @@ try {
   // apenas a aba visível, e marcamos as demais como "sujas" para serem renderizadas (com dados
   // já atualizados) só quando a pessoa realmente for vê-las — o resultado visual é idêntico,
   // só evita trabalho invisível.
+  // ---------- Jornada: visão de todos os editais ao longo do tempo ----------
+  const MONTH_ABBR = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+  const JOURNEY_COLORS = ["#6E2528", "#4D5746", "#8A6A14", "#2C3E63", "#B5654A", "#6B5B7B", "#3F7F7A", "#9A8F6B"];
+  function fmtMonthKey(key) { const parts = key.split("-"); return MONTH_ABBR[Number(parts[1]) - 1] + "/" + parts[0]; }
+  function fmtDateBR(dateStr) { return dateStr ? dateStr.split("-").reverse().join("/") : ""; }
+  function fmtHoursShort(seconds) {
+    const h = Math.round(seconds / 360) / 10;
+    return String(h).replace(".", ",") + "h";
+  }
+  function renderJornada() {
+    const statsEl = document.getElementById("jornadaStats");
+    if (!statsEl) return;
+    const entries = profiles.map((p, idx) => {
+      const data = readProfileData(p.id) || {};
+      const sessions = (data.sessions || []).filter(x => x && x.date);
+      const dates = sessions.map(x => x.date).sort();
+      const byMonth = {};
+      let seconds = 0, corretas = 0, erradas = 0;
+      sessions.forEach(x => {
+        const sec = x.seconds || 0;
+        seconds += sec;
+        corretas += x.corretas || 0;
+        erradas += x.erradas || 0;
+        const mk = x.date.slice(0, 7);
+        byMonth[mk] = (byMonth[mk] || 0) + sec;
+      });
+      let topicsDone = 0, topicsTotal = 0;
+      (data.subjects || []).forEach(sj => (sj.topics || []).forEach(t => { topicsTotal++; if (t.done) topicsDone++; }));
+      return {
+        profile: p, color: JOURNEY_COLORS[idx % JOURNEY_COLORS.length],
+        sessions: sessions.length, dates: dates, first: dates[0] || null, last: dates[dates.length - 1] || null,
+        seconds: seconds, corretas: corretas, erradas: erradas, byMonth: byMonth,
+        topicsDone: topicsDone, topicsTotal: topicsTotal, examDate: data.examDate || null
+      };
+    });
+
+    const totalSessions = entries.reduce((a, e) => a + e.sessions, 0);
+    const emptyHint = document.getElementById("jornadaEmptyHint");
+    const content = document.getElementById("jornadaContent");
+    if (totalSessions === 0) { emptyHint.style.display = "block"; content.style.display = "none"; return; }
+    emptyHint.style.display = "none"; content.style.display = "block";
+
+    const totalSeconds = entries.reduce((a, e) => a + e.seconds, 0);
+    const totalQ = entries.reduce((a, e) => a + e.corretas + e.erradas, 0);
+    const totalCorrect = entries.reduce((a, e) => a + e.corretas, 0);
+    const approved = profiles.filter(p => p.outcome === "aprovado").length;
+    const archivedCount = profiles.filter(p => p.archived).length;
+
+    // maior sequência de dias seguidos estudando (somando todos os editais)
+    const allDates = Array.from(new Set([].concat.apply([], entries.map(e => e.dates)))).sort();
+    let bestRun = 0, run = 0, prevT = null;
+    allDates.forEach(d => {
+      const t = Date.UTC(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, Number(d.slice(8, 10)));
+      run = (prevT !== null && Math.round((t - prevT) / 86400000) === 1) ? run + 1 : 1;
+      if (run > bestRun) bestRun = run;
+      prevT = t;
+    });
+
+    const card = (label, value, sub) =>
+      '<div class="stat-card"><div class="stat-label">' + label + '</div><div class="stat-value">' + value + '</div><div class="stat-sub">' + sub + '</div></div>';
+    statsEl.innerHTML =
+      card("Horas estudadas", fmtHoursLong(totalSeconds), totalSessions + (totalSessions === 1 ? " sessão" : " sessões") + " no total") +
+      card("Questões respondidas", String(totalQ), totalQ > 0 ? Math.round(totalCorrect / totalQ * 100) + "% de aproveitamento" : "nenhuma ainda") +
+      card("Objetivos", String(profiles.length), approved > 0 ? (approved === 1 ? "1 objetivo alcançado" : approved + " objetivos alcançados") : (archivedCount + " arquivado" + (archivedCount === 1 ? "" : "s"))) +
+      card("Maior sequência", bestRun + (bestRun === 1 ? " dia" : " dias"), "estudando em dias seguidos");
+
+    // mês mais estudado
+    const monthTotals = {};
+    entries.forEach(e => Object.keys(e.byMonth).forEach(mk => { monthTotals[mk] = (monthTotals[mk] || 0) + e.byMonth[mk]; }));
+    const monthKeysWithData = Object.keys(monthTotals).sort();
+    let topMonth = monthKeysWithData[0];
+    monthKeysWithData.forEach(mk => { if (monthTotals[mk] > monthTotals[topMonth]) topMonth = mk; });
+    document.getElementById("jornadaHighlights").innerHTML =
+      '<span>Primeira sessão: <b>' + fmtDateBR(allDates[0]) + '</b></span>' +
+      '<span>Mês mais estudado: <b>' + fmtMonthKey(topMonth) + '</b> (' + fmtHoursShort(monthTotals[topMonth]) + ')</span>' +
+      '<span>Dias estudados: <b>' + allDates.length + '</b></span>';
+
+    // gráfico: horas por mês, empilhado por edital (até 12 meses)
+    const nowKey = todayKey().slice(0, 7);
+    const lastKey = monthKeysWithData[monthKeysWithData.length - 1] > nowKey ? monthKeysWithData[monthKeysWithData.length - 1] : nowKey;
+    let months = [];
+    let y = Number(monthKeysWithData[0].slice(0, 4)), m = Number(monthKeysWithData[0].slice(5, 7));
+    while (true) {
+      const key = y + "-" + String(m).padStart(2, "0");
+      months.push(key);
+      if (key >= lastKey) break;
+      m++; if (m > 12) { m = 1; y++; }
+    }
+    if (months.length > 12) months = months.slice(months.length - 12);
+    const maxTotal = Math.max.apply(null, months.map(mk => monthTotals[mk] || 0).concat([1]));
+    const CHART_PX = 150;
+    document.getElementById("jornadaChart").innerHTML = months.map(mk => {
+      const total = monthTotals[mk] || 0;
+      const segs = entries.filter(e => (e.byMonth[mk] || 0) > 0).map(e => {
+        const sec = e.byMonth[mk];
+        const h = Math.max(2, Math.round(sec / maxTotal * CHART_PX));
+        return '<div class="journey-seg" style="height:' + h + 'px;background:' + e.color + ';" title="' + escapeHtml(e.profile.name) + ': ' + fmtHoursLong(sec) + '"></div>';
+      }).join("");
+      const mm = Number(mk.slice(5, 7));
+      const label = MONTH_ABBR[mm - 1] + (mm === 1 || mk === months[0] ? " " + mk.slice(2, 4) : "");
+      return '<div class="journey-col"><div class="journey-col-total">' + (total > 0 ? fmtHoursShort(total) : "") + '</div>' +
+        '<div class="journey-stack">' + segs + '</div><div class="journey-col-label">' + label + '</div></div>';
+    }).join("");
+    document.getElementById("jornadaLegend").innerHTML = entries.filter(e => e.seconds > 0).map(e =>
+      '<span><i style="background:' + e.color + ';"></i>' + escapeHtml(e.profile.name) + '</span>').join("");
+
+    // linha do tempo: editais em ordem cronológica
+    const ordered = entries.slice().sort((a, b) => {
+      if (a.first && b.first) return a.first < b.first ? -1 : a.first > b.first ? 1 : 0;
+      if (a.first) return -1;
+      if (b.first) return 1;
+      return 0;
+    });
+    document.getElementById("jornadaTimeline").innerHTML = ordered.map(e => {
+      const p = e.profile;
+      const isOpen = p.id === activeProfileId;
+      let badge;
+      if (p.outcome && outcomeLabel(p.outcome, p)) badge = '<span class="outcome-badge ' + p.outcome + '">' + outcomeLabel(p.outcome, p) + '</span>';
+      else if (p.archived) badge = '<span class="outcome-badge neutro">Arquivado</span>';
+      else badge = '<span class="outcome-badge andamento">Em andamento</span>';
+      let period = "sem sessões registradas";
+      const typeLabel = vocabFor(p).label;
+      if (e.first) {
+        const fk = e.first.slice(0, 7), lk = e.last.slice(0, 7);
+        period = fmtMonthKey(fk) + (lk !== fk ? " → " + fmtMonthKey(lk) : "");
+      }
+      if (e.examDate) period += " · " + vocabFor(p).dateTitle.toLowerCase() + ": " + fmtDateBR(e.examDate);
+      period = typeLabel + " · " + period;
+      const q = e.corretas + e.erradas;
+      const stats =
+        '<span><b>' + fmtHoursLong(e.seconds) + '</b> estudadas</span>' +
+        '<span><b>' + e.sessions + '</b>' + (e.sessions === 1 ? ' sessão' : ' sessões') + '</span>' +
+        (q > 0 ? '<span><b>' + q + '</b> questões (' + Math.round(e.corretas / q * 100) + '%)</span>' : '') +
+        (e.topicsTotal > 0 ? '<span><b>' + e.topicsDone + '/' + e.topicsTotal + '</b> tópicos</span>' : '');
+      return '<div class="journey-item' + (isOpen ? " current" : "") + '">' +
+        '<div class="journey-item-head"><span class="journey-item-name">' + escapeHtml(p.name) + '</span>' + badge + '</div>' +
+        '<div class="journey-item-period">' + period + '</div>' +
+        '<div class="journey-item-stats">' + stats + '</div>' +
+        (isOpen ? '' : '<div class="journey-item-actions"><button type="button" class="btn btn-outline btn-small" data-journey-open="' + p.id + '">Abrir objetivo</button></div>') +
+      '</div>';
+    }).join("");
+    document.querySelectorAll("[data-journey-open]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.getAttribute("data-journey-open");
+        await switchProfile(id);
+        if (activeProfileId === id) {
+          const editalTab = document.querySelector('nav.tabs button[data-page="edital"]');
+          if (editalTab) editalTab.click();
+        }
+      });
+    });
+    try { checkAchievements({ noRender: true }); renderAchievements(computeJourneyTotals()); } catch (e) { /* ignora */ }
+  }
+
+  // ---------- Conquistas leves ----------
+  const ACH_KEY = "meus-estudos:conquistas-v1";
+  const ACHIEVEMENTS = [
+    { id: "first-session", group: "Marcos", icon: "🌱", title: "Primeiro passo", desc: "Registre sua primeira sessão de estudo.", metric: "sessions", target: 1 },
+    { id: "objective-reached", group: "Marcos", icon: "🏆", title: "Objetivo alcançado", desc: "Arquive um objetivo marcando que você o alcançou.", metric: "reached", target: 1 },
+    { id: "hours-10", group: "Horas de estudo", icon: "⏱️", title: "Aquecendo", desc: "Some 10 horas de estudo.", metric: "hours", target: 10, suffix: "h" },
+    { id: "hours-50", group: "Horas de estudo", icon: "⏱️", title: "Ritmo firme", desc: "Some 50 horas de estudo.", metric: "hours", target: 50, suffix: "h" },
+    { id: "hours-100", group: "Horas de estudo", icon: "⏱️", title: "Cem horas", desc: "Some 100 horas de estudo.", metric: "hours", target: 100, suffix: "h" },
+    { id: "hours-250", group: "Horas de estudo", icon: "⏱️", title: "Maratonista", desc: "Some 250 horas de estudo.", metric: "hours", target: 250, suffix: "h" },
+    { id: "hours-500", group: "Horas de estudo", icon: "⏱️", title: "Veterano", desc: "Some 500 horas de estudo.", metric: "hours", target: 500, suffix: "h" },
+    { id: "streak-3", group: "Sequência", icon: "🔥", title: "Constância", desc: "Estude 3 dias seguidos.", metric: "streak", target: 3, suffix: " dias" },
+    { id: "streak-7", group: "Sequência", icon: "🔥", title: "Semana cheia", desc: "Estude 7 dias seguidos.", metric: "streak", target: 7, suffix: " dias" },
+    { id: "streak-14", group: "Sequência", icon: "🔥", title: "Quinzena de foco", desc: "Estude 14 dias seguidos.", metric: "streak", target: 14, suffix: " dias" },
+    { id: "streak-30", group: "Sequência", icon: "🔥", title: "Mês inabalável", desc: "Estude 30 dias seguidos.", metric: "streak", target: 30, suffix: " dias" },
+    { id: "questions-100", group: "Questões", icon: "🎯", title: "Primeiras 100", desc: "Responda 100 questões.", metric: "questions", target: 100 },
+    { id: "questions-500", group: "Questões", icon: "🎯", title: "Meio milhar", desc: "Responda 500 questões.", metric: "questions", target: 500 },
+    { id: "questions-1000", group: "Questões", icon: "🎯", title: "Mil questões", desc: "Responda 1.000 questões.", metric: "questions", target: 1000 },
+    { id: "questions-5000", group: "Questões", icon: "🎯", title: "Cinco mil", desc: "Responda 5.000 questões.", metric: "questions", target: 5000 },
+    { id: "topics-25", group: "Conteúdo", icon: "✅", title: "Desbravador", desc: "Conclua 25 tópicos.", metric: "topics", target: 25 },
+    { id: "topics-100", group: "Conteúdo", icon: "✅", title: "Explorador", desc: "Conclua 100 tópicos.", metric: "topics", target: 100 },
+    { id: "topics-250", group: "Conteúdo", icon: "✅", title: "Cartógrafo", desc: "Conclua 250 tópicos.", metric: "topics", target: 250 },
+    { id: "sim-1", group: "Simulados e revisão", icon: "📝", title: "Primeiro simulado", desc: "Registre seu primeiro simulado.", metric: "simulados", target: 1 },
+    { id: "sim-5", group: "Simulados e revisão", icon: "📝", title: "Rotina de simulados", desc: "Registre 5 simulados.", metric: "simulados", target: 5 },
+    { id: "sim-10", group: "Simulados e revisão", icon: "📝", title: "Calejado", desc: "Registre 10 simulados.", metric: "simulados", target: 10 },
+    { id: "cards-50", group: "Simulados e revisão", icon: "🗂️", title: "Baralho inicial", desc: "Crie 50 flashcards.", metric: "flashcards", target: 50 },
+    { id: "cards-200", group: "Simulados e revisão", icon: "🗂️", title: "Biblioteca de cards", desc: "Crie 200 flashcards.", metric: "flashcards", target: 200 }
+  ];
+  function longestStreak(sortedDates) {
+    let best = 0, run = 0, prevT = null;
+    sortedDates.forEach(d => {
+      const t = Date.UTC(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, Number(d.slice(8, 10)));
+      run = (prevT !== null && Math.round((t - prevT) / 86400000) === 1) ? run + 1 : 1;
+      if (run > best) best = run;
+      prevT = t;
+    });
+    return best;
+  }
+  // Soma de todos os objetivos (inclusive os arquivados)
+  function computeJourneyTotals() {
+    let seconds = 0, sessions = 0, questions = 0, topics = 0, simulados = 0, flashcards = 0;
+    const dateSet = new Set();
+    profiles.forEach(p => {
+      const d = readProfileData(p.id) || {};
+      (d.sessions || []).forEach(x => {
+        if (!x) return;
+        seconds += x.seconds || 0;
+        sessions++;
+        questions += (x.corretas || 0) + (x.erradas || 0);
+        if (x.date) dateSet.add(x.date);
+      });
+      (d.subjects || []).forEach(sj => (sj.topics || []).forEach(t => {
+        if (t.done) topics++;
+        flashcards += (t.flashcards || []).length;
+      }));
+      simulados += (d.simulados || []).length;
+    });
+    return {
+      hours: seconds / 3600, sessions: sessions, questions: questions, topics: topics, simulados: simulados, flashcards: flashcards,
+      streak: longestStreak(Array.from(dateSet).sort()),
+      reached: profiles.filter(p => p.outcome === "aprovado").length
+    };
+  }
+  // null = nunca rodou neste navegador (a primeira leitura registra tudo em silêncio)
+  function loadAchStore() {
+    try {
+      const raw = localStorage.getItem(ACH_KEY);
+      if (raw === null) return null;
+      const o = JSON.parse(raw);
+      return (o && typeof o === "object" && !Array.isArray(o)) ? o : null;
+    } catch (e) { return null; }
+  }
+  function saveAchStore(o) { try { localStorage.setItem(ACH_KEY, JSON.stringify(o)); } catch (e) { /* sem espaço: tenta de novo na próxima vez */ } }
+  function announceAchievements(list) {
+    let msg;
+    if (list.length === 1) msg = "🏅 Conquista desbloqueada: " + list[0].title;
+    else {
+      const names = list.slice(0, 3).map(a => a.title);
+      msg = "🏅 " + list.length + " conquistas desbloqueadas: " + names.join(", ") + (list.length > 3 ? " e mais " + (list.length - 3) : "");
+    }
+    showUndoToast(msg, null);
+  }
+  function checkAchievements(opts) {
+    try {
+      const totals = computeJourneyTotals();
+      const met = ACHIEVEMENTS.filter(a => (totals[a.metric] || 0) >= a.target);
+      const store = loadAchStore();
+      if (store === null) {
+        const init = {};
+        met.forEach(a => { init[a.id] = ""; });
+        saveAchStore(init);
+        return;
+      }
+      const fresh = met.filter(a => !(a.id in store));
+      if (!fresh.length) return;
+      fresh.forEach(a => { store[a.id] = todayKey(); });
+      saveAchStore(store);
+      announceAchievements(fresh);
+      if (!(opts && opts.noRender) && getActivePageKey() === "jornada") renderJornada();
+    } catch (e) { /* conquistas nunca devem atrapalhar o app */ }
+  }
+  var achCheckTimer = null; // var: save() pode rodar antes desta linha durante a inicialização
+  function scheduleAchievementCheck() {
+    try {
+      clearTimeout(achCheckTimer);
+      achCheckTimer = setTimeout(checkAchievements, 2500);
+    } catch (e) { /* ignora */ }
+  }
+  function renderAchievements(totals) {
+    const body = document.getElementById("achievementsBody");
+    if (!body) return;
+    const store = loadAchStore() || {};
+    const groups = {};
+    ACHIEVEMENTS.forEach(a => { (groups[a.group] = groups[a.group] || []).push(a); });
+    let unlockedCount = 0;
+    body.innerHTML = Object.keys(groups).map(g =>
+      '<div class="ach-group-title">' + g + '</div><div class="ach-grid">' +
+      groups[g].map(a => {
+        const val = totals[a.metric] || 0;
+        const unlocked = (a.id in store) || val >= a.target;
+        if (unlocked) unlockedCount++;
+        const pct = Math.min(100, Math.round(val / a.target * 100));
+        const meta = unlocked
+          ? (store[a.id] ? "desbloqueada em " + fmtDateBR(store[a.id]) : "desbloqueada")
+          : Math.floor(val) + " / " + a.target + (a.suffix || "");
+        return '<div class="ach-card ' + (unlocked ? "unlocked" : "locked") + '">' +
+          '<div class="ach-icon">' + a.icon + '</div>' +
+          '<div class="ach-title">' + a.title + '</div>' +
+          '<div class="ach-desc">' + a.desc + '</div>' +
+          '<div class="ach-meta">' + meta + '</div>' +
+          (unlocked ? '' : '<div class="ach-bar"><i style="width:' + pct + '%;"></i></div>') +
+        '</div>';
+      }).join("") + '</div>'
+    ).join("");
+    document.getElementById("achSummary").textContent = unlockedCount + "/" + ACHIEVEMENTS.length;
+  }
+
   const PAGE_RENDERERS = {
     edital: [renderEdital, renderPriorities, renderWelcomeBack],
     concurso: [renderExamInfo],
@@ -4181,7 +4781,8 @@ try {
     historico: [renderHistorico],
     planejamento: [renderSemanal, renderCiclo],
     simulados: [renderSimulados],
-    revisoes: [renderRevisoes, renderFlashcardsSummary]
+    revisoes: [renderRevisoes, renderFlashcardsSummary],
+    jornada: [renderJornada]
   };
   const dirtyPages = new Set(Object.keys(PAGE_RENDERERS));
   function getActivePageKey() {
@@ -4426,7 +5027,7 @@ try {
     }
 
     hint.style.display = "block";
-    hint.textContent = "Faltam " + diasRestantes + " dias para a prova" +
+    hint.textContent = "Faltam " + diasRestantes + " dias para " + activeVocab().target +
       (state.examQuestions ? " (" + state.examQuestions + " questões)" : "") +
       ". Sugestão: " + minutosPorDiaSugerido + " min/dia para cobrir o conteúdo com folga — ajuste como preferir.";
   }
@@ -5887,7 +6488,7 @@ try {
   const flashcardImportStatus = document.getElementById("flashcardImportStatus");
   const flashcardImportResults = document.getElementById("flashcardImportResults");
   const FLASHCARD_PROMPT_HEADER =
-    "Crie flashcards de estudo (pergunta e resposta) para quem está estudando para um concurso público, com base na lista de matérias e tópicos abaixo.\n" +
+    "Crie flashcards de estudo (pergunta e resposta) " + (profileType(profiles.find(x => x.id === activeProfileId)) === "concurso" ? "para quem está estudando para um concurso público" : "para quem está estudando") + ", com base na lista de matérias e tópicos abaixo.\n" +
     "Para cada tópico, gere de 2 a 4 flashcards cobrindo os pontos mais importantes/mais cobrados em prova. Perguntas objetivas, respostas curtas e diretas (não repita a pergunta na resposta, não invente conteúdo que não é comum nesse tipo de prova).\n" +
     "Responda SOMENTE no formato abaixo, sem nenhum texto extra, sem markdown adicional:\n\n" +
     "## Nome da matéria\n### Nome do tópico\n- P: pergunta 1 | R: resposta 1\n- P: pergunta 2 | R: resposta 2\n### Outro tópico\n- P: pergunta | R: resposta\n\n## Outra matéria\n### Tópico\n- P: pergunta | R: resposta\n\n" +
@@ -6086,7 +6687,7 @@ try {
   document.getElementById("addProfileBtn").addEventListener("click", () => {
     const input = document.getElementById("newProfileNameInput");
     if (!input.value.trim()) return;
-    createProfile(input.value);
+    createProfile(input.value, document.getElementById("newProfileTypeSelect").value);
     input.value = "";
     renderProfileSwitcher();
     renderAll();
@@ -6130,6 +6731,7 @@ try {
     renderAll();
     restoreTimerState();
     updateStatusBanner();
+    scheduleAchievementCheck();
   }
 
   // Saudação do header muda de acordo com o horário do dia.
