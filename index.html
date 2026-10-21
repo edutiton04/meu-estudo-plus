@@ -121,6 +121,10 @@
   .dup-subject-count { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
   .dup-link-btn { background: none; border: none; padding: 0 4px; font-family: var(--sans); font-size: 11.5px; font-weight: 600; color: var(--accent); cursor: pointer; text-decoration: underline; }
   [data-theme="dark"] .dup-subject-list { border-color: #2B303A; }
+  .status-banner.pre { border-color: var(--olive); border-left-color: var(--olive); color: var(--ink-soft); }
+  .status-banner.outdated { border-color: var(--bronze); border-left-color: var(--bronze); }
+  [data-theme="dark"] .status-banner.pre { color: #C9CDD4; }
+  .profile-phase-tag { margin-left: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
   .status-banner.archived { border-color: var(--olive); border-left-color: var(--olive); color: var(--ink-soft); }
   [data-theme="dark"] .status-banner.archived { color: #C9CDD4; }
   [data-theme="dark"] .outcome-option { border-color: #2B303A; }
@@ -786,6 +790,10 @@
             <div id="profileList"></div>
             <div class="profile-add-row" style="flex-wrap:wrap;">
               <select id="newProfileTypeSelect" class="profile-type-select" style="flex:1 1 100%;" aria-label="Tipo do novo objetivo"></select>
+              <select id="newProfilePhaseSelect" class="profile-type-select" style="flex:1 1 100%;" aria-label="Fase do concurso">
+                <option value="oficial">Edital publicado</option>
+                <option value="pre">Pré-edital (edital novo ainda não saiu)</option>
+              </select>
               <input type="text" id="newProfileNameInput" placeholder="Nome do novo objetivo (ex: PRF, Inglês B2)" />
               <button class="btn btn-primary btn-small" id="addProfileBtn">Criar</button>
             </div>
@@ -855,6 +863,10 @@
   <!-- Import panel -->
   <div class="card import-panel" id="importPanel">
     <div style="font-size:12px;font-weight:600;color:#6E6B63;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:14px;">Montar edital com IA</div>
+    <div class="status-banner pre" id="importUpdateHint" style="display:none;">
+      <span class="status-banner-msg">🔄 <strong>Atualizando com o novo edital.</strong> Importe o edital novo normalmente: os tópicos que coincidem mantêm o seu progresso, os novos são adicionados e os que sumiram ficam marcados como "fora do novo edital". A data da prova do novo edital será aplicada.</span>
+      <div class="status-banner-actions"><button type="button" class="btn btn-outline btn-small" id="cancelUpdateModeBtn">Cancelar atualização</button></div>
+    </div>
 
     <div class="import-step">
       <div class="step-title"><span class="step-num">1</span> Encontre o edital</div>
@@ -910,6 +922,14 @@
         Criar um edital novo
       </label>
       <input type="text" id="importNewEditalName" placeholder="Nome do novo edital" style="margin-top:8px; display:none;" />
+      <div id="importPreBlock" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line);">
+        <label style="display:flex; align-items:flex-start; gap:8px; font-size:13px; cursor:pointer;">
+          <input type="checkbox" id="importPreEditalCheck" style="margin-top:3px;">
+          <span>Este é um <strong>edital de referência</strong> (estudo pré-edital): importar o conteúdo, mas não aplicar a data da prova.</span>
+        </label>
+        <input type="text" id="importRefLabel" placeholder="Nome do edital de referência (ex: PRF 2021)" style="margin-top:8px; display:none;" />
+        <p class="field-hint">Use quando o edital novo ainda não saiu. Assim, a data da prova antiga não vira contagem regressiva.</p>
+      </div>
     </div>
 
     <div style="display:flex; gap:8px; align-items:center;">
@@ -957,6 +977,7 @@
 
   <!-- PAGE: EDITAL -->
   <div class="page active" id="page-edital">
+    <div id="preEditalBanner"></div>
     <div class="welcome-back-card" id="welcomeBackCard" style="display:none;">
       <span class="welcome-back-text" id="welcomeBackText"></span>
     </div>
@@ -999,6 +1020,13 @@
     <div class="field-row" style="max-width:320px;margin-bottom:14px;">
       <label class="field-label" for="profileTypeSelect">Tipo de objetivo</label>
       <select id="profileTypeSelect"></select>
+    </div>
+    <div class="field-row" id="profilePhaseRow" style="max-width:320px;margin-bottom:14px;display:none;">
+      <label class="field-label" for="profilePhaseSelect">Fase do concurso</label>
+      <select id="profilePhaseSelect">
+        <option value="oficial">Edital publicado</option>
+        <option value="pre">Pré-edital (o edital novo ainda não saiu)</option>
+      </select>
     </div>
     <p class="field-hint" id="aboutHint" style="margin:-6px 0 16px;max-width:640px;">
       Reúna aqui as informações do edital que fogem do conteúdo programático — etapas do certame,
@@ -1663,6 +1691,7 @@
       <label class="outcome-option"><input type="checkbox" id="dupIncludeTopics" checked> Trazer os tópicos (todos como pendentes)</label>
       <label class="outcome-option"><input type="checkbox" id="dupIncludeNotes" checked> Trazer as anotações dos tópicos</label>
       <label class="outcome-option"><input type="checkbox" id="dupIncludeFlashcards"> Trazer os flashcards (revisão reiniciada)</label>
+      <label class="outcome-option" id="dupPreEditalRow"><input type="checkbox" id="dupPreEditalCheck"> Criar como pré-edital (o edital novo ainda não saiu)</label>
     </div>
     <p class="field-hint" style="margin-bottom:4px;">Não são copiados: histórico de estudos, revisões, cronograma, ciclo, simulados e data da prova. Pesos e metas semanais também começam do zero, já que mudam de concurso para concurso.</p>
     <div class="modal-actions">
@@ -1834,34 +1863,69 @@ try {
     try { localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data: payload })); } catch (e) {}
   }
   const COLORS = ["#2C3E63", "#C9A227", "#EA7C2C", "#24365C", "#E1527A", "#1B2A4A", "#C9A227", "#1B2A4A"];
-  const PROMPT_TEMPLATE =
-    "Analise o edital de concurso abaixo.\n" +
-    "Primeiro, procure no texto a DATA DA PROVA (prova objetiva/primeira fase) e a QUANTIDADE TOTAL DE QUESTÕES da prova. Responda essas duas informações nas duas primeiras linhas, exatamente neste formato (use 'não informado' se não encontrar):\n" +
-    "DATA_PROVA: AAAA-MM-DD\n" +
-    "QUESTOES_PROVA: número\n\n" +
-    "Depois, extraia informações gerais sobre o concurso — principalmente as que exigem algum tipo de preparo além do conteúdo teórico (ex: TAF/teste físico, exame psicológico, curso de formação, exame toxicológico, investigação social). Responda no formato \"Rótulo: valor\", uma por linha, dentro do bloco abaixo (pule qualquer item que o edital não mencione, não invente informação):\n" +
-    "INFORMACOES_CONCURSO:\n" +
-    "Órgão/Banca: ...\n" +
-    "Cargo: ...\n" +
-    "Vagas: ... (imediatas e cadastro de reserva)\n" +
-    "Escolaridade exigida: ...\n" +
-    "Idade mínima: ...\n" +
-    "Requisitos específicos: ... (CNH, registro profissional etc.)\n" +
-    "Remuneração: ...\n" +
-    "Validade do concurso: ...\n" +
-    "Fases do concurso: ... (liste todas as fases na ordem, indicando se cada uma é eliminatória e/ou classificatória)\n" +
-    "TAF - Teste de Aptidão Física: ... (se houver: quais exercícios, índices mínimos por sexo/idade, prazo do atestado médico exigido)\n" +
-    "Avaliação psicológica: ... (se houver, o que é avaliado e se é eliminatória)\n" +
-    "Exame toxicológico: ... (se houver, tipo de exame e prazo de validade)\n" +
-    "Investigação social: ... (se houver, o que é exigido)\n" +
-    "Curso de formação: ... (se houver, carga horária, frequência mínima, se é eliminatório)\n" +
-    "Nota de corte / critério de aprovação: ...\n" +
-    "Critérios de desempate: ... (resuma a ordem dos critérios)\n\n" +
-    "Depois, organize o conteúdo programático por matéria e tópicos. Para cada matéria, com base no que o edital indica sobre a importância dela na prova (quantidade de questões, ênfase, ordem de apresentação, peso declarado no edital etc.), atribua um peso de 1 (baixa importância) a 5 (altíssima importância/prioridade). Se o edital não informar isso claramente, estime pela quantidade de questões ou pelo destaque dado a cada matéria.\n" +
-    "Responda o restante SOMENTE no formato abaixo, sem nenhum texto extra, sem markdown adicional:\n\n" +
-    "## Nome da matéria 1 (peso: 4)\n- tópico 1\n- tópico 2\n\n## Nome da matéria 2 (peso: 2)\n- tópico 1\n- tópico 2\n\n" +
-    "Mantenha os tópicos como aparecem no edital, sem resumir ou inventar conteúdo. Aqui está o edital:\n\n" +
-    "[COLE AQUI O TEXTO DO EDITAL]";
+  // Prompt de importação. A etapa de "peso" e o formato final são lidos por parseAiResponse(): se mudar os
+  // marcadores (DATA_PROVA, QUESTOES_PROVA, INFORMACOES_CONCURSO, "## matéria (peso: N)", "- tópico"), ajuste o leitor também.
+  const PROMPT_TEMPLATE = `Você vai ler o edital de um concurso público e devolver os dados em um formato fixo, que será lido por um programa. Por isso, o formato importa mais do que a redação. Siga as 3 etapas, na ordem.
+
+O EDITAL está mais abaixo (colado como texto) ou anexado a esta conversa.
+
+━━ ETAPA 1 — DATA E QUESTÕES DA PROVA ━━
+Procure a data da prova objetiva (ou da primeira fase) e o número total de questões dessa prova. Escreva:
+
+DATA_PROVA: 2099-12-31
+QUESTOES_PROVA: 100
+
+• A data vai em ano-mês-dia (AAAA-MM-DD).
+• Se o edital NÃO informar a data ou o número de questões, simplesmente apague a linha correspondente. Não escreva "não informado".
+
+━━ ETAPA 2 — INFORMAÇÕES GERAIS ━━
+Escreva uma linha com INFORMACOES_CONCURSO: e, logo abaixo, uma linha no formato "Rótulo: valor" para cada item abaixo que o edital mencionar. Pule os que não aparecerem, sem inventar nada:
+
+Órgão/Banca · Cargo · Vagas (imediatas e cadastro de reserva) · Escolaridade exigida · Idade mínima · Requisitos específicos (CNH, registro profissional etc.) · Remuneração · Validade do concurso · Fases do concurso (na ordem, dizendo se cada uma é eliminatória e/ou classificatória) · TAF - Teste de Aptidão Física (exercícios, índices mínimos, prazo do atestado médico) · Avaliação psicológica · Exame toxicológico · Investigação social · Curso de formação (carga horária, frequência mínima, se é eliminatório) · Nota de corte / critério de aprovação · Critérios de desempate
+
+Cada item deve ocupar uma única linha e ser curto.
+
+━━ ETAPA 3 — CONTEÚDO PROGRAMÁTICO ━━
+Liste todas as matérias, cada uma com seus tópicos:
+
+## Nome da matéria (peso: 3)
+- tópico
+- tópico
+
+Regras:
+1. Uma linha começando com "## " para cada matéria, com o nome como está no edital.
+2. O peso é um número inteiro de 1 (menos importante) a 5 (mais importante). Baseie-se no número de questões da matéria ou no peso/pontuação que o edital declarar. Se o edital não der nenhuma pista, use peso 3 em todas.
+3. Um tópico por linha, começando com "- ". Copie os tópicos como estão no edital: não resuma, não invente e não pule nenhum.
+4. Se uma mesma matéria aparecer mais de uma vez, junte tudo em uma só.
+5. Se houver vários cargos com conteúdos diferentes, use apenas o conteúdo do primeiro cargo listado.
+
+━━ COMO RESPONDER ━━
+• Comece direto na primeira linha do formato, sem frase de abertura e sem frase de encerramento.
+• Não use blocos de código, tabelas, negrito, numeração nos tópicos nem comentários.
+• Escreva só as etapas 1, 2 e 3, nesta ordem.
+
+━━ EXEMPLO (só para mostrar o formato; não copie o conteúdo) ━━
+DATA_PROVA: 2099-12-31
+QUESTOES_PROVA: 100
+
+INFORMACOES_CONCURSO:
+Órgão/Banca: Órgão Exemplo / Banca Exemplo
+Cargo: Cargo Exemplo
+Vagas: 10 imediatas e 20 de cadastro de reserva
+Fases do concurso: 1ª prova objetiva (eliminatória e classificatória); 2ª avaliação de títulos (classificatória)
+
+## Língua Portuguesa (peso: 4)
+- Compreensão e interpretação de textos
+- Ortografia oficial
+
+## Noções de Informática (peso: 2)
+- Conceitos de internet e intranet
+
+━━ EDITAL ━━
+[COLE AQUI O TEXTO DO EDITAL]
+
+━━ LEMBRETE FINAL ━━
+Responda agora usando somente o formato das 3 etapas (DATA_PROVA, QUESTOES_PROVA, INFORMACOES_CONCURSO e as matérias com "## " e tópicos com "- "), sem nenhum texto extra.`;
 
   if (window.pdfjsLib) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -2606,33 +2670,163 @@ try {
     populateTypeSelects();
     const p = profiles.find(x => x.id === activeProfileId);
     const V = vocabFor(p);
+    const pre = isPreEdital(p);
     const setText = (el, txt) => { if (el) el.textContent = txt; };
     setText(document.querySelector('nav.tabs button[data-page="edital"]'), V.tab);
     setText(document.querySelector('nav.tabs button[data-page="concurso"]'), V.about);
     setText(document.querySelector("#page-edital .edital-title"), V.title);
     setText(document.querySelector("#page-concurso .edital-title"), V.about);
-    setText(document.getElementById("aboutHint"), V.aboutHint);
+    setText(document.getElementById("aboutHint"), V.aboutHint + (pre ? " As informações cadastradas vêm do edital de referência e podem mudar — confirme quando o novo edital sair." : ""));
     setText(document.getElementById("statCoverageLabel"), V.coverage);
-    setText(document.getElementById("examModalTitle"), V.dateTitle);
-    setText(document.getElementById("examDateLabel"), V.dateTitle);
+    setText(document.getElementById("examModalTitle"), pre ? "Previsão da prova" : V.dateTitle);
+    setText(document.getElementById("examDateLabel"), pre ? "Data prevista (estimativa, opcional)" : V.dateTitle);
     setText(document.getElementById("examQuestionsLabel"), V.questionsLabel);
     const cd = document.getElementById("examCountdownBtn");
-    if (cd) cd.title = V.btnTitle;
+    if (cd) cd.title = pre ? "Clique para definir a previsão da prova (estimativa)" : V.btnTitle;
     document.documentElement.style.setProperty("--eyebrow", JSON.stringify(V.eyebrow));
     const typeSel = document.getElementById("profileTypeSelect");
     if (typeSel) typeSel.value = profileType(p);
+    const phaseRow = document.getElementById("profilePhaseRow");
+    if (phaseRow) phaseRow.style.display = profileType(p) === "concurso" ? "" : "none";
+    const phaseSel = document.getElementById("profilePhaseSelect");
+    if (phaseSel) phaseSel.value = pre ? "pre" : "oficial";
     const imp = document.getElementById("toggleImportBtn");
     if (imp) imp.style.display = V.importAI ? "" : "none";
     renderExamCountdown();
   }
   document.addEventListener("change", (e) => {
-    if (!e.target || e.target.id !== "profileTypeSelect") return;
+    if (!e.target) return;
+    if (e.target.id === "newProfileTypeSelect") {
+      const phaseSel = document.getElementById("newProfilePhaseSelect");
+      if (phaseSel) { phaseSel.style.display = e.target.value === "concurso" ? "" : "none"; if (e.target.value !== "concurso") phaseSel.value = "oficial"; }
+      return;
+    }
+    if (e.target.id === "profilePhaseSelect") {
+      const p = profiles.find(x => x.id === activeProfileId);
+      if (!p) return;
+      if (e.target.value === "pre") {
+        markProfilePre(p.id, p.refEdital && p.refEdital.label, p.refEdital && p.refEdital.examDate, p.refEdital && p.refEdital.questions);
+      } else {
+        markProfileOfficial(p.id);
+        state.examEstimated = false;
+        save();
+      }
+      renderProfileSwitcher();
+      renderAll();
+      return;
+    }
+    if (e.target.id !== "profileTypeSelect") return;
     const p = profiles.find(x => x.id === activeProfileId);
     if (!p) return;
     p.type = e.target.value;
     saveProfilesList();
     renderProfileSwitcher();
   });
+
+  // ---------- Modo pré-edital ----------
+  var importUpdateMode = false; // var: pode ser lido antes desta linha durante a inicialização
+  function isPreEdital(p) { return !!(p && p.phase === "pre" && profileType(p) === "concurso"); }
+  function activeProfileObj() { return profiles.find(x => x.id === activeProfileId); }
+  function markProfilePre(id, label, examDate, questions) {
+    const p = profiles.find(x => x.id === id);
+    if (!p) return;
+    p.phase = "pre";
+    p.refEdital = (label || examDate || questions) ? { label: label || "", examDate: examDate || null, questions: questions || null } : null;
+    saveProfilesList();
+  }
+  function refExamQuestions(p) {
+    return (p && p.refEdital && Number(p.refEdital.questions) > 0) ? Number(p.refEdital.questions) : null;
+  }
+  function markProfileOfficial(id) {
+    const p = profiles.find(x => x.id === id);
+    if (!p) return;
+    p.phase = "oficial";
+    p.refEdital = null;
+    saveProfilesList();
+  }
+  function outdatedTopicsList() {
+    const out = [];
+    state.subjects.forEach(sj => sj.topics.forEach(t => { if (t.outdated) out.push({ subject: sj, topic: t }); }));
+    return out;
+  }
+  // Compara o edital novo (matérias importadas) com o conteúdo atual: o que não aparece mais é marcado
+  function applyNewEditalDiff(materias) {
+    let outdated = 0, matched = 0;
+    state.subjects.forEach(sj => {
+      const m = materias.find(x => namesMatch(x.nome, sj.name));
+      sj.topics.forEach(t => {
+        const inNew = !!m && (m.topicos || []).some(tn => namesMatch(tn, t.name));
+        if (inNew) { delete t.outdated; matched++; }
+        else { t.outdated = true; outdated++; }
+      });
+    });
+    return { outdated: outdated, matched: matched };
+  }
+  function renderPreEditalBanner() {
+    const host = document.getElementById("preEditalBanner");
+    if (!host) return;
+    const p = activeProfileObj();
+    let html = "";
+    if (isPreEdital(p) && !p.archived) {
+      const ref = p.refEdital;
+      const refTxt = (ref && ref.label)
+        ? ' O conteúdo abaixo vem do edital de referência <strong>' + escapeHtml(ref.label) + '</strong>' + (ref.examDate ? ' (prova em ' + fmtDateBR(ref.examDate) + ')' : '') + ' e pode mudar quando o novo edital sair.'
+        : ' Estude o que costuma ser cobrado e ajuste o conteúdo quando o novo edital sair.';
+      html += '<div class="status-banner pre"><span class="status-banner-msg">🔭 <strong>Modo pré-edital.</strong>' + refTxt + '</span>' +
+        '<div class="status-banner-actions"><button type="button" class="btn btn-outline btn-small" id="preEditalNewBtn">Chegou o novo edital</button></div></div>';
+    }
+    const outdated = outdatedTopicsList();
+    if (outdated.length) {
+      html += '<div class="status-banner outdated"><span class="status-banner-msg">⚠️ <strong>' + outdated.length + (outdated.length === 1 ? ' tópico não aparece' : ' tópicos não aparecem') + '</strong> no novo edital e ' + (outdated.length === 1 ? 'está marcado' : 'estão marcados') + ' na lista.</span>' +
+        '<div class="status-banner-actions"><button type="button" class="btn btn-outline btn-small" id="outdatedRemoveBtn">Remover esses tópicos</button><button type="button" class="btn btn-outline btn-small" id="outdatedKeepBtn">Manter todos</button></div></div>';
+    }
+    host.innerHTML = html;
+    const nb = document.getElementById("preEditalNewBtn");
+    if (nb) nb.addEventListener("click", () => { setImportUpdateMode(true); openImportPanel(); });
+    const rb = document.getElementById("outdatedRemoveBtn");
+    if (rb) rb.addEventListener("click", removeOutdatedTopics);
+    const kb = document.getElementById("outdatedKeepBtn");
+    if (kb) kb.addEventListener("click", keepOutdatedTopics);
+  }
+  function keepOutdatedTopics() {
+    state.subjects.forEach(sj => sj.topics.forEach(t => { delete t.outdated; }));
+    save(); renderAll();
+  }
+  async function removeOutdatedTopics() {
+    const list = outdatedTopicsList();
+    if (!list.length) return;
+    const removable = list.filter(x => !state.sessions.some(se => se.topicId === x.topic.id));
+    const kept = list.length - removable.length;
+    if (!removable.length) {
+      alert('Todos esses tópicos têm histórico de estudos e não podem ser excluídos agora. Use "Manter todos" para tirar a marcação.');
+      return;
+    }
+    const ok = await confirmDialog(
+      "Remover " + removable.length + " tópico" + (removable.length === 1 ? "" : "s") + " que não aparece" + (removable.length === 1 ? "" : "m") + " no novo edital?" +
+      (kept ? " Outros " + kept + " têm histórico de estudos e continuarão na lista." : ""),
+      { danger: true, confirmLabel: "Remover", title: "Remover tópicos" }
+    );
+    if (!ok) return;
+    const snapshot = removable.map(x => ({
+      subjectId: x.subject.id, topic: x.topic, index: x.subject.topics.indexOf(x.topic),
+      revisions: state.revisions.filter(r => r.topicId === x.topic.id)
+    }));
+    const ids = new Set(removable.map(x => x.topic.id));
+    const profileAtDelete = activeProfileId;
+    state.subjects.forEach(sj => { sj.topics = sj.topics.filter(t => !ids.has(t.id)); });
+    state.revisions = state.revisions.filter(r => !ids.has(r.topicId));
+    save(); renderAll();
+    showUndoToast(removable.length + " tópico" + (removable.length === 1 ? "" : "s") + " removido" + (removable.length === 1 ? "" : "s") + ".", () => {
+      if (activeProfileId !== profileAtDelete) return;
+      snapshot.slice().sort((a, b) => a.index - b.index).forEach(item => {
+        const sj = state.subjects.find(x => x.id === item.subjectId);
+        if (!sj) return;
+        sj.topics.splice(Math.min(item.index, sj.topics.length), 0, item.topic);
+        state.revisions = state.revisions.concat(item.revisions);
+      });
+      save(); renderAll();
+    });
+  }
 
   // ---------- Duplicar objetivo (modelo reaproveitável) ----------
   const duplicateProfileOverlay = document.getElementById("duplicateProfileOverlay");
@@ -2665,6 +2859,8 @@ try {
     document.getElementById("dupIncludeTopics").checked = true;
     document.getElementById("dupIncludeNotes").checked = true;
     document.getElementById("dupIncludeFlashcards").checked = false;
+    document.getElementById("dupPreEditalRow").style.display = profileType(p) === "concurso" ? "" : "none";
+    document.getElementById("dupPreEditalCheck").checked = false;
     syncDuplicateOptionsState();
     duplicateProfileOverlay.classList.add("open");
     setTimeout(() => { duplicateProfileName.focus(); duplicateProfileName.select(); }, 0);
@@ -2733,7 +2929,12 @@ try {
     catch (e) { alert("Não consegui criar o objetivo: o armazenamento do navegador está cheio."); return; }
     markProfileChanged(newId);
     const dupSrcProfile = profiles.find(x => x.id === duplicateSourceId);
-    profiles.push({ id: newId, name: name, type: profileType(dupSrcProfile) });
+    const newProfileObj = { id: newId, name: name, type: profileType(dupSrcProfile) };
+    if (newProfileObj.type === "concurso" && document.getElementById("dupPreEditalCheck").checked) {
+      newProfileObj.phase = "pre";
+      newProfileObj.refEdital = { label: dupSrcProfile ? dupSrcProfile.name : "", examDate: null };
+    }
+    profiles.push(newProfileObj);
     saveProfilesList();
     closeDuplicateProfileModal();
     document.getElementById("profileDropdown").classList.remove("open");
@@ -2884,7 +3085,7 @@ try {
       const sel = 'data-select-profile="' + p.id + '" role="button" tabindex="0" aria-label="Selecionar objetivo ' + escapeHtml(p.name) + (isActive ? " (ativo)" : "") + '"';
       if (!p.archived) {
         return '<div class="profile-row' + (isActive ? " active" : "") + '" ' + sel + '>' +
-          '<span class="profile-row-name">' + escapeHtml(p.name) + (isActive ? ' &#10003;' : '') + '</span>' +
+          '<span class="profile-row-name">' + escapeHtml(p.name) + (isActive ? ' &#10003;' : '') + (isPreEdital(p) ? '<span class="profile-phase-tag">pré-edital</span>' : '') + '</span>' +
           '<button class="icon-btn" data-rename-profile="' + p.id + '" title="Renomear" aria-label="Renomear objetivo ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#9998;</button>' +
           '<button class="icon-btn" data-duplicate-profile="' + p.id + '" title="Duplicar como modelo" aria-label="Duplicar objetivo ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#128203;</button>' +
           (onlyOneActive ? '' : '<button class="icon-btn" data-archive-profile="' + p.id + '" title="Arquivar" aria-label="Arquivar objetivo ' + escapeHtml(p.name) + '" onclick="event.stopPropagation()">&#128230;</button>') +
@@ -2964,14 +3165,22 @@ try {
     const btn = document.getElementById("examCountdownBtn");
     if (!el || !btn) return;
     const V = activeVocab();
+    const pre = isPreEdital(activeProfileObj());
     if (!state.examDate) {
-      el.textContent = V.dateSet;
+      el.textContent = pre ? "Pré-edital · definir previsão" : V.dateSet;
       btn.classList.remove("urgent");
       return;
     }
     const today = new Date(todayKey() + "T00:00:00");
     const exam = new Date(state.examDate + "T00:00:00");
     const diffDays = Math.round((exam - today) / 86400000);
+    if (state.examEstimated || pre) {
+      btn.classList.remove("urgent");
+      el.textContent = diffDays > 0
+        ? "Previsão: " + (diffDays >= 60 ? "~" + Math.round(diffDays / 30) + " meses" : diffDays + (diffDays === 1 ? " dia" : " dias"))
+        : "Previsão vencida · atualizar";
+      return;
+    }
     if (diffDays > 0) {
       el.textContent = "Faltam " + diffDays + (diffDays === 1 ? " dia" : " dias") + " para " + V.target;
       btn.classList.toggle("urgent", diffDays <= 14);
@@ -3779,6 +3988,7 @@ try {
 
   // ---------- Render: Edital ----------
   function renderEdital() {
+    renderPreEditalBanner();
     const totalTopics = state.subjects.reduce((a, s) => a + s.topics.length, 0);
     const doneTopics = state.subjects.reduce((a, s) => a + s.topics.filter(t => t.done).length, 0);
     const subjectMetrics = state.subjects.map(subjectStudyMetrics);
@@ -3834,7 +4044,7 @@ try {
         const a = topicAgg(t.id);
         return '<tr class="topic-row-tr' + (t.id === justCompletedTopicId ? " just-completed" : "") + '">' +
           '<td class="check-cell"><button class="check-topic' + (t.done ? " done" : "") + '" data-toggle-topic="' + subject.id + '|' + t.id + '">' + (t.done ? "&check;" : "") + '</button></td>' +
-          '<td class="topic-name-cell' + (t.done ? " done" : "") + '"><span class="topic-num">' + (i + 1) + '.</span> ' + escapeHtml(t.name) + '</td>' +
+          '<td class="topic-name-cell' + (t.done ? " done" : "") + '"><span class="topic-num">' + (i + 1) + '.</span> ' + escapeHtml(t.name) + (t.outdated ? ' <span class="outcome-badge neutro" title="Este tópico não aparece no novo edital" style="margin-left:6px;">fora do novo edital</span>' : '') + '</td>' +
           '<td>' + a.corretas + '</td>' +
           '<td>' + a.erradas + '</td>' +
           '<td>' + (a.pct == null ? '<span class="pct-none">-</span>' : '<span class="pct-badge ' + pctClass(a.pct) + '">' + a.pct + '</span>') + '</td>' +
@@ -4516,7 +4726,7 @@ try {
         profile: p, color: JOURNEY_COLORS[idx % JOURNEY_COLORS.length],
         sessions: sessions.length, dates: dates, first: dates[0] || null, last: dates[dates.length - 1] || null,
         seconds: seconds, corretas: corretas, erradas: erradas, byMonth: byMonth,
-        topicsDone: topicsDone, topicsTotal: topicsTotal, examDate: data.examDate || null
+        topicsDone: topicsDone, topicsTotal: topicsTotal, examDate: data.examDate || null, examEstimated: !!data.examEstimated
       };
     });
 
@@ -4603,6 +4813,7 @@ try {
       let badge;
       if (p.outcome && outcomeLabel(p.outcome, p)) badge = '<span class="outcome-badge ' + p.outcome + '">' + outcomeLabel(p.outcome, p) + '</span>';
       else if (p.archived) badge = '<span class="outcome-badge neutro">Arquivado</span>';
+      else if (isPreEdital(p)) badge = '<span class="outcome-badge andamento">Pré-edital</span>';
       else badge = '<span class="outcome-badge andamento">Em andamento</span>';
       let period = "sem sessões registradas";
       const typeLabel = vocabFor(p).label;
@@ -4610,7 +4821,7 @@ try {
         const fk = e.first.slice(0, 7), lk = e.last.slice(0, 7);
         period = fmtMonthKey(fk) + (lk !== fk ? " → " + fmtMonthKey(lk) : "");
       }
-      if (e.examDate) period += " · " + vocabFor(p).dateTitle.toLowerCase() + ": " + fmtDateBR(e.examDate);
+      if (e.examDate) period += " · " + ((e.examEstimated || isPreEdital(p)) ? "previsão" : vocabFor(p).dateTitle.toLowerCase()) + ": " + fmtDateBR(e.examDate);
       period = typeLabel + " · " + period;
       const q = e.corretas + e.erradas;
       const stats =
@@ -5010,26 +5221,54 @@ try {
 
   function applyExamBasedSuggestion() {
     const hint = document.getElementById("examSuggestionHint");
-    if (!state.examDate) { hint.style.display = "none"; return; }
+    const p = activeProfileObj();
+    const pre = isPreEdital(p);
     const today = new Date(todayKey() + "T00:00:00");
-    const exam = new Date(state.examDate + "T00:00:00");
-    const diasRestantes = Math.round((exam - today) / 86400000);
-    if (diasRestantes <= 0) { hint.style.display = "none"; return; }
+    const diasRestantes = state.examDate ? Math.round((new Date(state.examDate + "T00:00:00") - today) / 86400000) : null;
+    const minutesInput = document.getElementById("autoScheduleMinutesInput");
 
+    // Pré-edital sem data útil (nunca definida ou previsão vencida): ritmo de base pelo volume de conteúdo
+    if (pre && (diasRestantes === null || diasRestantes <= 0)) {
+      const MINUTOS_BASE = 90;
+      const pendentes = state.subjects.reduce((a, sj) => a + sj.topics.filter(t => !t.done).length, 0);
+      const diasPorSemana = Math.max(1, document.querySelectorAll(".auto-day-check:checked").length);
+      minutesInput.value = MINUTOS_BASE;
+      let txt = (diasRestantes === null ? "Pré-edital, sem data definida." : "A previsão da prova já passou — atualize-a quando tiver uma nova estimativa.") +
+        " Sugestão de ritmo de base: " + MINUTOS_BASE + " min/dia.";
+      if (pendentes > 0) {
+        const semanas = Math.max(1, Math.ceil((pendentes * 60) / (MINUTOS_BASE * diasPorSemana)));
+        txt += " Com " + pendentes + " tópico" + (pendentes === 1 ? "" : "s") + " pendente" + (pendentes === 1 ? "" : "s") +
+          " e supondo cerca de 1 h por tópico na primeira passada, dá aproximadamente " + semanas + " semana" + (semanas === 1 ? "" : "s") +
+          " para percorrer o conteúdo com " + diasPorSemana + " dia" + (diasPorSemana === 1 ? "" : "s") + " de estudo por semana.";
+      }
+      txt += " Quando o edital sair, gere o cronograma de novo com a data real.";
+      hint.style.display = "block";
+      hint.textContent = txt;
+      return;
+    }
+    if (diasRestantes === null || diasRestantes <= 0) { hint.style.display = "none"; return; }
+
+    const estimada = !!state.examEstimated || pre;
     // ~12 min de estudo por questão da prova é uma estimativa simples para cobrir o conteúdo com folga
-    const questoes = state.examQuestions || Math.max(30, state.subjects.length * 20);
+    const refQ = pre ? refExamQuestions(p) : null;
+    const questoes = state.examQuestions || refQ || Math.max(30, state.subjects.length * 20);
     const minutosTotaisEstimados = questoes * 12;
-    const minutosPorDiaSugerido = Math.min(240, Math.max(30, Math.round((minutosTotaisEstimados / diasRestantes) / 5) * 5));
+    let minutosPorDiaSugerido = Math.min(240, Math.max(30, Math.round((minutosTotaisEstimados / diasRestantes) / 5) * 5));
+    // Com a prova ainda distante, a conta por questões dá um ritmo baixo demais para montar a base
+    let pisoAplicado = false;
+    if (pre && minutosPorDiaSugerido < 60) { minutosPorDiaSugerido = 60; pisoAplicado = true; }
 
-    document.getElementById("autoScheduleMinutesInput").value = minutosPorDiaSugerido;
-    if (diasRestantes <= 14) {
+    minutesInput.value = minutosPorDiaSugerido;
+    if (diasRestantes <= 14 && !estimada) {
       document.querySelectorAll(".auto-day-check").forEach(c => { c.checked = true; });
     }
 
+    const qTxt = state.examQuestions ? " (" + state.examQuestions + " questões)"
+      : (refQ ? " (" + refQ + " questões no edital de referência)" : "");
     hint.style.display = "block";
-    hint.textContent = "Faltam " + diasRestantes + " dias para " + activeVocab().target +
-      (state.examQuestions ? " (" + state.examQuestions + " questões)" : "") +
-      ". Sugestão: " + minutosPorDiaSugerido + " min/dia para cobrir o conteúdo com folga — ajuste como preferir.";
+    hint.textContent = (estimada ? "Faltam cerca de " : "Faltam ") + diasRestantes + " dias para " + activeVocab().target + (estimada ? " (data estimada" + (pre ? ", ainda sem edital" : "") + ")" : "") +
+      qTxt + ". Sugestão: " + minutosPorDiaSugerido + " min/dia para cobrir o conteúdo com folga" +
+      (pisoAplicado ? " (com piso de 60 min/dia para montar a base antes do edital)" : "") + " — ajuste como preferir.";
   }
 
   function shuffleArray(arr) {
@@ -6043,7 +6282,7 @@ try {
   function updateImportPrompt(extractedText) {
     const text = String(extractedText || "").trim();
     const prompt = text
-      ? PROMPT_TEMPLATE.replace("[COLE AQUI O TEXTO DO EDITAL]", "=== INÍCIO DO EDITAL ===\n" + text + "\n=== FIM DO EDITAL ===")
+      ? PROMPT_TEMPLATE.replace("[COLE AQUI O TEXTO DO EDITAL]", () => "=== INÍCIO DO EDITAL ===\n" + text + "\n=== FIM DO EDITAL ===")
       : PROMPT_TEMPLATE;
     const box = document.getElementById("promptBox");
     box.value = prompt;
@@ -6054,12 +6293,41 @@ try {
   }
   updateImportPrompt("");
 
-  document.getElementById("toggleImportBtn").addEventListener("click", () => {
+  function syncImportModeUI() {
+    document.getElementById("importUpdateHint").style.display = importUpdateMode ? "flex" : "none";
+    document.getElementById("importPreBlock").style.display = importUpdateMode ? "none" : "block";
+    document.getElementById("importDestNew").disabled = importUpdateMode;
+    if (importUpdateMode) {
+      document.getElementById("importDestCurrent").checked = true;
+      document.getElementById("importNewEditalName").style.display = "none";
+    }
+  }
+  function setImportUpdateMode(on) { importUpdateMode = !!on; syncImportModeUI(); }
+  function openImportPanel() {
     document.getElementById("moreMenuDropdown").classList.remove("open");
-    importPanel.classList.toggle("open");
+    importPanel.classList.add("open");
     const active = profiles.find(p => p.id === activeProfileId);
     document.getElementById("importDestCurrentName").textContent = active ? active.name : "Meu Edital";
+    const check = document.getElementById("importPreEditalCheck");
+    check.checked = !importUpdateMode && isPreEdital(active);
+    document.getElementById("importRefLabel").style.display = check.checked ? "block" : "none";
+    syncImportModeUI();
+    importPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  document.getElementById("toggleImportBtn").addEventListener("click", () => {
+    if (importPanel.classList.contains("open")) {
+      document.getElementById("moreMenuDropdown").classList.remove("open");
+      importPanel.classList.remove("open");
+      setImportUpdateMode(false);
+      return;
+    }
+    setImportUpdateMode(false);
+    openImportPanel();
   });
+  document.getElementById("importPreEditalCheck").addEventListener("change", (e) => {
+    document.getElementById("importRefLabel").style.display = e.target.checked ? "block" : "none";
+  });
+  document.getElementById("cancelUpdateModeBtn").addEventListener("click", () => setImportUpdateMode(false));
   document.querySelectorAll('input[name="importDest"]').forEach(radio => {
     radio.addEventListener("change", () => {
       document.getElementById("importNewEditalName").style.display =
@@ -6067,6 +6335,7 @@ try {
     });
   });
   document.getElementById("cancelImportBtn").addEventListener("click", () => {
+    setImportUpdateMode(false);
     importPanel.classList.remove("open");
     importStatus.textContent = ""; importStatus.className = "import-status";
     importResults.style.display = "none"; importResults.innerHTML = "";
@@ -6168,11 +6437,23 @@ try {
     let inInfoBlock = false;
     const errors = [];
     const headerRe = /^\s{0,3}(?:#{1,3}\s+|\*\*\s*)(.+?)(?:\s*\*\*)?\s*$/;
-    const pesoRe = /^(.*?)\s*\(\s*peso:?\s*(\d)\s*\)\s*$/i;
+    const pesoRe = /^(.*?)\s*[\(\[]\s*peso\s*[:=]?\s*(\d)\s*[\)\]]\s*$/i;
     const topicRe = /^\s*[-*•–—]\s+(.+?)\s*$/;
     const numberedRe = /^\s*\d+[\.\)]\s+(.+?)\s*$/;
-    const dataProvaRe = /^DATA_PROVA\s*:\s*(\d{4}-\d{2}-\d{2})\s*$/i;
-    const questoesProvaRe = /^QUESTOES_PROVA\s*:\s*(\d+)\s*$/i;
+    const dataProvaRe = /^DATA_PROVA\s*:\s*(.*)$/i;
+    const questoesProvaRe = /^QUESTOES_PROVA\s*:\s*(.*)$/i;
+    const semInfoRe = /(n[aã]o\s+(informad|consta|h[aá]|se aplica|divulgad|defin)|sem\s+(informa|data)|indefinid|a\s+definir|a\s+ser\s+(divulgad|defin)|^\s*[-–—.]*\s*$)/i;
+    // "20/11/2021", "20-11-2021" ou "2021-11-20" -> "2021-11-20" (ou null se não reconhecer)
+    function toIsoDate(txt) {
+      const iso = String(txt).match(/(\d{4})-(\d{2})-(\d{2})/);
+      const br = String(txt).match(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})/);
+      let y, m, d;
+      if (iso) { y = iso[1]; m = iso[2]; d = iso[3]; }
+      else if (br) { y = br[3]; m = br[2].padStart(2, "0"); d = br[1].padStart(2, "0"); }
+      else return null;
+      const out = y + "-" + m + "-" + d;
+      return Number.isNaN(new Date(out + "T00:00:00").getTime()) ? null : out;
+    }
     const infoBlockStartRe = /^INFORMACOES_CONCURSO\s*:?\s*$/i;
     const labelValueRe = /^([^:]{2,60}):\s*(.+)$/;
     const ignoredLineRe = /^(resultado|resposta|explicação|explicacao|observa(?:ção|cao)|nota|aqui está|aqui esta|segue|conforme|espero|formato|markdown|conteúdo programático|conteudo programatico)\b/i;
@@ -6181,41 +6462,41 @@ try {
       const raw = line.trim();
       if (!raw) return;
       if (/^```/.test(raw)) return;
+      // Versão "limpa" para metadados: tira negrito e marcadores de lista que as IAs costumam colocar
+      // (ex.: "**DATA_PROVA:** 20/11/2021" ou "- Cargo: Policial").
+      const metaRaw = raw.replace(/\*\*|__/g, "").replace(/^[\s>*•–—-]+/, "").trim();
 
-      const dataMatch = raw.match(dataProvaRe);
+      const dataMatch = metaRaw.match(dataProvaRe);
       if (dataMatch) {
-        const d = new Date(dataMatch[1] + "T00:00:00");
-        if (!Number.isNaN(d.getTime())) examDate = dataMatch[1];
-        else errors.push("Linha " + (lineIndex + 1) + ": data da prova inválida.");
+        const value = dataMatch[1].trim();
+        const iso = toIsoDate(value);
+        if (iso) examDate = iso;
+        else if (!semInfoRe.test(value)) errors.push("Linha " + (lineIndex + 1) + ": data da prova não reconhecida (\"" + value + "\").");
         return;
       }
-      const questoesMatch = raw.match(questoesProvaRe);
+      const questoesMatch = metaRaw.match(questoesProvaRe);
       if (questoesMatch) {
-        examQuestions = Number(questoesMatch[1]);
-        if (!Number.isFinite(examQuestions) || examQuestions < 0) {
-          examQuestions = null;
-          errors.push("Linha " + (lineIndex + 1) + ": quantidade de questões inválida.");
-        }
+        const value = questoesMatch[1].trim();
+        const num = value.match(/\d+/);
+        if (num && Number(num[0]) >= 0) examQuestions = Number(num[0]);
+        else if (!semInfoRe.test(value)) errors.push("Linha " + (lineIndex + 1) + ": quantidade de questões não reconhecida (\"" + value + "\").");
         return;
       }
-      if (/^(DATA_PROVA|QUESTOES_PROVA)\s*:/i.test(raw)) {
-        errors.push("Linha " + (lineIndex + 1) + ": formato de metadado não reconhecido.");
-        return;
-      }
-      if (infoBlockStartRe.test(raw)) { inInfoBlock = true; return; }
+      if (infoBlockStartRe.test(metaRaw)) { inInfoBlock = true; return; }
 
       if (inInfoBlock) {
+        const isHash = /^\s{0,3}#{1,3}\s+/.test(raw);
+        const lv = isHash ? null : metaRaw.match(labelValueRe);
+        if (lv) {
+          const value = lv[2].trim();
+          if (value && !/^(não|nao) (informado|se aplica|há|ha|consta)\.?$/i.test(value)) {
+            examInfo.push({ label: lv[1].trim(), value });
+          }
+          return;
+        }
         const headerCheck = raw.match(headerRe);
         if (!headerCheck) {
-          const lv = raw.match(labelValueRe);
-          if (lv) {
-            const value = lv[2].trim();
-            if (value && !/^não (informado|se aplica|há)\.?$/i.test(value)) {
-              examInfo.push({ label: lv[1].trim(), value });
-            }
-          } else if (!ignoredLineRe.test(raw)) {
-            errors.push("Linha " + (lineIndex + 1) + ": informação fora do formato 'Rótulo: valor'.");
-          }
+          if (!ignoredLineRe.test(raw)) errors.push("Linha " + (lineIndex + 1) + ": informação fora do formato 'Rótulo: valor'.");
           return;
         }
         inInfoBlock = false;
@@ -6223,11 +6504,12 @@ try {
 
       const headerMatch = raw.match(headerRe);
       if (headerMatch) {
-        let nome = headerMatch[1].trim();
+        let nome = headerMatch[1].replace(/\*\*|__/g, "").trim();
         if (/^(matérias?|disciplinas?|conteúdo|conteudo|edital)$/i.test(nome)) return;
         let peso = null;
         const pesoMatch = nome.match(pesoRe);
         if (pesoMatch) { nome = pesoMatch[1].trim(); peso = Number(pesoMatch[2]); }
+        nome = nome.replace(/\s*:\s*$/, "").trim();
         if (!nome) {
           errors.push("Linha " + (lineIndex + 1) + ": matéria sem nome.");
           return;
@@ -6372,7 +6654,7 @@ try {
     importResults.querySelectorAll('[data-import-subject]').forEach(subjectCheck => {
       subjectCheck.addEventListener('change', () => {
         const idx = subjectCheck.getAttribute('data-import-idx');
-        importResults.querySelectorAll('[data-import-topic="' + idx + '"]').forEach(topicCheck => {
+        importResults.querySelectorAll('[data-import-topic][data-import-idx="' + idx + '"]').forEach(topicCheck => {
           topicCheck.checked = subjectCheck.checked;
         });
       });
@@ -6380,7 +6662,7 @@ try {
     importResults.querySelectorAll('[data-import-topic]').forEach(topicCheck => {
       topicCheck.addEventListener('change', () => {
         const idx = topicCheck.getAttribute('data-import-idx');
-        const topics = Array.from(importResults.querySelectorAll('[data-import-topic="' + idx + '"]'));
+        const topics = Array.from(importResults.querySelectorAll('[data-import-topic][data-import-idx="' + idx + '"]'));
         const subjectCheck = importResults.querySelector('[data-import-subject][data-import-idx="' + idx + '"]');
         if (subjectCheck) subjectCheck.checked = topics.some(t => t.checked);
       });
@@ -6401,6 +6683,8 @@ try {
 
       let createdSubjects = 0, createdTopics = 0, skippedTopics = 0;
       const targetWasNew = document.getElementById("importDestNew").checked;
+      const asReference = !importUpdateMode && document.getElementById("importPreEditalCheck").checked;
+      const refLabelInput = document.getElementById("importRefLabel").value.trim();
 
       if (targetWasNew) {
         const nomeNovoEdital = document.getElementById("importNewEditalName").value.trim();
@@ -6414,6 +6698,7 @@ try {
           return;
         }
         createProfile(nomeNovoEdital);
+        if (asReference) markProfilePre(activeProfileId, refLabelInput || nomeNovoEdital, pendingImportExam.date, pendingImportExam.questions);
         renderProfileSwitcher();
       }
 
@@ -6421,7 +6706,7 @@ try {
         const idx = Number(subjectCheck.getAttribute("data-import-idx"));
         const m = materias[idx];
         if (!m) return;
-        const selectedTopicChecks = Array.from(importResults.querySelectorAll('[data-import-topic="' + idx + '"]:checked'));
+        const selectedTopicChecks = Array.from(importResults.querySelectorAll('[data-import-topic][data-import-idx="' + idx + '"]:checked'));
         if (!selectedTopicChecks.length) return;
 
         const selectedTopicIndexes = new Set(selectedTopicChecks.map(el => Number(el.getAttribute("data-import-topic"))));
@@ -6447,8 +6732,19 @@ try {
         });
       });
 
-      if (pendingImportExam.date) state.examDate = pendingImportExam.date;
-      if (pendingImportExam.questions) state.examQuestions = pendingImportExam.questions;
+      let updateSummary = null;
+      if (importUpdateMode) {
+        const diff = applyNewEditalDiff(materias);
+        updateSummary = { kept: skippedTopics, created: createdTopics, outdated: diff.outdated };
+        markProfileOfficial(activeProfileId);
+        if (pendingImportExam.date) state.examEstimated = false;
+      }
+      if (asReference && !targetWasNew) {
+        const activeP = activeProfileObj();
+        markProfilePre(activeProfileId, refLabelInput || (activeP && activeP.refEdital && activeP.refEdital.label) || "", pendingImportExam.date, pendingImportExam.questions || refExamQuestions(activeP));
+      }
+      if (!asReference && pendingImportExam.date) state.examDate = pendingImportExam.date;
+      if (!asReference && pendingImportExam.questions) state.examQuestions = pendingImportExam.questions;
       if (pendingImportExam.info && pendingImportExam.info.length) {
         state.examInfo = state.examInfo || [];
         pendingImportExam.info.forEach(item => {
@@ -6461,11 +6757,14 @@ try {
       save();
       renderAll();
       renderExamCountdown();
+      renderProfileSwitcher();
       importStatus.className = "import-status success";
       let doneMsg = targetWasNew ? "Edital criado e importação concluída." : "Importação concluída.";
       doneMsg += " " + createdSubjects + " matéria(s) e " + createdTopics + " tópico(s) adicionados.";
       if (skippedTopics) doneMsg += " " + skippedTopics + " tópico(s) já existente(s) foram mantidos.";
-      if (pendingImportExam.date) doneMsg += " Data da prova salva.";
+      if (asReference) doneMsg += " Modo pré-edital ativado: a data da prova do edital de referência não foi aplicada.";
+      else if (pendingImportExam.date) doneMsg += " Data da prova salva.";
+      if (updateSummary) doneMsg += " Novo edital aplicado: " + updateSummary.kept + " tópico(s) mantido(s) com o progresso, " + updateSummary.created + " novo(s) e " + updateSummary.outdated + " fora do novo edital.";
       if (pendingImportExam.info && pendingImportExam.info.length) doneMsg += " Informações do concurso atualizadas.";
       importStatus.textContent = doneMsg;
 
@@ -6473,6 +6772,10 @@ try {
       importResults.innerHTML = "";
       document.getElementById("aiResponseBox").value = "";
       document.getElementById("importDestCurrent").checked = true;
+      document.getElementById("importPreEditalCheck").checked = false;
+      document.getElementById("importRefLabel").value = "";
+      document.getElementById("importRefLabel").style.display = "none";
+      setImportUpdateMode(false);
       document.getElementById("importNewEditalName").value = "";
       document.getElementById("importNewEditalName").style.display = "none";
       document.getElementById("pdfInput").value = "";
@@ -6687,7 +6990,9 @@ try {
   document.getElementById("addProfileBtn").addEventListener("click", () => {
     const input = document.getElementById("newProfileNameInput");
     if (!input.value.trim()) return;
-    createProfile(input.value, document.getElementById("newProfileTypeSelect").value);
+    const newType = document.getElementById("newProfileTypeSelect").value;
+    createProfile(input.value, newType);
+    if (newType === "concurso" && document.getElementById("newProfilePhaseSelect").value === "pre") markProfilePre(activeProfileId, "", null);
     input.value = "";
     renderProfileSwitcher();
     renderAll();
@@ -6705,6 +7010,7 @@ try {
   document.getElementById("clearExamBtn").addEventListener("click", () => {
     state.examDate = null;
     state.examQuestions = null;
+    state.examEstimated = false;
     save();
     renderExamCountdown();
     examOverlay.classList.remove("open");
@@ -6715,6 +7021,7 @@ try {
     const questions = Number(document.getElementById("examQuestionsInput").value) || null;
     state.examDate = date || null;
     state.examQuestions = questions;
+    state.examEstimated = !!date && isPreEdital(activeProfileObj());
     save();
     renderExamCountdown();
     examOverlay.classList.remove("open");
